@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<title>Checklist dotisků</title>
+<style>
+/* ===== Proměnné a reset ===== */
+:root {
+  --white: #ffffff;
+  --black: #1a1a1a;
+  --blue: #4072ad;
+  --raspberry: #b11e54;
+  --green: #98c451;
+  --gray-bg: #f6f7f9;
+  --gray-border: #e3e6ea;
+  --gray-text: #8a8f96;
+  --radius: 8px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+  --transition: 200ms ease;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--gray-bg);
+  color: var(--black);
+  font-size: 14px;
+  line-height: 1.5;
+}
+h1, h2, h3 { font-family: Georgia, 'Times New Roman', serif; font-weight: 600; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input, textarea, select { font-family: inherit; font-size: inherit; }
+
+/* ===== Layout ===== */
+.app { display: flex; flex-direction: column; height: 100vh; }
+header.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 24px; background: var(--white);
+  border-bottom: 1px solid var(--gray-border);
+}
+header.topbar h1 { font-size: 20px; }
+.top-actions { display: flex; gap: 8px; }
+
+.main { display: flex; flex: 1; overflow: hidden; }
+
+/* Banner pro připomenutí exportu */
+.export-banner {
+  background: #fff5e6; border-bottom: 1px solid #f2c47b; color: #8a5a00;
+  padding: 10px 24px; font-size: 13px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.export-banner .banner-actions { display: flex; gap: 6px; align-items: center; }
+.banner-close {
+  width: 24px; height: 24px; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition);
+}
+.banner-close:hover { background: rgba(0,0,0,0.05); }
+
+/* ===== Levý panel ===== */
+.sidebar {
+  width: 320px; flex-shrink: 0;
+  background: var(--white);
+  border-right: 1px solid var(--gray-border);
+  display: flex; flex-direction: column;
+}
+.sidebar-header { padding: 16px; border-bottom: 1px solid var(--gray-border); }
+.tabs { display: flex; gap: 4px; margin-bottom: 12px; background: var(--gray-bg); border-radius: var(--radius); padding: 3px; }
+.tab {
+  flex: 1; padding: 7px 10px; border-radius: 6px;
+  font-size: 13px; font-weight: 500; color: var(--gray-text);
+  transition: var(--transition);
+}
+.tab.active { background: var(--white); color: var(--black); box-shadow: var(--shadow); }
+.book-list { flex: 1; overflow-y: auto; padding: 8px; }
+.book-item {
+  padding: 12px 14px; margin-bottom: 4px; border-radius: var(--radius);
+  cursor: pointer; transition: var(--transition); border: 1px solid transparent;
+}
+.book-item:hover { background: var(--gray-bg); }
+.book-item.active { background: var(--gray-bg); border-color: var(--blue); }
+.book-item .b-title { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+.book-item .b-author { font-size: 12px; color: var(--gray-text); }
+.book-item .b-progress {
+  margin-top: 8px; height: 4px; border-radius: 2px;
+  background: var(--gray-border); overflow: hidden;
+}
+.book-item .b-progress-fill { height: 100%; transition: width var(--transition); }
+.book-item .b-status {
+  margin-top: 6px; display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--gray-text);
+}
+.status-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.status-dot.zero { background: var(--raspberry); }
+.status-dot.mid { background: var(--blue); }
+.status-dot.full { background: var(--green); }
+.book-item .b-deadline {
+  margin-top: 4px; font-size: 11px; color: #e07b00; font-weight: 500;
+}
+
+/* Návoz warning banner */
+.deadline-banner {
+  padding: 12px 24px; background: #fff3e0; border-left: 4px solid #e07b00;
+  border-bottom: 1px solid var(--gray-border);
+  font-size: 13px; color: #5a3500;
+}
+.deadline-banner.overdue { background: #fdecea; border-left-color: var(--raspberry); color: #6b1235; }
+.deadline-banner .db-title { font-weight: 600; margin-bottom: 6px; }
+.deadline-banner .db-list { margin: 6px 0; }
+.deadline-banner .db-row { padding: 2px 0; }
+.deadline-banner .db-actions { display: flex; gap: 8px; margin-top: 8px; align-items: center; }
+
+/* Info pod datem návozu v detailu */
+.delivery-info {
+  margin-left: 30px; margin-top: 6px; font-size: 12px; color: var(--gray-text);
+}
+.delivery-info.warn { color: #e07b00; font-weight: 500; }
+.delivery-info.danger { color: var(--raspberry); font-weight: 600; }
+
+/* ===== Detail ===== */
+.detail-wrap { flex: 1; overflow-y: auto; }
+.detail { padding: 28px 36px; }
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 70vh; text-align: center; color: var(--gray-text);
+}
+.empty-state h2 { color: var(--black); margin-bottom: 8px; }
+.empty-state p { margin-bottom: 24px; max-width: 360px; }
+
+.detail-header {
+  background: var(--white); border-radius: var(--radius);
+  padding: 24px; margin-bottom: 20px; box-shadow: var(--shadow);
+}
+.detail-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 12px; font-weight: 500; color: var(--gray-text); text-transform: uppercase; letter-spacing: 0.04em; }
+.field input, .field textarea {
+  padding: 8px 10px; border: 1px solid var(--gray-border);
+  border-radius: 6px; transition: var(--transition); background: var(--white);
+}
+.field input:focus, .field textarea:focus { outline: none; border-color: var(--blue); }
+.field input:read-only { background: var(--gray-bg); color: var(--gray-text); }
+.field textarea.book-notes {
+  min-height: 70px; resize: vertical; font-family: inherit;
+}
+.field-fullwidth { grid-column: 1 / -1; }
+
+.progress-wrap { margin-top: 12px; }
+.progress-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 13px; }
+.progress-bar { height: 8px; background: var(--gray-border); border-radius: 4px; overflow: hidden; }
+.progress-fill { height: 100%; transition: width var(--transition), background var(--transition); }
+
+.detail-actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+
+/* Sekce */
+.section {
+  background: var(--white); border-radius: var(--radius);
+  padding: 20px 24px; margin-bottom: 16px; box-shadow: var(--shadow);
+}
+.section.optional-off { opacity: 0.5; }
+.section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--gray-border);
+  gap: 12px;
+}
+.section-head h3 {
+  font-size: 16px; display: flex; align-items: center; gap: 10px;
+  padding-left: 12px; position: relative;
+}
+.section-head h3::before {
+  content: ''; position: absolute; left: 0; top: 50%;
+  transform: translateY(-50%);
+  width: 4px; height: 1.2em; background: var(--blue); border-radius: 2px;
+}
+.section.optional .section-head h3::before {
+  background: transparent;
+  border-left: 4px dashed var(--blue);
+  opacity: 0.5;
+  border-radius: 0;
+  width: 0;
+}
+.optional-tag {
+  font-size: 11px; font-weight: 500; color: var(--blue);
+  opacity: 0.7; font-family: 'Inter', system-ui, sans-serif;
+  letter-spacing: 0.02em;
+}
+.section-toggle { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--gray-text); }
+.toggle-hint { font-style: italic; font-size: 11px; max-width: 280px; text-align: right; }
+
+/* Switch */
+.switch { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
+.switch input { display: none; }
+.switch-slider {
+  position: absolute; inset: 0; background: var(--gray-border);
+  border-radius: 10px; cursor: pointer; transition: var(--transition);
+}
+.switch-slider::before {
+  content: ''; position: absolute; left: 2px; top: 2px;
+  width: 16px; height: 16px; background: var(--white); border-radius: 50%;
+  transition: var(--transition);
+}
+.switch input:checked + .switch-slider { background: var(--blue); }
+.switch input:checked + .switch-slider::before { transform: translateX(16px); }
+
+/* Krok */
+.step { padding: 10px 0; border-bottom: 1px solid var(--gray-bg); }
+.step:last-child { border-bottom: none; }
+.step-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.step-check {
+  width: 20px; height: 20px; border: 2px solid var(--gray-border);
+  border-radius: 4px; cursor: pointer; transition: var(--transition);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  background: var(--white);
+}
+.step-check.done { background: var(--green); border-color: var(--green); }
+.step-check.done::after { content: '✓'; color: var(--white); font-size: 14px; font-weight: bold; }
+.step-label { flex: 1; cursor: pointer; min-width: 200px; }
+.step.done .step-label { text-decoration: line-through; color: var(--gray-text); }
+.step-completed-date { font-size: 11px; color: var(--gray-text); margin-left: 8px; }
+.step-input {
+  padding: 6px 10px; border: 1px solid var(--gray-border);
+  border-radius: 4px; font-size: 13px; min-width: 140px;
+}
+.step-input:focus { outline: none; border-color: var(--blue); }
+.step-input-label { font-size: 12px; color: var(--gray-text); margin-right: 4px; }
+.note-btn {
+  width: 26px; height: 26px; border-radius: 4px; display: flex;
+  align-items: center; justify-content: center; transition: var(--transition);
+  color: var(--gray-text); flex-shrink: 0;
+}
+.note-btn:hover { background: var(--gray-bg); }
+.note-btn.has-note { color: var(--raspberry); }
+.generate-btn {
+  padding: 4px 10px; font-size: 12px; border-radius: 4px;
+  background: var(--blue); color: var(--white); transition: var(--transition);
+}
+.generate-btn:hover { background: #345d92; }
+.note-area { margin-top: 8px; margin-left: 30px; display: none; }
+.note-area.open { display: block; }
+.note-area textarea {
+  width: 100%; min-height: 60px; padding: 8px 10px;
+  border: 1px solid var(--gray-border); border-radius: 6px;
+  resize: vertical;
+}
+.note-area textarea:focus { outline: none; border-color: var(--blue); }
+
+/* Tlačítka */
+.btn {
+  padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 500;
+  transition: var(--transition); display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid transparent;
+}
+.btn-primary { background: var(--blue); color: var(--white); }
+.btn-primary:hover { background: #345d92; }
+.btn-secondary { background: var(--white); color: var(--black); border-color: var(--gray-border); }
+.btn-secondary:hover { background: var(--gray-bg); }
+.btn-danger { background: var(--raspberry); color: var(--white); }
+.btn-danger:hover { background: #921843; }
+.btn-success { background: var(--green); color: var(--white); }
+.btn-success:hover { background: #80aa45; }
+.btn-block { width: 100%; justify-content: center; }
+.btn-lg { padding: 12px 20px; font-size: 14px; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  display: none; align-items: center; justify-content: center; z-index: 100;
+  padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--white); border-radius: var(--radius);
+  padding: 28px; width: 520px; max-width: 100%; max-height: 90vh; overflow-y: auto;
+  box-shadow: var(--shadow-md);
+}
+.modal-lg { width: 720px; }
+.modal h2 { margin-bottom: 18px; }
+.modal h3 { font-size: 15px; margin-top: 16px; margin-bottom: 8px; }
+.modal .field { margin-bottom: 14px; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 22px; flex-wrap: wrap; }
+.error-msg { color: var(--raspberry); font-size: 13px; margin-top: 8px; min-height: 20px; }
+
+.template-hint {
+  background: var(--gray-bg); padding: 10px 12px; border-radius: 6px;
+  font-size: 12px; color: var(--gray-text); margin-bottom: 14px;
+}
+.template-hint code {
+  background: var(--white); padding: 1px 5px; border-radius: 3px;
+  color: var(--raspberry); font-size: 11px;
+}
+.gen-output {
+  width: 100%; min-height: 280px; padding: 12px;
+  border: 1px solid var(--gray-border); border-radius: 6px;
+  font-family: 'Consolas', 'Monaco', monospace; font-size: 13px;
+  resize: vertical; white-space: pre-wrap;
+}
+.copy-toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--green); color: var(--white);
+  padding: 10px 20px; border-radius: var(--radius);
+  box-shadow: var(--shadow-md); z-index: 200;
+  opacity: 0; transition: opacity 200ms;
+  pointer-events: none;
+}
+.copy-toast.show { opacity: 1; }
+
+.archived-banner {
+  background: #fff5e6; border: 1px solid #f2c47b; color: #8a5a00;
+  padding: 10px 14px; border-radius: var(--radius); margin-bottom: 16px;
+  font-size: 13px;
+}
+
+/* Heslový gate */
+.lock-overlay {
+  position: fixed; inset: 0; background: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+}
+.lock-box {
+  width: 380px; max-width: 90vw; padding: 32px;
+  text-align: center;
+}
+.lock-box h2 { font-size: 24px; margin-bottom: 8px; }
+.lock-box p { color: var(--gray-text); margin-bottom: 24px; }
+.lock-box input {
+  width: 100%; padding: 12px 14px; border: 1px solid var(--gray-border);
+  border-radius: 6px; font-size: 15px; margin-bottom: 12px;
+}
+.lock-box input:focus { outline: none; border-color: var(--blue); }
+
+/* Footer */
+footer.app-footer {
+  padding: 10px 24px; text-align: center;
+  font-size: 11px; color: var(--gray-text);
+  border-top: 1px solid var(--gray-border); background: var(--white);
+}
+
+/* ===== Tisk ===== */
+@media print {
+  body { background: var(--white); }
+  .sidebar, header.topbar, .detail-actions, .note-btn, .section-toggle,
+  .generate-btn, .export-banner, .deadline-banner, .app-footer, .lock-overlay { display: none !important; }
+  .main, .detail-wrap, .detail { display: block; overflow: visible; height: auto; }
+  .detail { padding: 0; }
+  .section, .detail-header { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+  .step-check { border-color: #000; }
+  .step-check.done { background: #000; border-color: #000; }
+  .step.done .step-label { color: #000; }
+  .note-area { display: block !important; margin-left: 30px; }
+  .note-area textarea { border: none; padding: 0; min-height: auto; background: transparent; }
+  .progress-fill { background: #000 !important; }
+  .print-only { display: block !important; }
+  .step-input { border: none; background: transparent; padding: 0; }
+}
+.print-only { display: none; }
+</style>
+</head>
+<body>
+
+<!-- ===== Heslový gate ===== -->
+<div class="lock-overlay" id="lockOverlay">
+  <div class="lock-box">
+    <h2>Checklist dotisků</h2>
+    <p>Zadejte heslo pro vstup do aplikace.</p>
+    <input type="password" id="lockInput" placeholder="Heslo" autofocus>
+    <button class="btn btn-primary btn-block btn-lg" onclick="tryUnlock()">Vstoupit</button>
+    <div class="error-msg" id="lockError"></div>
+  </div>
+</div>
+
+<div class="app" id="app" style="display:none;">
+  <header class="topbar">
+    <h1>Checklist dotisků</h1>
+    <div class="top-actions">
+      <button class="btn btn-secondary" onclick="openTemplates()">Nastavení šablon</button>
+      <button class="btn btn-secondary" onclick="exportData()">Stažení zálohy</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">Nahrání zálohy</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+      <button class="btn btn-secondary" onclick="window.print()">Tisk</button>
+    </div>
+  </header>
+
+  <div id="exportBanner"></div>
+  <div id="deadlineBanner"></div>
+
+  <div class="main">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="tabs">
+          <button class="tab active" id="tabActive" onclick="switchTab('active')">Aktivní</button>
+          <button class="tab" id="tabArchived" onclick="switchTab('archived')">Archiv</button>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="openNewBookModal()">+ Nová kniha</button>
+      </div>
+      <div class="book-list" id="bookList"></div>
+    </aside>
+    <div class="detail-wrap">
+      <main class="detail" id="detail"></main>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    Aplikace pracuje výhradně s veřejně dostupnými údaji o publikacích.
+  </footer>
+</div>
+
+<!-- ===== Modal: Nová kniha ===== -->
+<div class="modal-overlay" id="newBookModal">
+  <div class="modal">
+    <h2>Nová kniha</h2>
+    <div class="field"><label>Název knihy *</label><input type="text" id="newTitle"></div>
+    <div class="field"><label>Autor (jméno a příjmení) *</label><input type="text" id="newAuthor"></div>
+    <div class="field"><label>Redaktor *</label><input type="text" id="newEditor"></div>
+    <div class="field"><label>SKU</label><input type="text" id="newIsbn"></div>
+    <div class="error-msg" id="newBookError"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeNewBookModal()">Zrušit</button>
+      <button class="btn btn-primary" onclick="createBook()">Vytvořit</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Modal: Šablony ===== -->
+<div class="modal-overlay" id="templatesModal">
+  <div class="modal modal-lg">
+    <h2>Nastavení šablon</h2>
+    <div class="template-hint">
+      <strong>Proměnné:</strong>
+      <code>{{nazev}}</code> <code>{{autor}}</code> <code>{{isbn}}</code>
+      <code>{{sku}}</code> (NAV č.)
+      <code>{{kusů}}</code> <code>{{datum_navozu}}</code>
+      <code>{{objednavkove_cislo}}</code> <code>{{redaktor}}</code>
+      <code>{{datum_dnes}}</code>
+    </div>
+    <div class="field"><label>E-mail Filipovi (účtárna)</label><textarea id="tplFilip" rows="10"></textarea></div>
+    <div class="field"><label>E-mail Martině (zákaznické odd.)</label><textarea id="tplMartina" rows="10"></textarea></div>
+    <div class="field"><label>Yammer příspěvek</label><textarea id="tplYammer" rows="8"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="resetTemplates()">Obnovit výchozí</button>
+      <button class="btn btn-secondary" onclick="closeTemplates()">Zrušit</button>
+      <button class="btn btn-primary" onclick="saveTemplates()">Uložit</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Modal: Vygenerovaný text ===== -->
+<div class="modal-overlay" id="genModal">
+  <div class="modal modal-lg">
+    <h2 id="genTitle">Vygenerovaný text</h2>
+    <textarea class="gen-output" id="genOutput"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeGen()">Zavřít</button>
+      <button class="btn btn-primary" onclick="copyGen()">Kopírovat do schránky</button>
+    </div>
+  </div>
+</div>
+
+<div class="copy-toast" id="copyToast">Zkopírováno ✓</div>
+
+<script>
+// ===== Konfigurace =====
+const APP_PASSWORD = 'dotisky2025';
+const STORAGE_KEY = 'dotisky-checklist-data';
+const TEMPLATES_KEY = 'dotisky-templates';
+const UNLOCK_KEY = 'dotisky-unlocked';
+const LAST_EXPORT_KEY = 'dotisky-last-export';
+const BANNER_DISMISS_KEY = 'dotisky-banner-dismissed';
+const EXPORT_REMINDER_DAYS = 14;
+
+// ===== Výchozí šablony =====
+const DEFAULT_TEMPLATES = {
+  filip: `Předmět: Dotisk – {{nazev}}
+
+Dobrý den Filipe,
+
+posílám informaci o dotisku knihy {{nazev}} ({{autor}}, ISBN: {{isbn}}, NAV č.: {{sku}}).
+
+Počet kusů: {{kusů}}
+Datum návozu: {{datum_navozu}}
+Objednávkové číslo: {{objednavkove_cislo}}
+
+S pozdravem
+{{redaktor}}`,
+  martina: `Předmět: Dotisk – {{nazev}}
+
+Dobrý den Martino,
+
+informuji tě o dotisku knihy {{nazev}} ({{autor}}, ISBN: {{isbn}}, NAV č.: {{sku}}).
+
+Počet kusů: {{kusů}}
+Datum návozu: {{datum_navozu}}
+
+S pozdravem
+{{redaktor}}`,
+  yammer: `📚 Dotisk | {{nazev}}
+
+Autor: {{autor}}
+ISBN: {{isbn}}
+NAV č.: {{sku}}
+Počet kusů: {{kusů}}
+Datum návozu: {{datum_navozu}}
+
+Dotisk byl zadán do tisku.`
+};
+
+// ===== Definice sekcí a kroků =====
+const SECTIONS = [
+  {
+    id: 's1', title: '1. Kalkulace',
+    steps: [
+      { id: 'price_book', label: 'Doplnit cenu tištěné knihy', input: { type: 'number', key: 'cena_knihy', placeholder: 'Kč' } },
+      { id: 'count', label: 'Doplnit počet kusů k dotisku', input: { type: 'number', key: 'count', placeholder: 'Počet kusů' } },
+      { id: 'pages', label: 'Doplnit počet stránek', input: { type: 'number', key: 'pocet_stran', placeholder: 'Stran' } },
+      { id: 'price_print', label: 'Doplnit cenu tisku', input: { type: 'number', key: 'cena_tisku', placeholder: 'Kč' } },
+      { id: 'mark_reprint', label: 'Označit jako dotisk' },
+      { id: 'royalties', label: 'Doplnit autorská procenta' }
+    ]
+  },
+  {
+    id: 's2', title: '2. Schválení',
+    steps: [
+      { id: 'approved', label: 'Kalkulace schválena šéfredaktorkou' }
+    ]
+  },
+  {
+    id: 's25', title: '2.5 Odarchivace v Navisionu', optional: true, optKey: 'section25',
+    hint: 'Zapnout, pokud kniha není v edičním plánu Navisionu',
+    steps: [
+      { id: 'unarch_book', label: 'Odarchivovat knihu v Navisionu' },
+      { id: 'unarch_print', label: 'Doplnit tiskárnu v osobě' },
+      { id: 'unarch_cont', label: 'Pokračovat podle sekce 3' }
+    ]
+  },
+  {
+    id: 's3', title: '3. Navision - ediční plán',
+    steps: [
+      { id: 'nav_open', label: 'Otevřít řádek knihy → záložka Navigace → Dotisk' },
+      { id: 'nav_date', label: 'Zapsat datum návozu', input: { type: 'date', key: 'datum_navozu' } },
+      { id: 'nav_count', label: 'Zapsat počet kusů k dotisku' },
+      { id: 'nav_eshop', label: 'Zapsat rezervované množství pro e-shop' },
+      { id: 'nav_print', label: 'Zkontrolovat zadanou tiskárnu u osob' },
+      { id: 'nav_royal', label: 'Zkontrolovat procenta u autorů' }
+    ]
+  },
+  {
+    id: 's35', title: '3.5 E-shop - předprodej', optional: true, optKey: 'section35',
+    hint: 'Zapnout, pokud je kniha na e-shopu vyprodaná',
+    steps: [
+      { id: 'eshop_pre', label: 'Zaškrtnout políčko předprodej na e-shopu' },
+      { id: 'eshop_bundle', label: 'Pokud je v balíčku: zaškrtnout předprodej u obou knih a uložit' }
+    ]
+  },
+  {
+    id: 's4', title: '4. Tisk',
+    steps: [
+      { id: 'print_order', label: 'Vyžádat v Navisionu objednávkové číslo na dotisk', input: { type: 'text', key: 'objednavkove_cislo', placeholder: 'např. OBJ-2025-0042', label: 'Objednávkové číslo:' } },
+      { id: 'print_reprint', label: 'Ve formuláři tiskárny doplnit REPRINT', input: { type: 'select', key: 'reprint', options: ['1', '2', '3'] } }
+    ]
+  },
+  {
+    id: 's5', title: '5. Složka a notifikace',
+    steps: [
+      { id: 'fld_create', label: 'Založit složku dotisku' },
+      { id: 'fld_calc', label: 'Vložit kalkulaci' },
+      { id: 'fld_calc_ok', label: 'Vložit schválenou kalkulaci' },
+      { id: 'fld_order', label: 'Vložit potvrzení objednávky tisku' },
+      { id: 'fld_cover', label: 'Vložit finální obálku' },
+      { id: 'fld_print', label: 'Vložit tiskový soubor' },
+      { id: 'fld_archive', label: 'Přesunout složku ke knize do archivu' },
+      { id: 'notif_filip', label: 'Poslat info o dotisku Filipovi (účtárna)', generator: { type: 'filip', label: 'Generovat e-mail' } },
+      { id: 'notif_martina', label: 'Poslat info o dotisku Martině (zákaznické odd.)', generator: { type: 'martina', label: 'Generovat e-mail' } },
+      { id: 'notif_yammer', label: 'Zveřejnit info o dotisku na Yammeru', generator: { type: 'yammer', label: 'Generovat příspěvek' } }
+    ]
+  }
+];
+
+// ===== Stav =====
+let state = loadState();
+let templates = loadTemplates();
+let currentTab = 'active';
+let currentBookId = null;
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) { console.error(e); }
+  return { books: [] };
+}
+function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+function loadTemplates() {
+  try {
+    const raw = localStorage.getItem(TEMPLATES_KEY);
+    if (raw) return { ...DEFAULT_TEMPLATES, ...JSON.parse(raw) };
+  } catch (e) {}
+  return { ...DEFAULT_TEMPLATES };
+}
+function saveTemplatesToStorage() { localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates)); }
+
+// ===== Pomocné funkce =====
+function uuid() { return 'b-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 9); }
+function todayISO() { return new Date().toISOString(); }
+function fmtDate(iso) {
+  if (!iso) return '';
+  try { return new Date(iso).toLocaleDateString('cs-CZ'); } catch (e) { return iso; }
+}
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// ===== Datumové utility =====
+// Spočítá počet dní od dneška do zadaného data (ISO YYYY-MM-DD nebo ISO timestamp)
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const target = new Date(dateStr);
+  if (isNaN(target.getTime())) return null;
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  target.setHours(0,0,0,0);
+  return Math.round((target - today) / (1000 * 60 * 60 * 24));
+}
+// Termín pro knihkupce = datum návozu - 14 dní (vrátí YYYY-MM-DD)
+function deadlineDate(deliveryStr) {
+  if (!deliveryStr) return '';
+  const d = new Date(deliveryStr);
+  if (isNaN(d.getTime())) return '';
+  d.setDate(d.getDate() - 14);
+  return d.toISOString().slice(0, 10);
+}
+// Český sklon "den / dny / dní"
+function dniText(n) {
+  const abs = Math.abs(n);
+  if (abs === 1) return 'den';
+  if (abs >= 2 && abs <= 4) return 'dny';
+  return 'dní';
+}
+// Banner se zavírá jen pro tuto session
+let deadlineBannerDismissed = false;
+
+// Prázdná struktura kroků
+function emptySteps() {
+  const steps = {};
+  SECTIONS.forEach(s => {
+    s.steps.forEach(st => {
+      steps[st.id] = { done: false, note: '', value: '', completedAt: null };
+    });
+  });
+  return steps;
+}
+
+// ===== Heslový gate =====
+function tryUnlock() {
+  const input = document.getElementById('lockInput');
+  const err = document.getElementById('lockError');
+  if (input.value === APP_PASSWORD) {
+    localStorage.setItem(UNLOCK_KEY, '1');
+    showApp();
+  } else {
+    err.textContent = 'Nesprávné heslo';
+    input.value = '';
+    input.focus();
+  }
+}
+function showApp() {
+  document.getElementById('lockOverlay').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  initApp();
+}
+
+// ===== Inicializace aplikace =====
+function initApp() {
+  // Migrace starých záznamů
+  state.books.forEach(b => {
+    if (!b.optionalSections) b.optionalSections = { section25: false, section35: false };
+    if (!b.steps) b.steps = emptySteps();
+    SECTIONS.forEach(s => s.steps.forEach(st => {
+      if (!b.steps[st.id]) b.steps[st.id] = { done: false, note: '', value: '', completedAt: null };
+    }));
+  });
+  const list = filteredBooks();
+  currentBookId = list[0]?.id || null;
+  renderExportBanner();
+  render();
+}
+
+// ===== Banner exportu =====
+function renderExportBanner() {
+  const wrap = document.getElementById('exportBanner');
+  const dismissed = localStorage.getItem(BANNER_DISMISS_KEY);
+  if (dismissed === todayStr()) { wrap.innerHTML = ''; return; }
+  const last = localStorage.getItem(LAST_EXPORT_KEY);
+  let daysSince = Infinity;
+  if (last) {
+    daysSince = Math.floor((Date.now() - new Date(last).getTime()) / (1000 * 60 * 60 * 24));
+  }
+  if (daysSince > EXPORT_REMINDER_DAYS && state.books.length > 0) {
+    wrap.innerHTML = `
+      <div class="export-banner">
+        <span>💾 Poslední záloha byla ${last ? 'před více než ' + EXPORT_REMINDER_DAYS + ' dny' : 'zatím neprovedena'}. Doporučujeme exportovat data.</span>
+        <div class="banner-actions">
+          <button class="btn btn-primary" onclick="exportData()">Exportovat teď</button>
+          <button class="banner-close" onclick="dismissBanner()" title="Zavřít">✕</button>
+        </div>
+      </div>`;
+  } else {
+    wrap.innerHTML = '';
+  }
+}
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+function dismissBanner() {
+  localStorage.setItem(BANNER_DISMISS_KEY, todayStr());
+  renderExportBanner();
+}
+
+// ===== Modal: Nová kniha =====
+function openNewBookModal() {
+  document.getElementById('newBookModal').classList.add('open');
+  ['newTitle', 'newAuthor', 'newEditor', 'newIsbn'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('newBookError').textContent = '';
+  setTimeout(() => document.getElementById('newTitle').focus(), 50);
+}
+function closeNewBookModal() { document.getElementById('newBookModal').classList.remove('open'); }
+function createBook() {
+  const title = document.getElementById('newTitle').value.trim();
+  const author = document.getElementById('newAuthor').value.trim();
+  const editor = document.getElementById('newEditor').value.trim();
+  const isbn = document.getElementById('newIsbn').value.trim();
+  if (!title || !author || !editor) {
+    document.getElementById('newBookError').textContent = 'Vyplňte prosím název, autora i redaktora.';
+    return;
+  }
+  const book = {
+    id: uuid(), title, author, editor, isbn,
+    createdAt: todayISO(), archivedAt: null,
+    optionalSections: { section25: false, section35: false },
+    steps: emptySteps()
+  };
+  state.books.unshift(book);
+  saveState();
+  currentBookId = book.id;
+  currentTab = 'active';
+  document.getElementById('tabActive').classList.add('active');
+  document.getElementById('tabArchived').classList.remove('active');
+  closeNewBookModal();
+  render();
+}
+
+// ===== Záložky =====
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tabActive').classList.toggle('active', tab === 'active');
+  document.getElementById('tabArchived').classList.toggle('active', tab === 'archived');
+  const list = filteredBooks();
+  currentBookId = list[0]?.id || null;
+  render();
+}
+function filteredBooks() {
+  return state.books.filter(b => currentTab === 'active' ? !b.archivedAt : !!b.archivedAt);
+}
+
+// ===== Progress =====
+function calcProgress(book) {
+  let total = 0, done = 0;
+  SECTIONS.forEach(s => {
+    if (s.optional && !book.optionalSections[s.optKey]) return;
+    s.steps.forEach(st => {
+      total++;
+      if (book.steps[st.id]?.done) done++;
+    });
+  });
+  return { total, done, pct: total === 0 ? 0 : Math.round(done / total * 100) };
+}
+function progressColor(pct) {
+  if (pct <= 33) return 'var(--raspberry)';
+  if (pct <= 66) return 'var(--blue)';
+  return 'var(--green)';
+}
+
+// ===== Render: levý panel =====
+function renderSidebar() {
+  const list = filteredBooks();
+  const el = document.getElementById('bookList');
+  if (list.length === 0) {
+    el.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--gray-text); font-size: 13px;">
+      ${currentTab === 'active' ? 'Žádné aktivní knihy' : 'Archiv je prázdný'}
+    </div>`;
+    return;
+  }
+  el.innerHTML = list.map(b => {
+    const p = calcProgress(b);
+    const dotClass = p.pct === 0 ? 'zero' : (p.pct >= 100 ? 'full' : 'mid');
+    const delivery = getBookValue(b, 'datum_navozu');
+    let deadlineHtml = '';
+    if (delivery) {
+      const days = daysUntil(delivery);
+      if (days !== null && days >= 0 && days <= 14) {
+        deadlineHtml = `<div class="b-deadline">⚠️ Návoz za ${days} ${dniText(days)}</div>`;
+      }
+    }
+    return `
+      <div class="book-item ${b.id === currentBookId ? 'active' : ''}" onclick="selectBook('${b.id}')">
+        <div class="b-title">${escapeHtml(b.title)}</div>
+        <div class="b-author">${escapeHtml(b.author)}</div>
+        <div class="b-progress"><div class="b-progress-fill" style="width:${p.pct}%; background:${progressColor(p.pct)};"></div></div>
+        <div class="b-status"><span class="status-dot ${dotClass}"></span>${p.done} / ${p.total} kroků</div>
+        ${deadlineHtml}
+      </div>`;
+  }).join('');
+}
+function selectBook(id) { currentBookId = id; render(); }
+
+// ===== Render: detail =====
+function renderDetail() {
+  const detail = document.getElementById('detail');
+  const book = state.books.find(b => b.id === currentBookId);
+
+  if (!book) {
+    const hasAny = state.books.length > 0;
+    detail.innerHTML = `
+      <div class="empty-state">
+        <h2>${hasAny ? 'Vyberte knihu' : 'Začněte první checklist'}</h2>
+        <p>${hasAny ? 'V levém panelu vyberte knihu pro zobrazení detailu.' : 'Vytvořte si checklist pro dotisk knihy a hlídejte si všechny potřebné kroky na jednom místě.'}</p>
+        ${!hasAny ? '<button class="btn btn-primary btn-lg" onclick="openNewBookModal()">+ Vytvořit první checklist</button>' : ''}
+      </div>`;
+    return;
+  }
+
+  const archived = !!book.archivedAt;
+  const p = calcProgress(book);
+  const ro = archived ? 'readonly' : '';
+
+  let html = '';
+  if (archived) html += `<div class="archived-banner">Tato kniha je archivovaná (${fmtDate(book.archivedAt)}). Checklist je jen ke čtení.</div>`;
+
+  html += `
+    <div class="detail-header">
+      <div class="detail-meta">
+        <div class="field"><label>Název knihy</label><input type="text" value="${escapeHtml(book.title)}" ${ro} onchange="updateField('title', this.value)"></div>
+        <div class="field"><label>Autor</label><input type="text" value="${escapeHtml(book.author)}" ${ro} onchange="updateField('author', this.value)"></div>
+        <div class="field"><label>Redaktor</label><input type="text" value="${escapeHtml(book.editor)}" ${ro} onchange="updateField('editor', this.value)"></div>
+        <div class="field"><label>ISBN</label><input type="text" value="${escapeHtml(book.isbn || '')}" ${ro} onchange="updateField('isbn', this.value)"></div>
+        <div class="field field-fullwidth"><label>Poznámky ke knize</label><textarea class="book-notes" placeholder="Poznámky, čekám na..., důležité informace" ${ro} onchange="updateField('notes', this.value)">${escapeHtml(book.notes || '')}</textarea></div>
+        <div class="field"><label>Vytvořeno</label><input type="text" value="${fmtDate(book.createdAt)}" readonly></div>
+        ${archived ? `<div class="field"><label>Archivováno</label><input type="text" value="${fmtDate(book.archivedAt)}" readonly></div>` : ''}
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-info">
+          <span><strong>${p.done}</strong> / ${p.total} kroků dokončeno</span>
+          <span style="color:${progressColor(p.pct)}; font-weight: 600;">${p.pct}%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${p.pct}%; background:${progressColor(p.pct)};"></div></div>
+      </div>
+      <div class="detail-actions">
+        ${!archived ? `<button class="btn btn-success" onclick="archiveBook()">Archivovat knihu</button>` : `<button class="btn btn-primary" onclick="unarchiveBook()">Obnovit do aktivních</button>`}
+        <button class="btn btn-secondary" onclick="window.print()">Tisk checklistu</button>
+        <button class="btn btn-danger" onclick="deleteBook()">Smazat knihu</button>
+      </div>
+      <div class="print-only" style="margin-top:12px; font-size:12px; color:#666;">
+        Vytištěno: <span id="printDate"></span>
+      </div>
+    </div>`;
+
+  SECTIONS.forEach(s => {
+    const isOpt = !!s.optional;
+    const enabled = !isOpt || book.optionalSections[s.optKey];
+    html += `<div class="section ${isOpt ? 'optional' : ''} ${isOpt && !enabled ? 'optional-off' : ''}">
+      <div class="section-head">
+        <h3>${s.title}${isOpt ? ' <span class="optional-tag">volitelná</span>' : ''}</h3>
+        ${isOpt ? `
+          <div class="section-toggle">
+            <span class="toggle-hint">${s.hint}</span>
+            <label class="switch">
+              <input type="checkbox" ${enabled ? 'checked' : ''} ${archived ? 'disabled' : ''} onchange="toggleOptional('${s.optKey}', this.checked)">
+              <span class="switch-slider"></span>
+            </label>
+          </div>` : ''}
+      </div>
+      ${(!isOpt || enabled) ? s.steps.map(st => renderStep(book, st, archived)).join('') : '<div style="color: var(--gray-text); font-size: 13px; font-style: italic;">Sekce vypnuta - nepočítá se do progressu.</div>'}
+    </div>`;
+  });
+
+  detail.innerHTML = html;
+  const pd = document.getElementById('printDate');
+  if (pd) pd.textContent = new Date().toLocaleString('cs-CZ');
+}
+
+function renderStep(book, st, archived) {
+  const stState = book.steps[st.id] || { done: false, note: '', value: '', completedAt: null };
+  const hasNote = !!stState.note;
+  let inputHtml = '';
+  if (st.input) {
+    const lbl = st.input.label ? `<span class="step-input-label">${st.input.label}</span>` : '';
+    if (st.input.type === 'select') {
+      inputHtml = `${lbl}<select class="step-input" ${archived ? 'disabled' : ''} onchange="updateStepValue('${st.id}', this.value)">
+        <option value="">—</option>
+        ${st.input.options.map(o => `<option ${stState.value === o ? 'selected' : ''}>${o}</option>`).join('')}
+      </select>`;
+    } else {
+      inputHtml = `${lbl}<input class="step-input" type="${st.input.type}" value="${escapeHtml(stState.value || '')}" placeholder="${st.input.placeholder || ''}" ${archived ? 'readonly' : ''} onchange="updateStepValue('${st.id}', this.value)">`;
+    }
+  }
+  let genHtml = '';
+  if (st.generator) {
+    genHtml = `<button class="generate-btn" onclick="generateText('${st.generator.type}')">${st.generator.label}</button>`;
+  }
+  // Info o termínu pro knihkupce pod datem návozu
+  let deliveryInfoHtml = '';
+  if (st.input && st.input.key === 'datum_navozu' && stState.value) {
+    const deadline = deadlineDate(stState.value);
+    const days = daysUntil(deadline);
+    let cls = '';
+    let warn = '';
+    if (days !== null) {
+      if (days <= 0) { cls = 'danger'; warn = ' ⚠️ Termín již proběhl nebo je dnes'; }
+      else if (days <= 7) { cls = 'warn'; }
+    }
+    deliveryInfoHtml = `<div class="delivery-info ${cls}">📅 Termín pro zadání info knihkupcům: ${fmtDate(deadline)}${warn}</div>`;
+  }
+  return `
+    <div class="step ${stState.done ? 'done' : ''}" data-step="${st.id}">
+      <div class="step-row">
+        <div class="step-check ${stState.done ? 'done' : ''}" onclick="${archived ? '' : `toggleStep('${st.id}')`}"></div>
+        <div class="step-label" onclick="${archived ? '' : `toggleStep('${st.id}')`}">${escapeHtml(st.label)}${stState.completedAt ? `<span class="step-completed-date">✓ ${fmtDate(stState.completedAt)}</span>` : ''}</div>
+        ${inputHtml}
+        ${genHtml}
+        <button class="note-btn ${hasNote ? 'has-note' : ''}" onclick="toggleNote('${st.id}')" title="Poznámka">📝</button>
+      </div>
+      ${deliveryInfoHtml}
+      <div class="note-area ${hasNote ? 'open' : ''}" id="note-${st.id}">
+        <textarea placeholder="Poznámka..." ${archived ? 'readonly' : ''} onchange="updateNote('${st.id}', this.value)">${escapeHtml(stState.note || '')}</textarea>
+      </div>
+    </div>`;
+}
+
+// ===== Mutace =====
+function getCurrentBook() { return state.books.find(b => b.id === currentBookId); }
+function updateField(field, value) {
+  const book = getCurrentBook(); if (!book) return;
+  book[field] = value;
+  saveState(); renderSidebar();
+}
+function toggleStep(id) {
+  const book = getCurrentBook(); if (!book || book.archivedAt) return;
+  const s = book.steps[id];
+  s.done = !s.done;
+  s.completedAt = s.done ? todayISO() : null;
+  saveState(); render();
+}
+function updateStepValue(id, value) {
+  const book = getCurrentBook(); if (!book) return;
+  book.steps[id].value = value;
+  saveState();
+}
+function updateNote(id, value) {
+  const book = getCurrentBook(); if (!book) return;
+  book.steps[id].note = value;
+  saveState();
+  const btn = document.querySelector(`[data-step="${id}"] .note-btn`);
+  if (btn) btn.classList.toggle('has-note', !!value);
+}
+function toggleNote(id) {
+  const area = document.getElementById('note-' + id);
+  if (area) area.classList.toggle('open');
+}
+function toggleOptional(key, enabled) {
+  const book = getCurrentBook(); if (!book) return;
+  book.optionalSections[key] = enabled;
+  saveState(); render();
+}
+function archiveBook() {
+  const book = getCurrentBook(); if (!book) return;
+  if (!confirm('Archivovat tuto knihu? Checklist se přesune do archivu a bude jen ke čtení.')) return;
+  book.archivedAt = todayISO();
+  saveState(); render();
+}
+function unarchiveBook() {
+  const book = getCurrentBook(); if (!book) return;
+  book.archivedAt = null;
+  saveState(); render();
+}
+function deleteBook() {
+  const book = getCurrentBook(); if (!book) return;
+  if (!confirm(`Opravdu smazat knihu "${book.title}"? Tato akce je nevratná.`)) return;
+  state.books = state.books.filter(b => b.id !== book.id);
+  saveState();
+  currentBookId = filteredBooks()[0]?.id || null;
+  render();
+}
+
+// ===== Export / Import =====
+function exportData() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `dotisky-zaloha-${todayStr()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  localStorage.setItem(LAST_EXPORT_KEY, todayISO());
+  renderExportBanner();
+}
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (!imported.books || !Array.isArray(imported.books)) {
+        alert('Neplatný formát souboru.'); return;
+      }
+      const choice = prompt('Akce s importovanými daty:\n1 = Přepsat všechna současná data\n2 = Sloučit s existujícími\n(prázdné = Zrušit)', '2');
+      if (!choice) return;
+      if (choice === '1') {
+        state = imported;
+      } else if (choice === '2') {
+        const existingIds = new Set(state.books.map(b => b.id));
+        imported.books.forEach(b => { if (!existingIds.has(b.id)) state.books.push(b); });
+      } else { return; }
+      saveState();
+      initApp();
+      alert('Import dokončen.');
+    } catch (err) {
+      alert('Chyba při čtení souboru: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ===== Šablony =====
+function openTemplates() {
+  document.getElementById('tplFilip').value = templates.filip;
+  document.getElementById('tplMartina').value = templates.martina;
+  document.getElementById('tplYammer').value = templates.yammer;
+  document.getElementById('templatesModal').classList.add('open');
+}
+function closeTemplates() { document.getElementById('templatesModal').classList.remove('open'); }
+function saveTemplates() {
+  templates.filip = document.getElementById('tplFilip').value;
+  templates.martina = document.getElementById('tplMartina').value;
+  templates.yammer = document.getElementById('tplYammer').value;
+  saveTemplatesToStorage();
+  closeTemplates();
+}
+function resetTemplates() {
+  if (!confirm('Obnovit výchozí šablony? Vaše úpravy budou ztraceny.')) return;
+  templates = { ...DEFAULT_TEMPLATES };
+  saveTemplatesToStorage();
+  openTemplates();
+}
+
+// ===== Generování textů =====
+function getBookValue(book, key) {
+  for (const s of SECTIONS) {
+    for (const st of s.steps) {
+      if (st.input && st.input.key === key) {
+        const v = book.steps[st.id]?.value || '';
+        if (key === 'datum_navozu' && v) return fmtDate(v);
+        return v;
+      }
+    }
+  }
+  return '';
+}
+function renderTemplate(tpl, book) {
+  return tpl
+    .replaceAll('{{nazev}}', book.title || '')
+    .replaceAll('{{autor}}', book.author || '')
+    .replaceAll('{{isbn}}', book.isbn || '')
+    .replaceAll('{{sku}}', book.isbn || '')
+    .replaceAll('{{redaktor}}', book.editor || '')
+    .replaceAll('{{kusů}}', getBookValue(book, 'count'))
+    .replaceAll('{{datum_navozu}}', getBookValue(book, 'datum_navozu'))
+    .replaceAll('{{objednavkove_cislo}}', getBookValue(book, 'objednavkove_cislo'))
+    .replaceAll('{{datum_dnes}}', new Date().toLocaleDateString('cs-CZ'));
+}
+function generateText(type) {
+  const book = getCurrentBook(); if (!book) return;
+  const tpl = templates[type];
+  if (!tpl) return;
+  const titles = { filip: 'E-mail pro Filipa', martina: 'E-mail pro Martinu', yammer: 'Yammer příspěvek' };
+  document.getElementById('genTitle').textContent = titles[type] || 'Vygenerovaný text';
+  document.getElementById('genOutput').value = renderTemplate(tpl, book);
+  document.getElementById('genModal').classList.add('open');
+}
+function closeGen() { document.getElementById('genModal').classList.remove('open'); }
+function copyGen() {
+  const ta = document.getElementById('genOutput');
+  ta.select();
+  navigator.clipboard.writeText(ta.value).then(() => showToast()).catch(() => {
+    document.execCommand('copy'); showToast();
+  });
+}
+function showToast() {
+  const t = document.getElementById('copyToast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+// ===== Deadline banner (návoz blíží se / již proběhl) =====
+function renderDeadlineBanner() {
+  const wrap = document.getElementById('deadlineBanner');
+  if (deadlineBannerDismissed) { wrap.innerHTML = ''; return; }
+  const upcoming = [];
+  const overdue = [];
+  state.books.filter(b => !b.archivedAt).forEach(b => {
+    const delivery = getBookValue(b, 'datum_navozu');
+    if (!delivery) return;
+    const days = daysUntil(delivery);
+    if (days === null) return;
+    if (days < 0) overdue.push({ book: b, delivery, days });
+    else if (days <= 14) upcoming.push({ book: b, delivery, days });
+  });
+  if (upcoming.length === 0 && overdue.length === 0) { wrap.innerHTML = ''; return; }
+
+  let html = '';
+  if (overdue.length > 0) {
+    html += `<div class="deadline-banner overdue">
+      <div class="db-title">⚠️ Datum návozu již proběhlo</div>
+      <div class="db-list">${overdue.map(x => `<div class="db-row"><strong>${escapeHtml(x.book.title)}</strong> (${fmtDate(x.delivery)})</div>`).join('')}</div>
+      <div class="db-actions">
+        <button class="btn btn-secondary" onclick="dismissDeadlineBanner()">✕ Zavřít</button>
+      </div>
+    </div>`;
+  }
+  if (upcoming.length > 0) {
+    html += `<div class="deadline-banner">
+      <div class="db-title">⚠️ Blíží se termín pro informaci knihkupcům</div>
+      <div class="db-list">${upcoming.map(x => {
+        const dl = deadlineDate(x.delivery);
+        const dDays = daysUntil(dl);
+        return `<div class="db-row"><strong>${escapeHtml(x.book.title)}</strong> – návoz ${fmtDate(x.delivery)}, termín pro knihkupce: ${fmtDate(dl)} (${dDays >= 0 ? 'za ' + dDays + ' ' + dniText(dDays) : 'před ' + Math.abs(dDays) + ' ' + dniText(dDays)})</div>`;
+      }).join('')}</div>
+      <div class="db-actions">
+        <button class="btn btn-primary" onclick="exportIcsForUpcoming()">Přidat připomenutí do kalendáře</button>
+        <button class="btn btn-secondary" onclick="dismissDeadlineBanner()">✕ Zavřít</button>
+      </div>
+    </div>`;
+  }
+  wrap.innerHTML = html;
+}
+function dismissDeadlineBanner() {
+  deadlineBannerDismissed = true;
+  renderDeadlineBanner();
+}
+
+// ===== ICS export pro připomenutí termínů =====
+function pad(n) { return String(n).padStart(2, '0'); }
+function icsDate(dateStr, hour, minute) {
+  // YYYY-MM-DD + hodina/minuta -> YYYYMMDDTHHMMSS (lokální čas pro Outlook)
+  const d = new Date(dateStr);
+  return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(hour)}${pad(minute)}00`;
+}
+function icsEscape(s) {
+  return String(s || '').replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+}
+function buildIcsEvent(book) {
+  const delivery = getBookValue(book, 'datum_navozu');
+  if (!delivery) return null;
+  const dl = deadlineDate(delivery);
+  const dtStart = icsDate(dl, 9, 0);
+  const dtEnd = icsDate(dl, 9, 30);
+  const uid = `dotisk-${book.id}-${dl}@checklist-dotisku`;
+  const dtStamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  const summary = icsEscape(`Termín pro knihkupce – ${book.title}`);
+  const desc = icsEscape(`Poslední možný den pro zadání informace o dotisku knihy ${book.title} (ISBN: ${book.isbn || '—'}) pro knihkupce. Datum návozu z tiskárny: ${fmtDate(delivery)}.`);
+  return [
+    'BEGIN:VEVENT',
+    `UID:${uid}`,
+    `DTSTAMP:${dtStamp}`,
+    `DTSTART:${dtStart}`,
+    `DTEND:${dtEnd}`,
+    `SUMMARY:${summary}`,
+    `DESCRIPTION:${desc}`,
+    'BEGIN:VALARM',
+    'TRIGGER:-P1D',
+    'ACTION:DISPLAY',
+    `DESCRIPTION:${summary}`,
+    'END:VALARM',
+    'END:VEVENT'
+  ].join('\r\n');
+}
+function exportIcsForUpcoming() {
+  const books = state.books.filter(b => {
+    if (b.archivedAt) return false;
+    const delivery = getBookValue(b, 'datum_navozu');
+    if (!delivery) return false;
+    const days = daysUntil(delivery);
+    return days !== null && days >= 0 && days <= 14;
+  });
+  if (books.length === 0) return;
+  const events = books.map(buildIcsEvent).filter(Boolean);
+  const ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Checklist dotisků//CS',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    ...events,
+    'END:VCALENDAR'
+  ].join('\r\n');
+  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const fnameBase = books.length === 1
+    ? books[0].title.replace(/[^a-zA-Z0-9áčďéěíňóřšťúůýžÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ ]/g, '').slice(0, 20).trim() || 'kniha'
+    : 'vice-knih';
+  a.href = url;
+  a.download = `termin-knihkupci-${fnameBase}.ics`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ===== Render =====
+function render() { renderSidebar(); renderDetail(); renderDeadlineBanner(); }
+
+// ===== Start =====
+(function start() {
+  // Heslový gate - pokud už uživatel odemkl, přeskočíme
+  if (localStorage.getItem(UNLOCK_KEY) === '1') {
+    showApp();
+  } else {
+    document.getElementById('lockInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') tryUnlock();
+    });
+  }
+  // Modal: klik mimo a Esc
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('open'); });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+    }
+  });
+})();
+</script>
+</body>
+</html>
