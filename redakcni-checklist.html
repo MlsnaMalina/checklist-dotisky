@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redakční checklist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1b2d52;
+  --navy-dim: rgba(255,255,255,0.07);
+  --blue: #4072ad;
+  --blue-light: #5a8fc8;
+  --raspberry: #b11e54;
+  --green: #98c451;
+  --green-dark: #7aaa38;
+  --amber: #e07b00;
+  --rose: #c0606a;
+  --cream: #f8f6f2;
+  --white: #ffffff;
+  --black: #1a1a1a;
+  --gray-bg: #f2f1ed;
+  --gray-border: #e4e1d9;
+  --gray-text: #8a8880;
+  --gray-dim: #b5b2aa;
+  --sidebar-w: 220px;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 2px 10px rgba(0,0,0,0.06);
+  --shadow-md: 0 6px 24px rgba(0,0,0,0.10);
+  --transition: 180ms ease;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: var(--cream); color: var(--black);
+  font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased;
+}
+h1,h2,h3,h4 { font-family: 'Playfair Display', Georgia, serif; font-weight: 600; line-height: 1.25; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input, textarea, select { font-family: inherit; font-size: inherit; color: inherit; }
+
+/* Lock */
+.lock-overlay {
+  position: fixed; inset: 0; background: var(--navy);
+  display: flex; align-items: center; justify-content: center; z-index: 1000;
+}
+.lock-box {
+  width: 380px; max-width: 90vw; text-align: center; padding: 48px 40px;
+  background: rgba(255,255,255,0.04); border-radius: 16px; border: 1px solid rgba(255,255,255,0.10);
+}
+.lock-logo { font-family: 'Playfair Display', serif; font-size: 13px; font-weight: 400;
+  color: rgba(255,255,255,0.4); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 32px; }
+.lock-box h2 { font-size: 30px; color: var(--white); margin-bottom: 8px; }
+.lock-box p { color: rgba(255,255,255,0.45); margin-bottom: 28px; font-size: 14px; }
+.lock-box input {
+  width: 100%; padding: 13px 16px; background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15); border-radius: var(--radius-sm);
+  color: var(--white); font-size: 15px; letter-spacing: 0.1em; margin-bottom: 12px; transition: var(--transition);
+}
+.lock-box input::placeholder { color: rgba(255,255,255,0.25); letter-spacing: 0; }
+.lock-box input:focus { outline: none; border-color: rgba(255,255,255,0.35); background: rgba(255,255,255,0.12); }
+.lock-err { color: #ff7b9c; font-size: 13px; min-height: 20px; margin-top: 4px; }
+
+/* App shell */
+.app { display: flex; height: 100vh; overflow: hidden; }
+
+/* Sidebar */
+.sidebar {
+  width: var(--sidebar-w); flex-shrink: 0; background: var(--navy);
+  color: #fff; display: flex; flex-direction: column; overflow: hidden;
+}
+.sidebar-brand { padding: 20px 16px 14px; border-bottom: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; }
+.brand-label { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 4px; }
+.brand-title { font-family: 'Playfair Display', serif; font-size: 17px; color: #fff; font-weight: 600; }
+.sidebar-search { padding: 12px 12px 10px; flex-shrink: 0; }
+.search-wrap { position: relative; }
+.search-wrap input {
+  width: 100%; padding: 8px 10px 8px 32px; background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.10); border-radius: var(--radius-sm);
+  color: #fff; font-size: 13px; transition: var(--transition);
+}
+.search-wrap input::placeholder { color: rgba(255,255,255,0.3); }
+.search-wrap input:focus { outline: none; background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.22); }
+.search-icon { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.35); font-size: 14px; pointer-events: none; }
+.sidebar-tabs {
+  display: flex; gap: 4px; margin: 0 12px 8px;
+  background: rgba(0,0,0,0.2); border-radius: var(--radius-sm); padding: 3px; flex-shrink: 0;
+}
+.s-tab { flex: 1; padding: 6px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.45); transition: var(--transition); text-align: center; }
+.s-tab.active { background: rgba(255,255,255,0.12); color: #fff; }
+
+/* Calendar */
+.calendar-wrap {
+  margin: 0 12px 10px; flex-shrink: 0; background: rgba(255,255,255,0.04);
+  border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.06); padding: 10px;
+}
+.cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.cal-month { font-size: 12px; font-weight: 600; color: #fff; }
+.cal-nav { width: 22px; height: 22px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.5); transition: var(--transition); font-size: 13px; }
+.cal-nav:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; }
+.cal-dow { font-size: 9px; text-align: center; color: rgba(255,255,255,0.3); padding: 2px 0; font-weight: 600; letter-spacing: 0.04em; }
+.cal-day { font-size: 10px; text-align: center; padding: 3px 1px; border-radius: 3px; color: rgba(255,255,255,0.4); cursor: default; transition: var(--transition); position: relative; }
+.cal-day.today { color: #fff; font-weight: 600; }
+.cal-day.today::after { content: ''; position: absolute; bottom: 1px; left: 50%; transform: translateX(-50%); width: 3px; height: 3px; background: var(--blue-light); border-radius: 50%; }
+.cal-day.has-book { background: rgba(64,114,173,0.3); color: #fff; cursor: pointer; font-weight: 600; }
+.cal-day.has-book:hover { background: rgba(64,114,173,0.5); }
+.cal-day.other-month { color: rgba(255,255,255,0.15); }
+
+/* Book list */
+.book-list { flex: 1; overflow-y: auto; padding: 4px 8px 16px; }
+.book-list::-webkit-scrollbar { width: 3px; }
+.book-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+.new-book-btn {
+  display: flex; align-items: center; gap: 8px; margin: 0 4px 8px;
+  padding: 9px 12px; border-radius: var(--radius-sm); background: var(--blue);
+  color: #fff; font-size: 13px; font-weight: 500; transition: var(--transition); width: calc(100% - 8px);
+}
+.new-book-btn:hover { background: var(--blue-light); }
+.book-item {
+  padding: 11px 12px; border-radius: var(--radius-sm); cursor: pointer;
+  margin-bottom: 2px; transition: var(--transition); border: 1px solid transparent;
+}
+.book-item:hover { background: var(--navy-dim); }
+.book-item.active { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.12); }
+.book-item.cancelled-item { background: rgba(192,96,106,0.10); border-color: rgba(192,96,106,0.15); }
+.book-item.cancelled-item:hover { background: rgba(192,96,106,0.16); }
+.book-item.cancelled-item.active { background: rgba(192,96,106,0.20); border-color: rgba(192,96,106,0.25); }
+.bi-title { font-size: 13px; font-weight: 500; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+.bi-author { font-size: 11px; color: rgba(255,255,255,0.4); margin-bottom: 6px; }
+.bi-bar { height: 2px; background: rgba(255,255,255,0.1); border-radius: 1px; overflow: hidden; }
+.bi-bar-fill { height: 100%; border-radius: 1px; transition: width 0.4s ease; }
+.bi-meta { display: flex; justify-content: space-between; margin-top: 4px; }
+.bi-pct { font-size: 10px; color: rgba(255,255,255,0.3); }
+.bi-rok { font-size: 10px; color: rgba(255,255,255,0.35); font-style: italic; }
+.bi-deadline { font-size: 10px; color: #ffd580; margin-top: 3px; }
+.bi-cancelled { font-size: 10px; color: rgba(192,96,106,0.7); margin-top: 3px; }
+.sidebar-empty { padding: 20px 12px; text-align: center; color: rgba(255,255,255,0.25); font-size: 12px; }
+
+/* Main */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.main-topbar {
+  display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+  padding: 12px 28px; background: var(--white); border-bottom: 1px solid var(--gray-border); flex-shrink: 0;
+}
+.detail-wrap { flex: 1; overflow-y: auto; }
+.detail { padding: 28px 32px 48px; }
+.detail-wrap::-webkit-scrollbar { width: 5px; }
+.detail-wrap::-webkit-scrollbar-thumb { background: var(--gray-border); border-radius: 3px; }
+
+/* Empty state */
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70vh; text-align: center; color: var(--gray-text); }
+.empty-state h2 { color: var(--black); margin-bottom: 10px; font-size: 26px; }
+.empty-state p { max-width: 340px; margin-bottom: 28px; line-height: 1.65; }
+.empty-ornament { width: 64px; height: 64px; border-radius: 50%; background: var(--gray-bg); display: flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 20px; color: var(--gray-dim); }
+
+/* Book header */
+.book-header {
+  background: var(--white); border-radius: var(--radius); padding: 24px 28px;
+  margin-bottom: 20px; box-shadow: var(--shadow); position: relative; overflow: hidden;
+}
+.book-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--blue) 0%, var(--blue-light) 100%); }
+.book-header.cancelled-book::before { background: linear-gradient(90deg, var(--rose) 0%, #d4888f 100%); }
+.bh-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; letter-spacing: 0.02em; }
+.chip-edice { background: rgba(64,114,173,0.10); color: var(--blue); }
+.chip-nav { background: rgba(152,196,81,0.15); color: #5a8a1a; }
+.chip-odevzdani { background: rgba(177,30,84,0.08); color: var(--raspberry); }
+.chip-cancelled { background: rgba(192,96,106,0.12); color: var(--rose); }
+.bh-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.bh-info { flex: 1; min-width: 0; }
+.bh-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600; color: var(--black); margin-bottom: 4px; line-height: 1.3; }
+.bh-author { font-size: 14px; color: var(--gray-text); margin-bottom: 14px; font-style: italic; }
+.bh-fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px,1fr)); gap: 10px; }
+.bh-field { display: flex; flex-direction: column; gap: 3px; }
+.bh-field label { font-size: 10px; font-weight: 600; color: var(--gray-text); text-transform: uppercase; letter-spacing: 0.07em; }
+.bh-field input, .bh-field select, .bh-field textarea {
+  padding: 7px 10px; border: 1px solid #e2e2e2; border-radius: var(--radius-sm);
+  background: var(--white); font-size: 13px; transition: var(--transition);
+}
+.bh-field input:focus, .bh-field select:focus, .bh-field textarea:focus { outline: none; border-color: #B83066; }
+.bh-field input[readonly] { background: var(--gray-bg); color: var(--gray-text); cursor: default; }
+.bh-notes { grid-column: 1 / -1; }
+.bh-notes textarea { resize: vertical; min-height: 60px; width: 100%; }
+.bh-progress { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
+.circ-progress { position: relative; width: 68px; height: 68px; }
+.circ-progress svg { transform: rotate(-90deg); }
+.circ-label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.circ-pct { font-size: 14px; font-weight: 600; color: var(--black); line-height: 1; }
+.circ-sub { font-size: 9px; color: var(--gray-text); line-height: 1; margin-top: 1px; }
+.bh-done-count { font-size: 11px; color: var(--gray-text); text-align: center; }
+.bh-actions { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+.archived-notice { background: #fff8e6; border: 1px solid #f2c47b; color: #7a5000; border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+.cancelled-notice { background: rgba(192,96,106,0.07); border: 1px solid rgba(192,96,106,0.25); color: #7a2832; border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+
+/* Sticky note ToDo */
+.todo-wrap {
+  margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--gray-border);
+}
+.todo-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--gray-text); margin-bottom: 8px; }
+.todo-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+.todo-item { display: flex; align-items: center; gap: 8px; }
+.todo-check {
+  width: 16px; height: 16px; border: 1.5px solid var(--gray-border); border-radius: 3px;
+  cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  transition: var(--transition); background: var(--white);
+}
+.todo-check:hover { border-color: var(--blue); }
+.todo-check.done { background: var(--green); border-color: var(--green); }
+.todo-check.done::after { content: '✓'; color: #fff; font-size: 10px; font-weight: 700; }
+.todo-text { flex: 1; font-size: 13px; color: var(--black); transition: var(--transition); }
+.todo-text.done { text-decoration: line-through; color: var(--gray-dim); }
+.todo-del { color: var(--gray-dim); cursor: pointer; font-size: 14px; transition: var(--transition); flex-shrink: 0; line-height: 1; padding: 2px; }
+.todo-del:hover { color: var(--raspberry); }
+.todo-add { display: flex; gap: 6px; }
+.todo-add input {
+  flex: 1; padding: 6px 10px; border: 1px solid #e2e2e2; border-radius: var(--radius-sm);
+  font-size: 13px; background: var(--white);
+}
+.todo-add input:focus { outline: none; border-color: #B83066; }
+.todo-add input::placeholder { color: var(--gray-dim); }
+.todo-add-btn { width: 32px; height: 32px; background: none; border: none; display: flex; align-items: center; justify-content: center; color: var(--gray-dim); cursor: pointer; border-radius: var(--radius-sm); transition: var(--transition); flex-shrink: 0; }
+.todo-add-btn:hover { color: #B83066; background: rgba(184,48,102,0.06); }
+
+/* Phases */
+.phase { background: var(--white); border-radius: var(--radius); margin-bottom: 12px; box-shadow: var(--shadow); overflow: hidden; }
+.phase-head { display: flex; align-items: center; gap: 14px; padding: 16px 22px; cursor: pointer; user-select: none; position: relative; transition: background var(--transition); }
+.phase-head:hover { background: var(--cream); }
+.phase-accent { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+.phase-num { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 700; color: var(--black); opacity: 0.05; line-height: 1; flex-shrink: 0; width: 32px; letter-spacing: -0.02em; }
+.phase-title-wrap { flex: 1; }
+.phase-title { font-size: 15px; font-weight: 600; color: var(--black); }
+.phase-subtitle { font-size: 12px; color: var(--gray-text); margin-top: 1px; }
+.phase-mini-bar { width: 80px; height: 3px; background: var(--gray-border); border-radius: 2px; overflow: hidden; margin-top: 6px; }
+.phase-mini-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
+.phase-stat { font-size: 12px; color: var(--gray-text); flex-shrink: 0; margin-right: 8px; }
+.phase-chevron { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; color: var(--gray-dim); transition: transform var(--transition); flex-shrink: 0; }
+.phase.open .phase-chevron { transform: rotate(180deg); }
+.phase-body { display: none; padding: 4px 22px 16px; }
+.phase.open .phase-body { display: block; }
+
+/* Steps */
+.step { padding: 10px 0; border-bottom: 1px solid var(--cream); transition: opacity var(--transition); }
+.step:last-child { border-bottom: none; }
+.step-row { display: flex; align-items: flex-start; gap: 10px; }
+.step-check {
+  width: 20px; height: 20px; border: 2px solid var(--gray-border); border-radius: 4px;
+  cursor: pointer; transition: var(--transition); display: flex; align-items: center;
+  justify-content: center; flex-shrink: 0; margin-top: 1px; background: var(--white);
+}
+.step-check:hover:not(.locked) { border-color: var(--blue); }
+.step-check.checked { background: var(--green); border-color: var(--green); }
+.step-check.checked::after { content: '✓'; color: #fff; font-size: 13px; font-weight: 700; }
+.step-check.locked { cursor: default; opacity: 0.5; }
+.step-content { flex: 1; min-width: 0; }
+.step-label { font-size: 13px; color: var(--black); cursor: pointer; display: inline; transition: var(--transition); }
+.step.is-done .step-label { text-decoration: line-through; color: var(--gray-text); }
+.step-date { font-size: 11px; color: var(--gray-dim); margin-left: 6px; }
+.step-end { display: flex; align-items: center; gap: 2px; flex-shrink: 0; margin-left: auto; padding-left: 8px; }
+.step-note-btn { width: 26px; height: 26px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--gray-dim); transition: var(--transition); flex-shrink: 0; }
+.step-note-btn:hover { background: var(--gray-bg); color: var(--black); }
+.step-note-btn.has-note { color: #B83066; }
+.step-tpl-link { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--gray-dim); transition: var(--transition); padding: 3px 6px; border-radius: 4px; white-space: nowrap; }
+.step-tpl-link:hover { color: var(--blue); background: rgba(64,114,173,0.07); }
+.note-area { margin-top: 8px; margin-left: 30px; display: none; }
+.note-area.open { display: block; }
+.note-area textarea { width: 100%; min-height: 55px; padding: 8px 10px; border: 1px solid #e2e2e2; border-radius: var(--radius-sm); resize: vertical; font-size: 13px; background: var(--white); }
+.note-area textarea:focus { outline: none; border-color: #B83066; }
+
+/* Optional (grey) steps */
+.step.opt-step .step-label { color: var(--gray-dim); font-style: italic; }
+.step.opt-step .step-check { border-style: dashed; border-color: var(--gray-dim); }
+.step.opt-step .step-check:hover { border-color: var(--gray-dim); cursor: default; }
+.opt-activate-btn { font-size: 11px; color: var(--blue); background: none; border: none; cursor: pointer; text-decoration: underline; opacity: 0.7; margin-left: 4px; padding: 0; }
+.opt-activate-btn:hover { opacity: 1; }
+.step.opt-step.opt-on .step-label { color: var(--black); font-style: normal; }
+.step.opt-step.opt-on .step-check { border-style: solid; border-color: var(--gray-border); cursor: pointer; }
+.step.opt-step.opt-on .step-check:hover { border-color: var(--blue); }
+
+/* Repeatable step (Dodatek) */
+.rep-list { margin-top: 6px; margin-left: 30px; }
+.rep-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: var(--cream); border-radius: var(--radius-sm); margin-bottom: 4px; font-size: 13px; }
+.rep-check { width: 18px; height: 18px; border: 2px solid var(--gray-border); border-radius: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: var(--transition); background: var(--white); }
+.rep-check:hover { border-color: var(--blue); }
+.rep-check.checked { background: var(--green); border-color: var(--green); }
+.rep-check.checked::after { content: '✓'; color: #fff; font-size: 11px; font-weight: 700; }
+.rep-label { flex: 1; font-size: 13px; }
+.rep-del { color: var(--gray-dim); font-size: 15px; cursor: pointer; transition: var(--transition); }
+.rep-del:hover { color: var(--raspberry); }
+.add-rep-btn { font-size: 12px; color: var(--blue); background: rgba(64,114,173,0.08); padding: 5px 10px; border-radius: 4px; margin-top: 4px; margin-left: 30px; transition: var(--transition); }
+.add-rep-btn:hover { background: rgba(64,114,173,0.15); }
+
+/* Phase notes */
+.phase-note-toggle { font-size: 12px; color: var(--gray-dim); margin-bottom: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: var(--transition); }
+.phase-note-toggle:hover { color: var(--blue); }
+.phase-note-area { margin-bottom: 12px; display: none; }
+.phase-note-area.open { display: block; }
+.phase-note-area textarea { width: 100%; min-height: 60px; padding: 8px 10px; border: 1px solid #e2e2e2; border-radius: var(--radius-sm); font-size: 13px; resize: vertical; background: var(--white); }
+.phase-note-area textarea:focus { outline: none; border-color: #B83066; }
+
+/* Archive step */
+.archive-step-ui { margin-top: 8px; margin-left: 30px; display: flex; align-items: center; gap: 8px; }
+.archive-step-ui input { width: 90px; padding: 6px 10px; border: 1px solid var(--gray-border); border-radius: var(--radius-sm); font-size: 13px; background: var(--white); }
+.archive-step-ui input:focus { outline: none; border-color: var(--blue); }
+.archive-step-ui button { padding: 6px 12px; background: var(--raspberry); color: #fff; border-radius: var(--radius-sm); font-size: 12px; font-weight: 500; transition: var(--transition); }
+.archive-step-ui button:hover { background: #921843; }
+
+/* Buttons */
+.btn { padding: 8px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent; transition: var(--transition); cursor: pointer; }
+.btn-primary { background: var(--blue); color: #fff; }
+.btn-primary:hover { background: var(--blue-light); }
+.btn-secondary { background: var(--white); color: var(--black); border-color: var(--gray-border); }
+.btn-secondary:hover { background: var(--cream); }
+.btn-danger { background: transparent; color: var(--raspberry); border-color: rgba(177,30,84,0.25); }
+.btn-danger:hover { background: rgba(177,30,84,0.06); }
+.btn-cancel { background: transparent; color: var(--rose); border-color: rgba(192,96,106,0.25); }
+.btn-cancel:hover { background: rgba(192,96,106,0.06); }
+.btn-success { background: var(--green); color: #fff; }
+.btn-success:hover { background: var(--green-dark); }
+.btn-block { width: 100%; justify-content: center; }
+
+/* Modals */
+.modal-overlay { position: fixed; inset: 0; background: rgba(20,30,60,0.45); display: none; align-items: center; justify-content: center; z-index: 200; padding: 20px; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--white); border-radius: var(--radius); padding: 28px; width: 540px; max-width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-md); }
+.modal-lg { width: 680px; }
+.modal h2 { font-size: 22px; margin-bottom: 20px; }
+.modal-field { margin-bottom: 14px; }
+.modal-field label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--gray-text); margin-bottom: 5px; }
+.modal-field input, .modal-field select { width: 100%; padding: 9px 11px; border: 1px solid #e2e2e2; border-radius: var(--radius-sm); font-size: 14px; background: var(--white); transition: var(--transition); }
+.modal-field input:focus, .modal-field select:focus { outline: none; border-color: #B83066; }
+.modal-err { color: var(--raspberry); font-size: 13px; min-height: 20px; margin-top: 4px; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 22px; flex-wrap: wrap; }
+.modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.modal-fullrow { grid-column: 1 / -1; }
+.tpl-vars { background: var(--cream); padding: 10px 12px; border-radius: var(--radius-sm); font-size: 12px; color: var(--gray-text); margin-bottom: 16px; border-left: 3px solid var(--blue); }
+.tpl-vars code { background: rgba(64,114,173,0.10); color: var(--blue); padding: 1px 5px; border-radius: 3px; font-size: 11px; margin: 0 2px; }
+.tpl-select { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+.tpl-tab { padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: 500; background: var(--cream); color: var(--gray-text); transition: var(--transition); border: 1px solid var(--gray-border); }
+.tpl-tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+.gen-output { width: 100%; min-height: 260px; padding: 12px; font-size: 13px; border: 1px solid #e2e2e2; border-radius: var(--radius-sm); resize: vertical; background: var(--white); font-family: 'DM Sans', sans-serif; line-height: 1.6; }
+.gen-output:focus { outline: none; border-color: #B83066; }
+.copy-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--green); color: #fff; padding: 10px 20px; border-radius: var(--radius-sm); box-shadow: var(--shadow-md); z-index: 300; opacity: 0; transition: opacity 200ms; pointer-events: none; font-size: 13px; font-weight: 500; }
+.copy-toast.show { opacity: 1; }
+
+@media print {
+  body { background: var(--white); }
+  .sidebar, .main-topbar, .bh-actions, .step-end, .phase-note-toggle, .add-rep-btn, .todo-add, .modal-overlay, .copy-toast { display: none !important; }
+  .app { display: block; }
+  .main { display: block; }
+  .detail-wrap, .detail { display: block; overflow: visible; height: auto; }
+  .detail { padding: 0; }
+  .book-header, .phase { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+  .phase-body { display: block !important; }
+  .note-area { display: block !important; }
+  .phase-note-area { display: block !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="lock-overlay" id="lockOverlay">
+  <div class="lock-box">
+    <div class="lock-logo">Wolters Kluwer · Redakce</div>
+    <h2>Redakční checklist</h2>
+    <p>Zadejte heslo pro vstup do aplikace.</p>
+    <input type="password" id="lockInput" placeholder="heslo" autofocus>
+    <button class="btn btn-primary btn-block" style="justify-content:center;padding:12px 16px;font-size:14px;" onclick="tryUnlock()">Vstoupit</button>
+    <div class="lock-err" id="lockErr"></div>
+  </div>
+</div>
+
+<div class="app" id="app" style="display:none;">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-label">Wolters Kluwer</div>
+      <div class="brand-title">Redakční checklist</div>
+    </div>
+    <div class="sidebar-search">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input type="text" id="searchInput" placeholder="Hledat knihu…" oninput="onSearch()">
+      </div>
+    </div>
+    <div class="sidebar-tabs">
+      <button class="s-tab active" id="tabActive" onclick="switchTab('active')">Aktivní</button>
+      <button class="s-tab" id="tabArchived" onclick="switchTab('archived')">Archiv</button>
+    </div>
+    <div class="calendar-wrap">
+      <div class="cal-header">
+        <button class="cal-nav" onclick="calPrev()">‹</button>
+        <div class="cal-month" id="calMonthLabel"></div>
+        <button class="cal-nav" onclick="calNext()">›</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+    <div class="book-list" id="bookList">
+      <button class="new-book-btn" onclick="openNewBook()">+ Nová kniha</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="main-topbar">
+      <button class="btn btn-secondary" onclick="openTemplatesEditor()">Šablony e-mailů</button>
+      <button class="btn btn-secondary" onclick="exportData()">Záloha ↓</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">Nahrát zálohu</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+      <button class="btn btn-secondary" onclick="window.print()">Tisk</button>
+    </header>
+    <div class="detail-wrap">
+      <main class="detail" id="detail"></main>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Nová kniha -->
+<div class="modal-overlay" id="newBookModal">
+  <div class="modal">
+    <h2>Nová kniha</h2>
+    <div class="modal-grid">
+      <div class="modal-field modal-fullrow">
+        <label>Název knihy *</label>
+        <input type="text" id="nb_title" placeholder="Název…">
+      </div>
+      <div class="modal-field">
+        <label>Autor / autoři *</label>
+        <input type="text" id="nb_author" placeholder="Jméno Příjmení">
+      </div>
+      <div class="modal-field">
+        <label>Ediční řada *</label>
+        <select id="nb_edice">
+          <option value="komentar">Komentář</option>
+          <option value="praktickyKomentar">Praktický komentář</option>
+          <option value="monografie">Právní monografie</option>
+          <option value="edice">Jiná ediční řada</option>
+        </select>
+      </div>
+      <div class="modal-field" id="nb_edice_custom_wrap" style="display:none;">
+        <label>Název ediční řady</label>
+        <input type="text" id="nb_edice_custom" placeholder="Název…">
+      </div>
+      <div class="modal-field">
+        <label>Redaktorka</label>
+        <input type="text" id="nb_editor" value="Kateřina Schmiedtová">
+      </div>
+      <div class="modal-field">
+        <label>Jazyková korektorka</label>
+        <input type="text" id="nb_korektorka" value="Daniela Schmiedtová">
+      </div>
+      <div class="modal-field">
+        <label>Sazeč</label>
+        <input type="text" id="nb_sazec" value="Tomáš Brejcha">
+      </div>
+      <div class="modal-field">
+        <label>ISBN</label>
+        <input type="text" id="nb_isbn" placeholder="978-80-…">
+      </div>
+      <div class="modal-field">
+        <label>NAV č. <span style="font-weight:300;text-transform:none;letter-spacing:0;">(přidělí se až po odevzdání)</span></label>
+        <input type="text" id="nb_nav" placeholder="volitelné">
+      </div>
+      <div class="modal-field">
+        <label>Datum odevzdání rukopisu</label>
+        <input type="date" id="nb_odevzdani">
+      </div>
+    </div>
+    <div class="modal-err" id="nb_err"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('newBookModal')">Zrušit</button>
+      <button class="btn btn-primary" onclick="createBook()">Vytvořit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Generovaný e-mail -->
+<div class="modal-overlay" id="genModal">
+  <div class="modal modal-lg">
+    <h2 id="genTitle">E-mail</h2>
+    <div class="tpl-vars">
+      <strong>Proměnné:</strong>
+      <code>{{nazev}}</code> <code>{{autor}}</code> <code>{{edice}}</code>
+      <code>{{isbn}}</code> <code>{{nav}}</code> <code>{{redaktor}}</code>
+      <code>{{korektorka}}</code> <code>{{sazec}}</code> <code>{{datum_odevzdani}}</code> <code>{{datum_dnes}}</code>
+    </div>
+    <textarea class="gen-output" id="genOutput"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('genModal')">Zavřít</button>
+      <button class="btn btn-primary" onclick="copyGen()">Kopírovat do schránky</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Šablony editor -->
+<div class="modal-overlay" id="tplEditorModal">
+  <div class="modal modal-lg">
+    <h2>Šablony e-mailů</h2>
+    <div class="tpl-vars" style="margin-bottom:14px;">
+      Proměnné: <code>{{nazev}}</code> <code>{{autor}}</code> <code>{{edice}}</code>
+      <code>{{isbn}}</code> <code>{{nav}}</code> <code>{{redaktor}}</code>
+      <code>{{korektorka}}</code> <code>{{sazec}}</code> <code>{{datum_odevzdani}}</code> <code>{{datum_dnes}}</code>
+    </div>
+    <div class="tpl-select" id="tplTabRow"></div>
+    <div class="modal-field">
+      <label id="tplEditorLabel">Šablona</label>
+      <textarea class="gen-output" id="tplEditorArea" style="min-height:200px;"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="resetCurrentTemplate()">Obnovit výchozí</button>
+      <button class="btn btn-secondary" onclick="closeModal('tplEditorModal')">Zavřít</button>
+      <button class="btn btn-primary" onclick="saveCurrentTemplate()">Uložit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Archivace -->
+<div class="modal-overlay" id="archiveModal">
+  <div class="modal" style="width:380px;">
+    <h2>Archivovat knihu</h2>
+    <p style="color:var(--gray-text);margin-bottom:18px;font-size:13px;">Zadejte rok vydání. Kniha se přesune do archivu a checklist bude jen ke čtení.</p>
+    <div class="modal-field">
+      <label>Rok vydání *</label>
+      <input type="number" id="archiveYear" placeholder="2025" min="1990" max="2099">
+    </div>
+    <div class="modal-err" id="archiveErr"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('archiveModal')">Zrušit</button>
+      <button class="btn btn-primary" onclick="confirmArchive()">Archivovat</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Zrušení spolupráce -->
+<div class="modal-overlay" id="cancelModal">
+  <div class="modal" style="width:400px;">
+    <h2>Zrušení spolupráce</h2>
+    <p style="color:var(--gray-text);margin-bottom:18px;font-size:13px;">Kniha se přesune do archivu a bude označena jako zrušená. Checklist bude zachován jen ke čtení. Tuto akci lze vrátit obnovením knihy do aktivních.</p>
+    <div class="modal-field">
+      <label>Důvod zrušení <span style="font-weight:300;text-transform:none;letter-spacing:0;">(volitelné)</span></label>
+      <input type="text" id="cancelReason" placeholder="např. autor odstoupil od smlouvy">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('cancelModal')">Zpět</button>
+      <button class="btn btn-cancel" onclick="confirmCancel()">Zrušit spolupráci</button>
+    </div>
+  </div>
+</div>
+
+<div class="copy-toast" id="copyToast">Zkopírováno ✓</div>
+
+<script>
+const SVG_CHEVRON = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`;
+const SVG_NOTE = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
+const SVG_MAIL = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>`;
+const SVG_PLUS = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
+const SVG_FILE = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+
+const APP_PASSWORD  = 'dotisky2025';
+const STORAGE_KEY   = 'redakcni-checklist-v1';
+const TEMPLATES_KEY = 'redakcni-templates-v1';
+const UNLOCK_KEY    = 'redakcni-unlocked';
+
+const EDICE_LABELS = {
+  komentar: 'Komentář',
+  praktickyKomentar: 'Praktický komentář',
+  monografie: 'Právní monografie',
+};
+
+// ===== FÁZE A KROKY =====
+// Kroky odpovídají přesně procesu dle uživatelky – žádné kroky nepřidávat bez potvrzení
+const PHASES = [
+  {
+    id: 'p1', title: 'Smlouva a onboarding',
+    steps: [
+      { id: 'p1_1', label: 'E-mail: oslovení autora', template: 'b' },
+      { id: 'p1_2', label: 'E-mail: návrh smlouvy autorovi', template: 'a' },
+      { id: 'p1_3', label: 'Legisway tabulka + e-mail Elišce' },
+      { id: 'p1_4', label: 'Autorům složka v PublishOnu' },
+      { id: 'p1_5', label: 'Smlouva podepsána a uložena' },
+      { id: 'p1_6', label: 'Dodatek ke smlouvě', optional: true, repeatable: true },
+      { id: 'p1_7', label: 'E-mail: informace o procesu autorům', template: 'c' },
+    ]
+  },
+  {
+    id: 'p2', title: 'Redakce',
+    steps: [
+      { id: 'p2_1', label: 'E-mail: žádost o ISBN čísla Ivě', template: 'e' },
+      { id: 'p2_2', label: 'Kontrola stylů v PublishOnu' },
+      { id: 'p2_3', label: 'Spuštění nástroje CHT v PublishOnu' },
+      { id: 'p2_4', label: 'E-mail: předání rukopisu jazykové korektorce', template: 'd' },
+      { id: 'p2_5', label: 'Vytvoření záznamu v Edičním plánu' },
+      { id: 'p2_5b', label: 'Nastavení deadlinů v Edičním plánu' },
+      { id: 'p2_6', label: 'Redakční kontrola + kontrola jazykové korektorky' },
+      { id: 'p2_6a', label: 'Seznam zkratek', optional: true },
+      { id: 'p2_6b', label: 'Seznam literatury', optional: true },
+      { id: 'p2_6c', label: 'Seznam předpisů a judikatury', optional: true },
+      { id: 'p2_7', label: 'E-mail: odeslání na kontrolu autorům', template: 'f' },
+      { id: 'p2_8', label: 'Zapracování oprav od autorů' },
+      { id: 'p2_9', label: 'Příprava rejstříku', optional: true },
+      { id: 'p2_10', label: 'E-mail: oslovit sazeče', template: 'g' },
+      { id: 'p2_11', label: 'E-mail: představení autorů jazykové korektorce', template: 'q' },
+      { id: 'p2_12', label: 'E-mail: představení autorů sazeči', template: 'r' },
+      { id: 'p2_13', label: 'Předání rukopisu sazeči' },
+    ]
+  },
+  {
+    id: 'p3', title: 'Sazba a tisk',
+    steps: [
+      { id: 'p3_1', label: 'Kontrola sazby — konce řádků, obsah, záhlaví' },
+      { id: 'p3_2', label: 'Vytvoření kalkulace' },
+      { id: 'p3_3', label: 'Zaslání kalkulace na schválení' },
+      { id: 'p3_4', label: 'Žádost Filipovi o vytvoření složky pro knihu' },
+      { id: 'p3_5', label: 'Vytvoření záznamu pro knihu v Edičním plánu' },
+      { id: 'p3_6', label: 'Odeslání sazby autorům ke kontrole' },
+      { id: 'p3_7', label: 'Zapracování posledních poznámek k opravě sazby a odeslání sazeči' },
+      { id: 'p3_8', label: 'Kontrola opravené sazby' },
+      { id: 'p3_9', label: 'Doplnění kalkulace' },
+      { id: 'p3_10', label: 'Kontrola obálky a tiskových materiálů' },
+      { id: 'p3_11', label: 'Odeslání knihy do tisku' },
+      { id: 'p3_12', label: 'Potvrzení tisku' },
+      { id: 'p3_13', label: 'Výtisky autorům, povinné výtisky a výtisk do archivu' },
+    ]
+  },
+  {
+    id: 'p4', title: 'Vydání',
+    steps: [
+      { id: 'p4_1', label: 'Vytvoření záznamu v e-shopu' },
+      { id: 'p4_2', label: 'Kontrola metadat v PublishOnu' },
+      { id: 'p4_3', label: 'E-mail: vytvoření e-knihy Lukášovi', template: 'l' },
+      { id: 'p4_4', label: 'Vizuálně zkontrolovat hotový epub' },
+      { id: 'p4_5', label: 'Odeslat epub na vytvoření do hotline (Jiří Nezbeda, Jiří Svoboda)' },
+      { id: 'p4_6', label: 'Aktualizace Edičního plánu — datum vydání' },
+      { id: 'p4_7', label: 'E-mail: Martině — evidence výtisku', template: 'n' },
+      { id: 'p4_8', label: 'Záznam v NAV' },
+      { id: 'p4_9', label: 'Vydání oznámeno na Yammer', template: 'm' },
+    ]
+  },
+  {
+    id: 'p5', title: 'Závěr a administrativa',
+    steps: [
+      { id: 'p5_1', label: 'Výplata honoráře — kontrola podkladů' },
+      { id: 'p5_2', label: 'E-mail: Filip — uzavření účetnictví', template: 'o' },
+      { id: 'p5_3', label: 'Archivace složky v PublishOnu' },
+      { id: 'p5_4', label: 'Přesunout knihu do archivu', archiveStep: true },
+    ]
+  },
+];
+
+const DEFAULT_TEMPLATES = {
+  a: `Předmět: Návrh smlouvy – {{nazev}}
+
+Dobrý den,
+
+v příloze zasílám návrh smlouvy o vydání knihy {{nazev}}.
+
+Prosím o prostudování a případné připomínky. Jakmile smlouva projde schválením na naší straně, zašlu vám finální verzi k podpisu.
+
+S pozdravem
+{{redaktor}}`,
+
+  b: `Předmět: Oslovení – spolupráce na knize {{nazev}}
+
+Dobrý den,
+
+ráda bych vás oslovila ohledně možnosti vydání vaší knihy v nakladatelství Wolters Kluwer.
+
+Máte zájem o spolupráci? Budu ráda, pokud mi sdělíte více o projektu a vašich představách.
+
+S pozdravem
+{{redaktor}}`,
+
+  c: `Předmět: Informace o redakčním procesu – {{nazev}}
+
+Dobrý den,
+
+dovolte mi stručně nastínit průběh redakčního procesu pro knihu {{nazev}}:
+
+1. Odevzdání rukopisu: {{datum_odevzdani}}
+2. Jazyková korektura: {{korektorka}}
+3. Sazba: {{sazec}}
+4. Po schválení sazby: tisk a distribuce
+
+V případě jakýchkoliv dotazů se prosím obraťte přímo na mě.
+
+S pozdravem
+{{redaktor}}`,
+
+  d: `Předmět: Předání rukopisu k jazykové korektuře – {{nazev}}
+
+Dobrý den {{korektorka}},
+
+v příloze zasílám rukopis knihy {{nazev}} od autora {{autor}} k jazykové korektuře.
+
+ISBN: {{isbn}} | Ediční řada: {{edice}}
+
+Prosím o sdělení předpokládaného termínu dokončení korektur.
+
+S pozdravem
+{{redaktor}}`,
+
+  e: `Předmět: Žádost o přidělení ISBN – {{nazev}}
+
+Dobrý den Ivo,
+
+prosím o přidělení ISBN pro nový titul:
+
+Název: {{nazev}}
+Autor: {{autor}}
+Ediční řada: {{edice}}
+
+Děkuji.
+
+S pozdravem
+{{redaktor}}`,
+
+  f: `Předmět: Rukopis k autorské revizi – {{nazev}}
+
+Dobrý den,
+
+v příloze vám zasílám redakčně upravenou verzi rukopisu {{nazev}} k vaší poslední kontrole před sazbou.
+
+Prosím o vrácení případných připomínek do [doplnit termín].
+
+S pozdravem
+{{redaktor}}`,
+
+  g: `Předmět: Žádost o sazbu – {{nazev}}
+
+Dobrý den {{sazec}},
+
+prosím vás o sazbu titulu:
+
+Název: {{nazev}}
+Autor: {{autor}}
+ISBN: {{isbn}}
+Ediční řada: {{edice}}
+
+Podklady v příloze. Případné dotazy rád(a) zodpovím obratem.
+
+S pozdravem
+{{redaktor}}`,
+
+  l: `Předmět: Vytvoření e-knihy – {{nazev}}
+
+Dobrý den Lukáši,
+
+prosím o vytvoření elektronické verze (epub) titulu:
+
+Název: {{nazev}}
+Autor: {{autor}}
+ISBN: {{isbn}}
+
+Podklady v příloze.
+
+S pozdravem
+{{redaktor}}`,
+
+  m: `📚 Nový titul | {{nazev}}
+
+Autor: {{autor}}
+Ediční řada: {{edice}}
+ISBN: {{isbn}}
+
+Právě vychází nová kniha nakladatelství Wolters Kluwer. 🎉`,
+
+  n: `Předmět: Evidence výtisku – {{nazev}}
+
+Dobrý den Martino,
+
+zasílám podklady k evidenci autorského výtisku pro titul {{nazev}} (autor: {{autor}}, ISBN: {{isbn}}).
+
+S pozdravem
+{{redaktor}}`,
+
+  o: `Předmět: Uzavření účetnictví – {{nazev}}
+
+Dobrý den Filipe,
+
+prosím o uzavření účetnictví ke knize {{nazev}} (autor: {{autor}}, ISBN: {{isbn}}, NAV č.: {{nav}}).
+
+S pozdravem
+{{redaktor}}`,
+
+  q: `Předmět: Představení – {{nazev}}
+
+Dobrý den {{korektorka}},
+
+dovolte mi vás seznámit s autorem/autory knihy {{nazev}}: {{autor}}.
+
+Budete spolu v kontaktu pro případné dotazy při korektuře. Přeji příjemnou spolupráci!
+
+S pozdravem
+{{redaktor}}`,
+
+  r: `Předmět: Představení – {{nazev}}
+
+Dobrý den {{sazec}},
+
+dovolte mi vás seznámit s autorem/autory knihy {{nazev}}: {{autor}}.
+
+Budete spolu v kontaktu pro případné dotazy při sazbě. Přeji příjemnou spolupráci!
+
+S pozdravem
+{{redaktor}}`,
+};
+
+const TEMPLATE_LABELS = {
+  a: 'Návrh smlouvy', b: 'Oslovení autora', c: 'Onboarding',
+  d: 'Předání korektorce', e: 'Žádost o ISBN', f: 'Odeslání autorům',
+  g: 'Oslovení sazeče', l: 'E-kniha (Lukáš)', m: 'Yammer',
+  n: 'Evidence výtisku', o: 'Účetnictví (Filip)', q: 'Představení korektorce',
+  r: 'Představení sazeči',
+};
+
+// ===== State =====
+let state = loadState();
+let templates = loadTemplates();
+let currentTab = 'active';
+let currentBookId = null;
+let searchQ = '';
+let calYear, calMonth;
+let openPhaseId = null;
+let tplEditorKey = 'a';
+
+function initCal() { const n = new Date(); calYear = n.getFullYear(); calMonth = n.getMonth(); }
+
+function loadState() {
+  try { const r = localStorage.getItem(STORAGE_KEY); if (r) return JSON.parse(r); } catch(e) {}
+  return { books: [] };
+}
+function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function loadTemplates() {
+  try { const r = localStorage.getItem(TEMPLATES_KEY); if (r) return { ...DEFAULT_TEMPLATES, ...JSON.parse(r) }; } catch(e) {}
+  return { ...DEFAULT_TEMPLATES };
+}
+function saveTemplates() { localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates)); }
+
+// Helpers
+function uuid() { return 'r-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,8); }
+function todayISO() { return new Date().toISOString(); }
+function fmtDate(iso) {
+  if (!iso) return '';
+  try { const d = new Date(iso); return isNaN(d.getTime()) ? iso : d.toLocaleDateString('cs-CZ'); } catch(e) { return iso; }
+}
+function fmtDateInput(iso) {
+  if (!iso) return '';
+  try { return new Date(iso).toISOString().slice(0,10); } catch(e) { return ''; }
+}
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+function ediceLabel(b) { return EDICE_LABELS[b.edice] || b.ediceCustom || b.edice || ''; }
+function allStepIds() { const r = []; PHASES.forEach(ph => ph.steps.forEach(st => r.push(st.id))); return r; }
+function emptySteps() { const s = {}; allStepIds().forEach(id => { s[id] = { done: false, note: '', completedAt: null }; }); return s; }
+
+function migrateBook(b) {
+  if (!b.steps) b.steps = emptySteps();
+  allStepIds().forEach(id => { if (!b.steps[id]) b.steps[id] = { done: false, note: '', completedAt: null }; });
+  if (!b.activeOptional) b.activeOptional = [];
+  if (!b.phaseNotes) b.phaseNotes = {};
+  if (!b.additionals) b.additionals = {};
+  if (!b.todos) b.todos = [];
+  if (b.cancelled === undefined) b.cancelled = false;
+}
+
+// Progress
+function calcProgress(b) {
+  let total = 0, done = 0;
+  PHASES.forEach(ph => ph.steps.forEach(st => {
+    if (st.optional && !b.activeOptional.includes(st.id)) return;
+    if (st.repeatable) {
+      total++; if (b.steps[st.id].done) done++;
+      (b.additionals[st.id] || []).forEach(r => { total++; if (r.done) done++; });
+      return;
+    }
+    total++; if (b.steps[st.id].done) done++;
+  }));
+  return { total, done, pct: total === 0 ? 0 : Math.round(done / total * 100) };
+}
+function phaseProgress(b, ph) {
+  let total = 0, done = 0;
+  ph.steps.forEach(st => {
+    if (st.optional && !b.activeOptional.includes(st.id)) return;
+    if (st.repeatable) {
+      total++; if (b.steps[st.id].done) done++;
+      (b.additionals[st.id] || []).forEach(r => { total++; if (r.done) done++; });
+      return;
+    }
+    total++; if (b.steps[st.id].done) done++;
+  });
+  return { total, done };
+}
+function progressColor(pct) {
+  if (pct >= 100) return 'var(--green)';
+  if (pct >= 33) return 'var(--blue)';
+  return 'var(--raspberry)';
+}
+
+// Calendar
+function calPrev() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar(); }
+function calNext() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); }
+function getDeliveryDates() {
+  const map = {};
+  state.books.filter(b => !b.archivedAt).forEach(b => {
+    if (!b.odevzdaniRukopisu) return;
+    const d = fmtDateInput(b.odevzdaniRukopisu); if (!d) return;
+    if (!map[d]) map[d] = []; map[d].push(b.id);
+  });
+  return map;
+}
+function renderCalendar() {
+  const mn = ['Leden','Únor','Březen','Duben','Květen','Červen','Červenec','Srpen','Září','Říjen','Listopad','Prosinec'];
+  document.getElementById('calMonthLabel').textContent = mn[calMonth] + ' ' + calYear;
+  const grid = document.getElementById('calGrid');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const delivery = getDeliveryDates();
+  let html = ['Po','Út','St','Čt','Pá','So','Ne'].map(d => `<div class="cal-dow">${d}</div>`).join('');
+  const first = new Date(calYear, calMonth, 1);
+  let sd = first.getDay(); sd = sd === 0 ? 6 : sd - 1;
+  for (let i = 0; i < sd; i++) { const d = new Date(calYear, calMonth, 1-(sd-i)); html += `<div class="cal-day other-month">${d.getDate()}</div>`; }
+  const dim = new Date(calYear, calMonth+1, 0).getDate();
+  for (let d = 1; d <= dim; d++) {
+    const dt = new Date(calYear, calMonth, d);
+    const iso = dt.toISOString().slice(0,10);
+    const isT = dt.getTime() === today.getTime();
+    const ids = delivery[iso];
+    const cls = ['cal-day', isT?'today':'', ids?'has-book':''].filter(Boolean).join(' ');
+    const oc = ids ? `onclick="selectBookFromCal('${ids[0]}')"` : '';
+    const ti = ids ? `title="${ids.map(id=>{ const b=state.books.find(x=>x.id===id); return b?b.title:''; }).join(', ')}"` : '';
+    html += `<div class="${cls}" ${oc} ${ti}>${d}</div>`;
+  }
+  grid.innerHTML = html;
+}
+function selectBookFromCal(id) { if (currentTab!=='active') switchTab('active'); currentBookId=id; render(); }
+
+// Book list
+function filteredBooks() {
+  let books = state.books.filter(b => currentTab==='active' ? !b.archivedAt : !!b.archivedAt);
+  if (searchQ) { const q = searchQ.toLowerCase(); books = books.filter(b => b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q)); }
+  return books;
+}
+function renderBookList() {
+  const list = filteredBooks();
+  const el = document.getElementById('bookList');
+  let html = `<button class="new-book-btn" onclick="openNewBook()">+ Nová kniha</button>`;
+  if (!list.length) { html += `<div class="sidebar-empty">${searchQ?'Žádné výsledky':(currentTab==='active'?'Žádné aktivní knihy':'Archiv je prázdný')}</div>`; el.innerHTML=html; return; }
+  list.forEach(b => {
+    const p = calcProgress(b);
+    const cls = ['book-item', b.id===currentBookId?'active':'', b.cancelled?'cancelled-item':''].filter(Boolean).join(' ');
+    let extra = '';
+    if (b.odevzdaniRukopisu && !b.archivedAt) {
+      const days = daysUntil(b.odevzdaniRukopisu);
+      if (days !== null && days >= 0 && days <= 30) extra += `<div class="bi-deadline">⏰ Odevzdání za ${days} ${dnyCz(days)}</div>`;
+    }
+    if (b.cancelled) extra += `<div class="bi-cancelled">Zrušeno${b.cancelReason?' · '+escapeHtml(b.cancelReason):''}</div>`;
+    html += `<div class="${cls}" onclick="selectBook('${b.id}')">
+      <div class="bi-title" title="${escapeHtml(b.title)}">${escapeHtml(b.title)}</div>
+      <div class="bi-author">${escapeHtml(b.author)}</div>
+      <div class="bi-bar"><div class="bi-bar-fill" style="width:${p.pct}%;background:${b.cancelled?'var(--rose)':progressColor(p.pct)};"></div></div>
+      <div class="bi-meta"><span class="bi-pct">${p.pct}% (${p.done}/${p.total})</span>${b.archivedAt?`<span class="bi-rok">${b.rokVydani||''}</span>`:''}</div>
+      ${extra}
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+function selectBook(id) { currentBookId=id; renderMain(); renderBookList(); }
+function switchTab(tab) {
+  currentTab=tab;
+  document.getElementById('tabActive').classList.toggle('active', tab==='active');
+  document.getElementById('tabArchived').classList.toggle('active', tab==='archived');
+  currentBookId = filteredBooks()[0]?.id || null;
+  render();
+}
+function onSearch() { searchQ=document.getElementById('searchInput').value.trim(); renderBookList(); }
+
+// Date utils
+function daysUntil(iso) {
+  if (!iso) return null;
+  const t = new Date(iso); if (isNaN(t.getTime())) return null;
+  const today = new Date(); today.setHours(0,0,0,0); t.setHours(0,0,0,0);
+  return Math.round((t-today)/86400000);
+}
+function dnyCz(n) { const a=Math.abs(n); if(a===1)return'den'; if(a>=2&&a<=4)return'dny'; return'dní'; }
+
+// Circular SVG
+function circSvg(pct, cancelled) {
+  const r=28,cx=34,cy=34,circ=2*Math.PI*r;
+  const col = cancelled ? 'var(--rose)' : progressColor(pct);
+  return `<svg viewBox="0 0 68 68" width="68" height="68">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--gray-border)" stroke-width="5"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${col}" stroke-width="5"
+      stroke-dasharray="${circ*pct/100} ${circ}" stroke-linecap="round"
+      transform="rotate(-90 ${cx} ${cy})" style="transition:stroke-dasharray 0.4s ease;"/>
+  </svg>`;
+}
+
+// ===== Render main =====
+function renderMain() {
+  const detail = document.getElementById('detail');
+  const book = state.books.find(b => b.id === currentBookId);
+  if (!book) {
+    detail.innerHTML = `<div class="empty-state"><div class="empty-ornament">📖</div><h2>Vyberte knihu</h2><p>V levém panelu vyberte knihu pro zobrazení checklistu, nebo vytvořte novou.</p><button class="btn btn-primary" onclick="openNewBook()">+ Nová kniha</button></div>`;
+    return;
+  }
+  const archived = !!book.archivedAt;
+  const cancelled = !!book.cancelled;
+  const ro = archived ? 'readonly' : '';
+  const p = calcProgress(book);
+
+  let html = '';
+  if (cancelled) html += `<div class="cancelled-notice">⚠ Spolupráce zrušena ${fmtDate(book.archivedAt)}${book.cancelReason?' · Důvod: '+escapeHtml(book.cancelReason):''}. Checklist je zachován jen ke čtení.</div>`;
+  else if (archived) html += `<div class="archived-notice">Archivováno ${fmtDate(book.archivedAt)}${book.rokVydani?' · vydáno '+book.rokVydani:''}. Checklist je jen ke čtení.</div>`;
+
+  let chips = `<span class="chip chip-edice">${escapeHtml(ediceLabel(book))}</span>`;
+  if (book.nav) chips += `<span class="chip chip-nav">NAV: ${escapeHtml(book.nav)}</span>`;
+  if (book.odevzdaniRukopisu) chips += `<span class="chip chip-odevzdani">Odevzdání: ${fmtDate(book.odevzdaniRukopisu)}</span>`;
+  if (cancelled) chips += `<span class="chip chip-cancelled">Zrušeno</span>`;
+
+  // ToDo list
+  const todos = book.todos || [];
+  const todoItems = todos.map((t,i) => `
+    <div class="todo-item">
+      <div class="todo-check ${t.done?'done':''}" onclick="${archived?'':'toggleTodo('+i+')'}"></div>
+      <span class="todo-text ${t.done?'done':''}">${escapeHtml(t.text)}</span>
+      ${!archived ? `<span class="todo-del" onclick="deleteTodo(${i})">×</span>` : ''}
+    </div>`).join('');
+  const todoHtml = `
+    <div class="todo-wrap">
+      <div class="todo-title">Poznámky / To-Do</div>
+      <div class="todo-list">${todoItems}</div>
+      ${!archived ? `<div class="todo-add">
+        <input type="text" id="todoInput" placeholder="Přidat úkol… (Enter)">
+        <button class="todo-add-btn" onclick="addTodo()" title="Přidat úkol">${SVG_PLUS}</button>
+      </div>` : ''}
+    </div>`;
+
+  html += `
+    <div class="book-header ${cancelled?'cancelled-book':''}">
+      <div class="bh-chips">${chips}</div>
+      <div class="bh-top">
+        <div class="bh-info">
+          <div class="bh-title">${escapeHtml(book.title)}</div>
+          <div class="bh-author">${escapeHtml(book.author)}</div>
+          <div class="bh-fields">
+            <div class="bh-field"><label>Název</label><input type="text" value="${escapeHtml(book.title)}" ${ro} onchange="updateBook('title',this.value)" onblur="renderMain()"></div>
+            <div class="bh-field"><label>Autor</label><input type="text" value="${escapeHtml(book.author)}" ${ro} onchange="updateBook('author',this.value)"></div>
+            <div class="bh-field"><label>Redaktorka</label><input type="text" value="${escapeHtml(book.editor||'')}" ${ro} onchange="updateBook('editor',this.value)"></div>
+            <div class="bh-field"><label>Ediční řada</label><input type="text" value="${escapeHtml(ediceLabel(book))}" readonly style="background:var(--gray-bg);color:var(--gray-text);"></div>
+            <div class="bh-field"><label>ISBN</label><input type="text" value="${escapeHtml(book.isbn||'')}" ${ro} onchange="updateBook('isbn',this.value)"></div>
+            <div class="bh-field"><label>NAV č.</label><input type="text" value="${escapeHtml(book.nav||'')}" ${ro} onchange="updateBook('nav',this.value)" onblur="renderMain()" placeholder="přidělí se po odevzdání"></div>
+            <div class="bh-field"><label>Jazyková korektorka</label><input type="text" value="${escapeHtml(book.jazykovaKorektorka||'')}" ${ro} onchange="updateBook('jazykovaKorektorka',this.value)"></div>
+            <div class="bh-field"><label>Sazeč</label><input type="text" value="${escapeHtml(book.sazec||'')}" ${ro} onchange="updateBook('sazec',this.value)"></div>
+            <div class="bh-field"><label>Datum odevzdání rukopisu</label><input type="date" value="${fmtDateInput(book.odevzdaniRukopisu)}" ${ro} onchange="updateBook('odevzdaniRukopisu',this.value?new Date(this.value).toISOString():'');renderCalendar();renderMain();"></div>
+            <div class="bh-field"><label>Vytvořeno</label><input type="text" value="${fmtDate(book.createdAt)}" readonly></div>
+            <div class="bh-field bh-notes"><label>Poznámky ke knize</label><textarea ${ro} onchange="updateBook('notes',this.value)">${escapeHtml(book.notes||'')}</textarea></div>
+          </div>
+          ${todoHtml}
+        </div>
+        <div class="bh-progress">
+          <div class="circ-progress">${circSvg(p.pct, cancelled)}<div class="circ-label"><span class="circ-pct">${p.pct}%</span><span class="circ-sub">hotovo</span></div></div>
+          <div class="bh-done-count">${p.done} / ${p.total}</div>
+        </div>
+      </div>
+      <div class="bh-actions">
+        ${!archived
+          ? `<button class="btn btn-success" onclick="openArchiveModal()">Archivovat</button>
+             <button class="btn btn-cancel" onclick="openCancelModal()">Zrušit spolupráci</button>`
+          : `<button class="btn btn-secondary" onclick="unarchiveBook()">Obnovit do aktivních</button>`}
+        <button class="btn btn-secondary" onclick="window.print()">Tisk</button>
+        <button class="btn btn-danger" onclick="deleteBook()">Smazat</button>
+      </div>
+    </div>`;
+
+  PHASES.forEach((ph, idx) => {
+    const pp = phaseProgress(book, ph);
+    const ppct = pp.total===0 ? 0 : Math.round(pp.done/pp.total*100);
+    const isOpen = openPhaseId===ph.id || (openPhaseId===null && idx===0);
+    const accent = cancelled ? 'var(--rose)' : (ppct>=100?'var(--green)':ppct>0?'var(--blue)':'var(--gray-border)');
+    const hasNote = !!book.phaseNotes[ph.id];
+    html += `
+      <div class="phase ${isOpen?'open':''}" id="phase-${ph.id}">
+        <div class="phase-head" onclick="togglePhase('${ph.id}')">
+          <div class="phase-accent" style="background:${accent};"></div>
+          <div class="phase-num">${idx+1}</div>
+          <div class="phase-title-wrap">
+            <div class="phase-title">${ph.title}</div>
+            <div class="phase-subtitle">${pp.done} / ${pp.total} kroků</div>
+            <div class="phase-mini-bar"><div class="phase-mini-fill" style="width:${ppct}%;background:${accent};"></div></div>
+          </div>
+          <div class="phase-stat">${ppct}%</div>
+          <div class="phase-chevron">${SVG_CHEVRON}</div>
+        </div>
+        <div class="phase-body">
+          <button class="phase-note-toggle" onclick="togglePhaseNote('${ph.id}',event)">
+            ${SVG_FILE} Poznámka k fázi
+          </button>
+          <div class="phase-note-area ${hasNote?'open':''}" id="phnote-${ph.id}">
+            <textarea ${ro} placeholder="Poznámky, čekám na…" onchange="updatePhaseNote('${ph.id}',this.value)">${escapeHtml(book.phaseNotes[ph.id]||'')}</textarea>
+          </div>
+          ${ph.steps.map(st => renderStep(book, st, archived)).join('')}
+        </div>
+      </div>`;
+  });
+
+  detail.innerHTML = html;
+  // attach todo Enter key
+  const ti = document.getElementById('todoInput');
+  if (ti) ti.addEventListener('keydown', e => { if (e.key==='Enter') addTodo(); });
+}
+
+function renderStep(book, st, archived) {
+  const s = book.steps[st.id] || { done: false, note: '', completedAt: null };
+  const isOpt = !!st.optional;
+  const isRep = !!st.repeatable;
+  const isArchStep = !!st.archiveStep;
+  const isActive = !isOpt || book.activeOptional.includes(st.id);
+  const checkLocked = archived || (isOpt && !isActive);
+
+  const classes = ['step',
+    s.done ? 'is-done' : '',
+    isOpt ? 'opt-step' : '',
+    isOpt && isActive ? 'opt-on' : '',
+  ].filter(Boolean).join(' ');
+
+  const checkCls = `step-check ${s.done?'checked':''} ${checkLocked?'locked':''}`;
+  const checkClick = (!archived && (!isOpt || isActive)) ? `onclick="toggleStep('${st.id}')"` : '';
+  const labelClick = (!archived && (!isOpt || isActive)) ? `onclick="toggleStep('${st.id}')"` : '';
+  const dateHtml = s.completedAt ? `<span class="step-date">✓ ${fmtDate(s.completedAt)}</span>` : '';
+
+  const hasNote = !!s.note;
+  const optBtn = (!archived && isOpt && !isActive) ? `<button class="opt-activate-btn" onclick="activateOptional('${st.id}')">+ aktivovat</button>` : '';
+  const tplLink = st.template ? `<button class="step-tpl-link" onclick="generateEmail('${st.template}')">${SVG_MAIL} Generovat e-mail</button>` : '';
+  const noteBtn = `<button class="step-note-btn ${hasNote?'has-note':''}" onclick="toggleStepNote('${st.id}')" title="Poznámka">${SVG_NOTE}</button>`;
+
+  let repHtml = '';
+  if (isRep) {
+    const reps = book.additionals[st.id] || [];
+    const repItems = reps.map((r,i) => `
+      <div class="rep-item">
+        <div class="rep-check ${r.done?'checked':''}" ${archived?'':` onclick="toggleAdditional('${st.id}',${i})"`}></div>
+        <span class="rep-label">Dodatek ${i+1}</span>
+        ${!archived?`<span class="rep-del" onclick="removeAdditional('${st.id}',${i})">✕</span>`:''}
+      </div>`).join('');
+    repHtml = `<div class="rep-list">${repItems}</div>`;
+    if (!archived) repHtml += `<button class="add-rep-btn" onclick="addAdditional('${st.id}')">+ Přidat dodatek</button>`;
+  }
+
+  let archiveStepHtml = '';
+  if (isArchStep && !archived) {
+    archiveStepHtml = `<div class="archive-step-ui">
+      <input type="number" id="archiveYearInline" placeholder="Rok vydání" min="1990" max="2099">
+      <button onclick="archiveFromStep()">Archivovat</button>
+    </div>`;
+  }
+
+  return `
+    <div class="${classes}" data-step="${st.id}">
+      <div class="step-row">
+        <div class="${checkCls}" ${checkClick}></div>
+        <div class="step-content">
+          <span class="step-label" ${labelClick}>${escapeHtml(st.label)}</span>${dateHtml}${optBtn}
+        </div>
+        <div class="step-end">${tplLink}${noteBtn}</div>
+      </div>
+      ${repHtml}
+      ${archiveStepHtml}
+      <div class="note-area ${hasNote?'open':''}" id="snote-${st.id}">
+        <textarea ${archived?'readonly':''} placeholder="Poznámka…" onchange="updateStepNote('${st.id}',this.value)">${escapeHtml(s.note||'')}</textarea>
+      </div>
+    </div>`;
+}
+
+function togglePhase(id) {
+  openPhaseId = openPhaseId===id ? null : id;
+  document.querySelectorAll('.phase').forEach(el => el.classList.remove('open'));
+  if (openPhaseId) { const el = document.getElementById('phase-'+openPhaseId); if (el) el.classList.add('open'); }
+}
+function togglePhaseNote(phId, e) {
+  e.stopPropagation();
+  const el = document.getElementById('phnote-'+phId);
+  if (el) el.classList.toggle('open');
+}
+
+// Mutations
+function getBook() { return state.books.find(b => b.id===currentBookId); }
+function updateBook(field, value) { const b=getBook(); if(!b||b.archivedAt) return; b[field]=value; saveState(); renderBookList(); }
+function toggleStep(stepId) {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  const s=b.steps[stepId]; s.done=!s.done; s.completedAt=s.done?todayISO():null;
+  saveState(); renderMain(); renderBookList();
+}
+function activateOptional(stepId) {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  if(!b.activeOptional.includes(stepId)) b.activeOptional.push(stepId);
+  saveState(); renderMain();
+}
+function addAdditional(stepId) {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  if(!b.additionals[stepId]) b.additionals[stepId]=[];
+  b.additionals[stepId].push({done:false,completedAt:null});
+  saveState(); renderMain();
+}
+function toggleAdditional(stepId,idx) {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  const r=b.additionals[stepId][idx]; r.done=!r.done; r.completedAt=r.done?todayISO():null;
+  saveState(); renderMain(); renderBookList();
+}
+function removeAdditional(stepId,idx) {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  b.additionals[stepId].splice(idx,1); saveState(); renderMain();
+}
+function updatePhaseNote(phId,val) { const b=getBook(); if(!b||b.archivedAt) return; b.phaseNotes[phId]=val; saveState(); }
+function toggleStepNote(stepId) {
+  const el=document.getElementById('snote-'+stepId);
+  if(el) { el.classList.toggle('open'); if(el.classList.contains('open')) el.querySelector('textarea')?.focus(); }
+}
+function updateStepNote(stepId,val) {
+  const b=getBook(); if(!b) return; b.steps[stepId].note=val; saveState();
+  const btn=document.querySelector(`[data-step="${stepId}"] .step-note-btn`);
+  if(btn) btn.classList.toggle('has-note',!!val);
+}
+
+// ToDo
+function addTodo() {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  const inp=document.getElementById('todoInput'); if(!inp) return;
+  const text=inp.value.trim(); if(!text) return;
+  b.todos.push({id:uuid(),text,done:false});
+  saveState(); renderMain();
+}
+function toggleTodo(idx) {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  b.todos[idx].done=!b.todos[idx].done; saveState(); renderMain();
+}
+function deleteTodo(idx) {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  b.todos.splice(idx,1); saveState(); renderMain();
+}
+
+// Book CRUD
+function openNewBook() {
+  ['nb_title','nb_author','nb_isbn','nb_nav','nb_edice_custom'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('nb_editor').value='Kateřina Schmiedtová';
+  document.getElementById('nb_korektorka').value='Daniela Schmiedtová';
+  document.getElementById('nb_sazec').value='Tomáš Brejcha';
+  document.getElementById('nb_edice').value='komentar';
+  document.getElementById('nb_odevzdani').value='';
+  document.getElementById('nb_err').textContent='';
+  document.getElementById('nb_edice_custom_wrap').style.display='none';
+  openModal('newBookModal');
+  setTimeout(()=>document.getElementById('nb_title').focus(),80);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('nb_edice')?.addEventListener('change', function() {
+    document.getElementById('nb_edice_custom_wrap').style.display=this.value==='edice'?'':'none';
+  });
+});
+
+function createBook() {
+  const title=document.getElementById('nb_title').value.trim();
+  const author=document.getElementById('nb_author').value.trim();
+  const editor=document.getElementById('nb_editor').value.trim();
+  const edice=document.getElementById('nb_edice').value;
+  if(!title||!author||!editor) { document.getElementById('nb_err').textContent='Vyplňte název, autora a redaktorku.'; return; }
+  const ov=document.getElementById('nb_odevzdani').value;
+  const book={
+    id:uuid(), title, author, editor, edice,
+    ediceCustom: edice==='edice'?document.getElementById('nb_edice_custom').value.trim():'',
+    isbn:document.getElementById('nb_isbn').value.trim(),
+    nav:document.getElementById('nb_nav').value.trim(),
+    jazykovaKorektorka:document.getElementById('nb_korektorka').value.trim(),
+    sazec:document.getElementById('nb_sazec').value.trim(),
+    odevzdaniRukopisu:ov?new Date(ov).toISOString():'',
+    notes:'', createdAt:todayISO(), archivedAt:null, rokVydani:null,
+    cancelled:false, cancelReason:'',
+    activeOptional:[], additionals:{}, phaseNotes:{}, todos:[], steps:emptySteps(),
+  };
+  state.books.unshift(book); saveState();
+  currentBookId=book.id; currentTab='active';
+  document.getElementById('tabActive').classList.add('active');
+  document.getElementById('tabArchived').classList.remove('active');
+  closeModal('newBookModal'); render();
+}
+
+function deleteBook() {
+  const b=getBook(); if(!b) return;
+  if(!confirm(`Smazat knihu „${b.title}"? Akce je nevratná.`)) return;
+  state.books=state.books.filter(x=>x.id!==b.id); saveState();
+  currentBookId=filteredBooks()[0]?.id||null; render();
+}
+
+function openArchiveModal() {
+  document.getElementById('archiveYear').value=new Date().getFullYear();
+  document.getElementById('archiveErr').textContent='';
+  openModal('archiveModal');
+  setTimeout(()=>document.getElementById('archiveYear').focus(),80);
+}
+function confirmArchive() {
+  const yr=parseInt(document.getElementById('archiveYear').value);
+  if(!yr||yr<1990||yr>2099) { document.getElementById('archiveErr').textContent='Zadejte platný rok.'; return; }
+  const b=getBook(); if(!b) return;
+  b.archivedAt=todayISO(); b.rokVydani=yr; b.cancelled=false;
+  saveState(); closeModal('archiveModal'); render();
+}
+function archiveFromStep() {
+  const yr=parseInt(document.getElementById('archiveYearInline')?.value);
+  if(!yr||yr<1990||yr>2099) { alert('Zadejte platný rok vydání.'); return; }
+  const b=getBook(); if(!b) return;
+  b.archivedAt=todayISO(); b.rokVydani=yr;
+  b.steps['p5_4'].done=true; b.steps['p5_4'].completedAt=todayISO();
+  saveState();
+  currentTab='archived';
+  document.getElementById('tabActive').classList.remove('active');
+  document.getElementById('tabArchived').classList.add('active');
+  render();
+}
+function unarchiveBook() {
+  const b=getBook(); if(!b) return;
+  if(!confirm('Obnovit knihu do aktivních?')) return;
+  b.archivedAt=null; b.rokVydani=null; b.cancelled=false; b.cancelReason='';
+  saveState(); render();
+}
+
+// Cancellation
+function openCancelModal() {
+  document.getElementById('cancelReason').value='';
+  openModal('cancelModal');
+  setTimeout(()=>document.getElementById('cancelReason').focus(),80);
+}
+function confirmCancel() {
+  const b=getBook(); if(!b) return;
+  b.archivedAt=todayISO(); b.cancelled=true;
+  b.cancelReason=document.getElementById('cancelReason').value.trim();
+  b.rokVydani=null;
+  saveState(); closeModal('cancelModal');
+  currentTab='archived';
+  document.getElementById('tabActive').classList.remove('active');
+  document.getElementById('tabArchived').classList.add('active');
+  render();
+}
+
+// Email templates
+function renderTemplate(tpl, book) {
+  const od=book.odevzdaniRukopisu?fmtDate(book.odevzdaniRukopisu):'[nevyplněno]';
+  return tpl
+    .replaceAll('{{nazev}}', book.title||'')
+    .replaceAll('{{autor}}', book.author||'')
+    .replaceAll('{{edice}}', ediceLabel(book))
+    .replaceAll('{{isbn}}', book.isbn||'[nevyplněno]')
+    .replaceAll('{{nav}}', book.nav||'[nevyplněno]')
+    .replaceAll('{{redaktor}}', book.editor||'')
+    .replaceAll('{{korektorka}}', book.jazykovaKorektorka||'')
+    .replaceAll('{{sazec}}', book.sazec||'')
+    .replaceAll('{{datum_odevzdani}}', od)
+    .replaceAll('{{datum_dnes}}', new Date().toLocaleDateString('cs-CZ'));
+}
+function generateEmail(key) {
+  const b=getBook(); if(!b) return;
+  const tpl=templates[key]; if(!tpl) return;
+  document.getElementById('genTitle').textContent=TEMPLATE_LABELS[key]||'E-mail';
+  document.getElementById('genOutput').value=renderTemplate(tpl,b);
+  openModal('genModal');
+}
+function copyGen() {
+  const ta=document.getElementById('genOutput');
+  navigator.clipboard.writeText(ta.value).then(showToast).catch(()=>{ ta.select(); document.execCommand('copy'); showToast(); });
+}
+function showToast() { const t=document.getElementById('copyToast'); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1800); }
+
+// Template editor
+function openTemplatesEditor() { tplEditorKey='a'; renderTplEditorTabs(); loadTplEditorContent(); openModal('tplEditorModal'); }
+function renderTplEditorTabs() {
+  document.getElementById('tplTabRow').innerHTML=Object.keys(TEMPLATE_LABELS).map(k =>
+    `<button class="tpl-tab ${k===tplEditorKey?'active':''}" onclick="selectTplTab('${k}')">${k.toUpperCase()} – ${TEMPLATE_LABELS[k]}</button>`
+  ).join('');
+}
+function selectTplTab(k) { tplEditorKey=k; renderTplEditorTabs(); loadTplEditorContent(); }
+function loadTplEditorContent() { document.getElementById('tplEditorLabel').textContent=TEMPLATE_LABELS[tplEditorKey]||tplEditorKey; document.getElementById('tplEditorArea').value=templates[tplEditorKey]||''; }
+function saveCurrentTemplate() { templates[tplEditorKey]=document.getElementById('tplEditorArea').value; saveTemplates(); showToast(); }
+function resetCurrentTemplate() { if(!confirm('Obnovit výchozí šablonu?')) return; templates[tplEditorKey]=DEFAULT_TEMPLATES[tplEditorKey]; saveTemplates(); loadTplEditorContent(); }
+
+// Export / Import
+function exportData() {
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`redakcni-zaloha-${new Date().toISOString().slice(0,10)}.json`; a.click();
+  URL.revokeObjectURL(url);
+}
+function importData(event) {
+  const file=event.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try {
+      const imp=JSON.parse(e.target.result);
+      if(!imp.books||!Array.isArray(imp.books)) { alert('Neplatný formát souboru.'); return; }
+      const choice=prompt('1 = Přepsat vše\n2 = Sloučit (přidat nové)\n(Enter = zrušit)','2');
+      if(!choice) return;
+      if(choice==='1') { state=imp; }
+      else if(choice==='2') { const ids=new Set(state.books.map(b=>b.id)); imp.books.forEach(b=>{ if(!ids.has(b.id)) state.books.push(b); }); }
+      saveState(); initApp(); alert('Import dokončen.');
+    } catch(err) { alert('Chyba: '+err.message); }
+  };
+  reader.readAsText(file); event.target.value='';
+}
+
+// Modal helpers
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// Lock
+function tryUnlock() {
+  const inp=document.getElementById('lockInput');
+  if(inp.value===APP_PASSWORD) { localStorage.setItem(UNLOCK_KEY,'1'); showApp(); }
+  else { document.getElementById('lockErr').textContent='Nesprávné heslo'; inp.value=''; inp.focus(); }
+}
+function showApp() { document.getElementById('lockOverlay').style.display='none'; document.getElementById('app').style.display='flex'; initApp(); }
+
+// Init
+function initApp() { state.books.forEach(migrateBook); openPhaseId=null; initCal(); currentBookId=filteredBooks()[0]?.id||null; render(); }
+function render() { renderCalendar(); renderBookList(); renderMain(); }
+
+(function start() {
+  if(localStorage.getItem(UNLOCK_KEY)==='1') { showApp(); }
+  else { document.getElementById('lockInput').addEventListener('keydown',e=>{ if(e.key==='Enter') tryUnlock(); }); }
+  document.querySelectorAll('.modal-overlay').forEach(m => { m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); }); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open')); });
+})();
+</script>
+</body>
+</html>
