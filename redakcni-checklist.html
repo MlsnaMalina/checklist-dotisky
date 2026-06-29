@@ -241,6 +241,24 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .phase-stat { font-size: 12px; color: var(--gray-text); flex-shrink: 0; margin-right: 8px; }
 .phase-chevron { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; color: var(--gray-dim); transition: transform var(--transition); flex-shrink: 0; }
 .phase.open .phase-chevron { transform: rotate(180deg); }
+
+/* Dark phase headers — status-based */
+.phase-done .phase-head, .phase-active .phase-head, .phase-pending .phase-head { border-radius: var(--radius) var(--radius) 0 0; }
+.phase-done .phase-head { background: linear-gradient(135deg, #3a7218 0%, #549e25 100%); }
+.phase-done .phase-head:hover { background: linear-gradient(135deg, #336515 0%, #4a8c20 100%); }
+.phase-active .phase-head { background: linear-gradient(135deg, #1b2d52 0%, #2d4a80 100%); }
+.phase-active .phase-head:hover { background: linear-gradient(135deg, #1b2d52 0%, #354f85 100%); }
+.phase-pending .phase-head { background: linear-gradient(135deg, #2a2e3d 0%, #383d52 100%); }
+.phase-pending .phase-head:hover { background: linear-gradient(135deg, #22263a 0%, #303550 100%); }
+.phase-done .phase-title, .phase-active .phase-title, .phase-pending .phase-title { color: #fff; }
+.phase-done .phase-subtitle, .phase-active .phase-subtitle, .phase-pending .phase-subtitle { color: rgba(255,255,255,.55); }
+.phase-done .phase-stat, .phase-active .phase-stat, .phase-pending .phase-stat { color: rgba(255,255,255,.7); }
+.phase-done .phase-chevron, .phase-active .phase-chevron, .phase-pending .phase-chevron { color: rgba(255,255,255,.6); }
+.phase-done .phase-num, .phase-active .phase-num, .phase-pending .phase-num { color: #fff; opacity: 0.10; }
+.phase-done .phase-mini-bar, .phase-active .phase-mini-bar, .phase-pending .phase-mini-bar { background: rgba(255,255,255,.18); }
+.phase-done .phase-mini-fill, .phase-active .phase-mini-fill, .phase-pending .phase-mini-fill { background: rgba(255,255,255,.80) !important; }
+.phase-done .phase-accent, .phase-active .phase-accent, .phase-pending .phase-accent { display: none; }
+.phase-badge { font-size: 11px; font-weight: 600; color: #fff; background: rgba(255,255,255,.22); padding: 3px 10px; border-radius: 20px; flex-shrink: 0; margin-right: 4px; }
 .phase-body { display: none; padding: 4px 22px 16px; }
 .phase.open .phase-body { display: block; }
 
@@ -259,8 +277,10 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .step-check.locked { cursor: default; opacity: 0.5; }
 .step-content { flex: 1; min-width: 0; }
 .step-label { font-size: 13px; color: var(--black); cursor: pointer; display: inline; transition: var(--transition); }
-.step.is-done .step-label { text-decoration: line-through; color: var(--gray-text); }
+.step.is-done { background: linear-gradient(90deg, rgba(152,196,81,.09) 0%, rgba(152,196,81,.02) 70%, transparent 100%); box-shadow: inset 3px 0 0 #98c451; border-radius: 4px; }
+.step.is-done .step-label { text-decoration: line-through; color: #5a8a1a; }
 .step-date { font-size: 11px; color: var(--gray-dim); margin-left: 6px; }
+.step.is-done .step-date { color: #5a8a1a; opacity: 0.8; }
 .step-end { display: flex; align-items: center; gap: 2px; flex-shrink: 0; margin-left: auto; padding-left: 8px; }
 .step-note-btn { width: 26px; height: 26px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--gray-dim); transition: var(--transition); flex-shrink: 0; }
 .step-note-btn:hover { background: var(--gray-bg); color: var(--black); }
@@ -972,6 +992,7 @@ function phaseProgress(b, ph) {
 }
 function progressColor(pct) {
   if (pct >= 100) return 'var(--green)';
+  if (pct >= 70) return '#f7c017';
   if (pct >= 33) return 'var(--blue)';
   return 'var(--raspberry)';
 }
@@ -1157,8 +1178,10 @@ function renderMain() {
     const isOpen = openPhaseId===ph.id || (openPhaseId===null && idx===0);
     const accent = cancelled ? 'var(--rose)' : (ppct>=100?'var(--green)':ppct>0?'var(--blue)':'var(--gray-border)');
     const hasNote = !!book.phaseNotes[ph.id];
+    const phaseStatusCls = cancelled ? '' : (ppct>=100 ? 'phase-done' : ppct>0 ? 'phase-active' : 'phase-pending');
+    const phaseBadge = ppct>=100 ? `<span class="phase-badge">✓ Hotovo</span>` : '';
     html += `
-      <div class="phase ${isOpen?'open':''}" id="phase-${ph.id}">
+      <div class="phase ${isOpen?'open':''} ${phaseStatusCls}" id="phase-${ph.id}">
         <div class="phase-head" onclick="togglePhase('${ph.id}')">
           <div class="phase-accent" style="background:${accent};"></div>
           <div class="phase-num">${idx+1}</div>
@@ -1168,6 +1191,7 @@ function renderMain() {
             <div class="phase-mini-bar"><div class="phase-mini-fill" style="width:${ppct}%;background:${accent};"></div></div>
           </div>
           <div class="phase-stat">${ppct}%</div>
+          ${phaseBadge}
           <div class="phase-chevron">${SVG_CHEVRON}</div>
         </div>
         <div class="phase-body">
