@@ -272,15 +272,15 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
   justify-content: center; flex-shrink: 0; margin-top: 1px; background: var(--white);
 }
 .step-check:hover:not(.locked) { border-color: var(--blue); }
-.step-check.checked { background: var(--green); border-color: var(--green); }
+.step-check.checked { background: #B83066; border-color: #B83066; }
 .step-check.checked::after { content: '✓'; color: #fff; font-size: 13px; font-weight: 700; }
 .step-check.locked { cursor: default; opacity: 0.5; }
 .step-content { flex: 1; min-width: 0; }
 .step-label { font-size: 13px; color: var(--black); cursor: pointer; display: inline; transition: var(--transition); }
-.step.is-done { background: linear-gradient(90deg, rgba(152,196,81,.09) 0%, rgba(152,196,81,.02) 70%, transparent 100%); box-shadow: inset 3px 0 0 #98c451; border-radius: 4px; }
-.step.is-done .step-label { text-decoration: line-through; color: #5a8a1a; }
+.step.is-done { background: linear-gradient(90deg, rgba(184,48,102,.07) 0%, rgba(184,48,102,.02) 70%, transparent 100%); box-shadow: inset 3px 0 0 #B83066; border-radius: 4px; }
+.step.is-done .step-label { text-decoration: line-through; color: #B83066; }
 .step-date { font-size: 11px; color: var(--gray-dim); margin-left: 6px; }
-.step.is-done .step-date { color: #5a8a1a; opacity: 0.8; }
+.step.is-done .step-date { color: #B83066; opacity: 0.7; }
 .step-end { display: flex; align-items: center; gap: 2px; flex-shrink: 0; margin-left: auto; padding-left: 8px; }
 .step-note-btn { width: 26px; height: 26px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--gray-dim); transition: var(--transition); flex-shrink: 0; }
 .step-note-btn:hover { background: var(--gray-bg); color: var(--black); }
@@ -307,7 +307,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .sub-step { display: flex; align-items: center; gap: 8px; padding: 3px 0; }
 .sub-step-check { width: 15px; height: 15px; border: 1.5px solid var(--gray-border); border-radius: 3px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: var(--transition); background: var(--white); }
 .sub-step-check:hover:not(.locked) { border-color: var(--blue); }
-.sub-step-check.checked { background: var(--green); border-color: var(--green); }
+.sub-step-check.checked { background: #B83066; border-color: #B83066; }
 .sub-step-check.checked::after { content: '✓'; color: #fff; font-size: 9px; font-weight: 700; }
 .sub-step-check.locked { cursor: default; opacity: 0.5; }
 .sub-step-label { font-size: 12px; color: var(--gray-text); flex: 1; }
