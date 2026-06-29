@@ -105,10 +105,11 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; }
 .cal-dow { font-size: 9px; text-align: center; color: rgba(255,255,255,0.3); padding: 2px 0; font-weight: 600; letter-spacing: 0.04em; }
 .cal-day { font-size: 10px; text-align: center; padding: 3px 1px; border-radius: 3px; color: rgba(255,255,255,0.4); cursor: default; transition: var(--transition); position: relative; }
-.cal-day.today { color: #fff; font-weight: 600; }
-.cal-day.today::after { content: ''; position: absolute; bottom: 1px; left: 50%; transform: translateX(-50%); width: 3px; height: 3px; background: var(--blue-light); border-radius: 50%; }
-.cal-day.has-book { background: rgba(64,114,173,0.3); color: #fff; cursor: pointer; font-weight: 600; }
-.cal-day.has-book:hover { background: rgba(64,114,173,0.5); }
+.cal-day.today { color: #fff; font-weight: 700; background: rgba(255,255,255,0.12); }
+.cal-day.today::after { content: ''; position: absolute; bottom: 1px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background: #f7c017; border-radius: 50%; }
+.cal-day.has-book { background: rgba(184,48,102,0.40); color: #fff; cursor: pointer; font-weight: 600; }
+.cal-day.has-book:hover { background: rgba(184,48,102,0.60); }
+.cal-day.today.has-book { background: rgba(184,48,102,0.55); }
 .cal-day.other-month { color: rgba(255,255,255,0.15); }
 
 /* Book list */
@@ -280,6 +281,21 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .step.opt-step.opt-on .step-label { color: var(--black); font-style: normal; }
 .step.opt-step.opt-on .step-check { border-style: solid; border-color: var(--gray-border); cursor: pointer; }
 .step.opt-step.opt-on .step-check:hover { border-color: var(--blue); }
+
+/* Sub-steps */
+.sub-steps { margin-top: 6px; margin-left: 30px; display: flex; flex-direction: column; gap: 3px; }
+.sub-step { display: flex; align-items: center; gap: 8px; padding: 3px 0; }
+.sub-step-check { width: 15px; height: 15px; border: 1.5px solid var(--gray-border); border-radius: 3px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: var(--transition); background: var(--white); }
+.sub-step-check:hover:not(.locked) { border-color: var(--blue); }
+.sub-step-check.checked { background: var(--green); border-color: var(--green); }
+.sub-step-check.checked::after { content: '✓'; color: #fff; font-size: 9px; font-weight: 700; }
+.sub-step-check.locked { cursor: default; opacity: 0.5; }
+.sub-step-label { font-size: 12px; color: var(--gray-text); flex: 1; }
+.sub-step.opt-sub .sub-step-check { border-style: dashed; border-color: var(--gray-dim); cursor: default; }
+.sub-step.opt-sub .sub-step-label { color: var(--gray-dim); font-style: italic; }
+.sub-step.opt-sub.opt-on .sub-step-check { border-style: solid; border-color: var(--gray-border); cursor: pointer; }
+.sub-step.opt-sub.opt-on .sub-step-label { color: var(--gray-text); font-style: normal; }
+.sub-step.is-done .sub-step-label { text-decoration: line-through; color: var(--gray-dim); }
 
 /* Repeatable step (Dodatek) */
 .rep-list { margin-top: 6px; margin-left: 30px; }
@@ -576,12 +592,24 @@ const PHASES = [
     id: 'p1', title: 'Smlouva a onboarding',
     steps: [
       { id: 'p1_1', label: 'E-mail: oslovení autora', template: 'b' },
-      { id: 'p1_2', label: 'E-mail: návrh smlouvy autorovi', template: 'a' },
+      { id: 'p1_2', label: 'E-mail: návrh smlouvy autorovi', template: 'a', subSteps: [
+        { id: 'p1_2a', label: 'Vysvětlení způsobu uzavírání smluv' },
+        { id: 'p1_2b', label: 'Zaslání manuálu k uzavření smlouvy' },
+      ]},
+      { id: 'p1_7', label: 'E-mail: informace o procesu autorům', template: 'c', subSteps: [
+        { id: 'p1_7a', label: 'Autorský formulář', optional: true },
+        { id: 'p1_7b', label: 'Zápůjční protokol ASPI', optional: true },
+        { id: 'p1_7c', label: 'Manuál k ediční řadě', optional: true },
+        { id: 'p1_7d', label: 'Tabulka vztahů monografie k předpisům', optional: true },
+        { id: 'p1_7e', label: 'Seznam zkratek', optional: true },
+      ]},
+      { id: 'p1_8', label: 'E-mail: Podepsaný autorský formulář zaslat Elišce, Filip v kopii', optional: true },
+      { id: 'p1_9', label: 'Podepsaný Zápůjční protokol ASPI odeslat Ivě' },
       { id: 'p1_3', label: 'Legisway tabulka + e-mail Elišce' },
-      { id: 'p1_4', label: 'Autorům složka v PublishOnu' },
+      { id: 'p1_4', label: 'Autorům FOUNDED složku v PublishOnu' },
+      { id: 'p1_10', label: 'Autorům FOUNDED účty v PublishOnu', optional: true },
       { id: 'p1_5', label: 'Smlouva podepsána a uložena' },
       { id: 'p1_6', label: 'Dodatek ke smlouvě', optional: true, repeatable: true },
-      { id: 'p1_7', label: 'E-mail: informace o procesu autorům', template: 'c' },
     ]
   },
   {
@@ -592,17 +620,17 @@ const PHASES = [
       { id: 'p2_3', label: 'Spuštění nástroje CHT v PublishOnu' },
       { id: 'p2_4', label: 'E-mail: předání rukopisu jazykové korektorce', template: 'd' },
       { id: 'p2_5', label: 'Vytvoření záznamu v Edičním plánu' },
-      { id: 'p2_5b', label: 'Nastavení deadlinů v Edičním plánu' },
       { id: 'p2_6', label: 'Redakční kontrola + kontrola jazykové korektorky' },
       { id: 'p2_6a', label: 'Seznam zkratek', optional: true },
       { id: 'p2_6b', label: 'Seznam literatury', optional: true },
       { id: 'p2_6c', label: 'Seznam předpisů a judikatury', optional: true },
-      { id: 'p2_7', label: 'E-mail: odeslání na kontrolu autorům', template: 'f' },
+      { id: 'p2_7', label: 'E-mail: odeslání upraveného rukopisu na kontrolu autorům', template: 'f' },
       { id: 'p2_8', label: 'Zapracování oprav od autorů' },
       { id: 'p2_9', label: 'Příprava rejstříku', optional: true },
-      { id: 'p2_10', label: 'E-mail: oslovit sazeče', template: 'g' },
-      { id: 'p2_11', label: 'E-mail: představení autorů jazykové korektorce', template: 'q' },
-      { id: 'p2_12', label: 'E-mail: představení autorů sazeči', template: 'r' },
+      { id: 'p2_10', label: 'E-mail: oslovit sazeče, zda má prostor pro sazbu', template: 'g' },
+      { id: 'p2_14', label: 'Připravit podklady pro sazeče (před stavem „odsouhlaseno" v PublishOnu) a zadat sazeče do role Sazeč – ve složce v PublishOnu je třeba mít dokumenty jen pro sazbu, pokud je tam něco navíc, je třeba výslovně sazeče informovat', subSteps: [
+        { id: 'p2_14a', label: 'U dokumentů v PublishOnu změnit stav na „odsouhlaseno"' },
+      ]},
       { id: 'p2_13', label: 'Předání rukopisu sazeči' },
     ]
   },
@@ -611,8 +639,8 @@ const PHASES = [
     steps: [
       { id: 'p3_1', label: 'Kontrola sazby — konce řádků, obsah, záhlaví' },
       { id: 'p3_2', label: 'Vytvoření kalkulace' },
-      { id: 'p3_3', label: 'Zaslání kalkulace na schválení' },
-      { id: 'p3_4', label: 'Žádost Filipovi o vytvoření složky pro knihu' },
+      { id: 'p3_3', label: 'Zaslání kalkulace na schválení', template: 'h' },
+      { id: 'p3_4', label: 'Žádost Filipovi o vytvoření složky pro knihu', template: 'i' },
       { id: 'p3_5', label: 'Vytvoření záznamu pro knihu v Edičním plánu' },
       { id: 'p3_6', label: 'Odeslání sazby autorům ke kontrole' },
       { id: 'p3_7', label: 'Zapracování posledních poznámek k opravě sazby a odeslání sazeči' },
@@ -621,6 +649,9 @@ const PHASES = [
       { id: 'p3_10', label: 'Kontrola obálky a tiskových materiálů' },
       { id: 'p3_11', label: 'Odeslání knihy do tisku' },
       { id: 'p3_12', label: 'Potvrzení tisku' },
+      { id: 'p3_14', label: 'Doplnění chyb ze sazby do PublishOnu' },
+      { id: 'p3_15', label: 'Vytvoření objednávkových čísel — tisk, obálka + sazba, jazyková korektura' },
+      { id: 'p3_16', label: 'Doplnění edičního plánu (doplnit cenu + procenta u autorského honoráře)' },
       { id: 'p3_13', label: 'Výtisky autorům, povinné výtisky a výtisk do archivu' },
     ]
   },
@@ -628,19 +659,24 @@ const PHASES = [
     id: 'p4', title: 'Vydání',
     steps: [
       { id: 'p4_1', label: 'Vytvoření záznamu v e-shopu' },
-      { id: 'p4_2', label: 'Kontrola metadat v PublishOnu' },
+      { id: 'p4_2', label: 'Kontrola metadat v PublishOnu + nahrání obálky do příloh v PublishOnu („cover.jpg")' },
+      { id: 'p4_10', label: 'Vytvoření anotace' },
       { id: 'p4_3', label: 'E-mail: vytvoření e-knihy Lukášovi', template: 'l' },
       { id: 'p4_4', label: 'Vizuálně zkontrolovat hotový epub' },
       { id: 'p4_5', label: 'Odeslat epub na vytvoření do hotline (Jiří Nezbeda, Jiří Svoboda)' },
       { id: 'p4_6', label: 'Aktualizace Edičního plánu — datum vydání' },
-      { id: 'p4_7', label: 'E-mail: Martině — evidence výtisku', template: 'n' },
-      { id: 'p4_8', label: 'Záznam v NAV' },
+      { id: 'p4_7', label: 'E-mail Martině — připravená karta v E-shopu', template: 'n' },
       { id: 'p4_9', label: 'Vydání oznámeno na Yammer', template: 'm' },
     ]
   },
   {
     id: 'p5', title: 'Závěr a administrativa',
     steps: [
+      { id: 'p5_5', label: 'Oznámení knihy v Národní knihovně' },
+      { id: 'p5_6', label: 'E-mail: odeslat objednávková čísla externistům', subSteps: [
+        { id: 'p5_6a', label: 'obálka + sazba', optional: true },
+        { id: 'p5_6b', label: 'jazyková korektura', optional: true },
+      ]},
       { id: 'p5_1', label: 'Výplata honoráře — kontrola podkladů' },
       { id: 'p5_2', label: 'E-mail: Filip — uzavření účetnictví', template: 'o' },
       { id: 'p5_3', label: 'Archivace složky v PublishOnu' },
@@ -795,6 +831,32 @@ Budete spolu v kontaktu pro případné dotazy při korektuře. Přeji příjemn
 S pozdravem
 {{redaktor}}`,
 
+  h: `Předmět: Kalkulace ke schválení – {{nazev}}
+
+Dobrý den,
+
+zasílám kalkulaci pro titul {{nazev}} (autor: {{autor}}, ISBN: {{isbn}}) ke schválení.
+
+Prosím o potvrzení do [doplnit termín].
+
+S pozdravem
+{{redaktor}}`,
+
+  i: `Předmět: Žádost o vytvoření složky – {{nazev}}
+
+Dobrý den Filipe,
+
+prosím o vytvoření složky pro nový titul:
+
+Název: {{nazev}}
+Autor: {{autor}}
+ISBN: {{isbn}}
+
+Děkuji.
+
+S pozdravem
+{{redaktor}}`,
+
   r: `Předmět: Představení – {{nazev}}
 
 Dobrý den {{sazec}},
@@ -810,9 +872,9 @@ S pozdravem
 const TEMPLATE_LABELS = {
   a: 'Návrh smlouvy', b: 'Oslovení autora', c: 'Onboarding',
   d: 'Předání korektorce', e: 'Žádost o ISBN', f: 'Odeslání autorům',
-  g: 'Oslovení sazeče', l: 'E-kniha (Lukáš)', m: 'Yammer',
-  n: 'Evidence výtisku', o: 'Účetnictví (Filip)', q: 'Představení korektorce',
-  r: 'Představení sazeči',
+  g: 'Oslovení sazeče', h: 'Kalkulace ke schválení', i: 'Složka pro knihu (Filip)',
+  l: 'E-kniha (Lukáš)', m: 'Yammer', n: 'Evidence výtisku',
+  o: 'Účetnictví (Filip)', q: 'Představení korektorce', r: 'Představení sazeči',
 };
 
 // ===== State =====
@@ -853,7 +915,14 @@ function escapeHtml(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 }
 function ediceLabel(b) { return EDICE_LABELS[b.edice] || b.ediceCustom || b.edice || ''; }
-function allStepIds() { const r = []; PHASES.forEach(ph => ph.steps.forEach(st => r.push(st.id))); return r; }
+function allStepIds() {
+  const r = [];
+  PHASES.forEach(ph => ph.steps.forEach(st => {
+    r.push(st.id);
+    (st.subSteps || []).forEach(ss => r.push(ss.id));
+  }));
+  return r;
+}
 function emptySteps() { const s = {}; allStepIds().forEach(id => { s[id] = { done: false, note: '', completedAt: null }; }); return s; }
 
 function migrateBook(b) {
@@ -877,6 +946,10 @@ function calcProgress(b) {
       return;
     }
     total++; if (b.steps[st.id].done) done++;
+    (st.subSteps || []).forEach(ss => {
+      if (ss.optional && !b.activeOptional.includes(ss.id)) return;
+      total++; if ((b.steps[ss.id] || {}).done) done++;
+    });
   }));
   return { total, done, pct: total === 0 ? 0 : Math.round(done / total * 100) };
 }
@@ -890,6 +963,10 @@ function phaseProgress(b, ph) {
       return;
     }
     total++; if (b.steps[st.id].done) done++;
+    (st.subSteps || []).forEach(ss => {
+      if (ss.optional && !b.activeOptional.includes(ss.id)) return;
+      total++; if ((b.steps[ss.id] || {}).done) done++;
+    });
   });
   return { total, done };
 }
@@ -1156,6 +1233,22 @@ function renderStep(book, st, archived) {
     </div>`;
   }
 
+  let subStepsHtml = '';
+  if (st.subSteps && st.subSteps.length > 0) {
+    const items = st.subSteps.map(ss => {
+      const ssData = book.steps[ss.id] || { done: false };
+      const isOptSS = !!ss.optional;
+      const isActiveSS = !isOptSS || book.activeOptional.includes(ss.id);
+      const ssCheckLocked = archived || (isOptSS && !isActiveSS);
+      const ssCls = ['sub-step', isOptSS ? 'opt-sub' : '', isOptSS && isActiveSS ? 'opt-on' : '', ssData.done ? 'is-done' : ''].filter(Boolean).join(' ');
+      const ssCheckCls = `sub-step-check ${ssData.done ? 'checked' : ''} ${ssCheckLocked ? 'locked' : ''}`;
+      const ssClick = (!archived && (!isOptSS || isActiveSS)) ? `onclick="toggleStep('${ss.id}')"` : '';
+      const ssOptBtn = (!archived && isOptSS && !isActiveSS) ? `<button class="opt-activate-btn" onclick="activateOptional('${ss.id}')">+ aktivovat</button>` : '';
+      return `<div class="${ssCls}"><div class="${ssCheckCls}" ${ssClick}></div><span class="sub-step-label">${escapeHtml(ss.label)}</span>${ssOptBtn}</div>`;
+    }).join('');
+    subStepsHtml = `<div class="sub-steps">${items}</div>`;
+  }
+
   return `
     <div class="${classes}" data-step="${st.id}">
       <div class="step-row">
@@ -1165,6 +1258,7 @@ function renderStep(book, st, archived) {
         </div>
         <div class="step-end">${tplLink}${noteBtn}</div>
       </div>
+      ${subStepsHtml}
       ${repHtml}
       ${archiveStepHtml}
       <div class="note-area ${hasNote?'open':''}" id="snote-${st.id}">
