@@ -430,6 +430,36 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .copy-toast { position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 8px); background: var(--navy); color: #fff; padding: 10px 22px; border-radius: 20px; box-shadow: var(--shadow-md); z-index: 300; opacity: 0; transition: opacity 220ms ease, transform 220ms cubic-bezier(0.2,0.8,0.3,1); pointer-events: none; font-size: 13px; font-weight: 500; letter-spacing: 0.01em; }
 .copy-toast.show { opacity: 1; transform: translate(-50%, 0); }
 
+/* Editor struktury checklistu */
+.se-phase { border: 1px solid var(--gray-border); border-radius: var(--radius-sm); margin-bottom: 14px; overflow: hidden; }
+.se-phase-head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--navy); }
+.se-phase-num { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: rgba(255,255,255,0.35); flex-shrink: 0; }
+.se-phase-title { flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 4px; color: #fff; font-size: 14px; font-weight: 600; padding: 6px 10px; transition: var(--transition); }
+.se-phase-title:focus { outline: none; border-color: rgba(255,255,255,0.35); background: rgba(255,255,255,0.12); }
+.se-steps { padding: 8px 12px; }
+.se-step { border-bottom: 1px solid var(--cream); padding: 5px 0; }
+.se-step:last-child { border-bottom: none; }
+.se-row { display: flex; align-items: center; gap: 6px; }
+.se-row.sub { margin-left: 26px; margin-top: 4px; }
+.se-label { flex: 1; min-width: 0; padding: 6px 9px; border: 1px solid transparent; border-radius: 4px; font-size: 13px; background: transparent; transition: var(--transition); }
+.se-label:hover { border-color: var(--gray-border); }
+.se-label:focus { outline: none; border-color: #B83066; background: var(--white); }
+.se-row.sub .se-label { font-size: 12px; }
+.se-flag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 10px; flex-shrink: 0; letter-spacing: 0.02em; }
+.se-flag.tpl { background: rgba(64,114,173,0.10); color: var(--blue); }
+.se-flag.rep { background: rgba(224,123,0,0.10); color: var(--amber); }
+.se-flag.arch { background: rgba(152,196,81,0.15); color: #5a8a1a; }
+.se-opt { font-size: 11px; padding: 3px 9px; border-radius: 12px; border: 1px dashed var(--gray-border); color: var(--gray-dim); cursor: pointer; flex-shrink: 0; transition: var(--transition); user-select: none; }
+.se-opt:hover { border-color: var(--gray-text); color: var(--gray-text); }
+.se-opt.on { border: 1px solid rgba(184,48,102,0.4); color: #B83066; background: rgba(184,48,102,0.05); font-weight: 600; }
+.se-ctl { width: 24px; height: 24px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--gray-dim); font-size: 13px; flex-shrink: 0; transition: var(--transition); }
+.se-ctl:hover { background: var(--gray-bg); color: var(--black); }
+.se-ctl.del:hover { background: rgba(177,30,84,0.08); color: var(--raspberry); }
+.se-add-sub { font-size: 11px; color: var(--gray-dim); padding: 2px 8px; margin-left: 26px; margin-top: 2px; border-radius: 4px; transition: var(--transition); }
+.se-add-sub:hover { color: var(--blue); background: rgba(64,114,173,0.06); }
+.se-add-step { display: block; width: calc(100% - 24px); margin: 4px 12px 10px; padding: 7px; border: 1px dashed var(--gray-border); border-radius: var(--radius-sm); font-size: 12px; color: var(--gray-text); transition: var(--transition); text-align: center; }
+.se-add-step:hover { border-color: var(--blue); color: var(--blue); background: rgba(64,114,173,0.04); }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; }
 }
@@ -497,6 +527,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 
   <div class="main">
     <header class="main-topbar">
+      <button class="btn btn-secondary" onclick="openStructEditor()">Nastavení checklistu</button>
       <button class="btn btn-secondary" onclick="openTemplatesEditor()">Šablony e-mailů</button>
       <button class="btn btn-secondary" onclick="exportData()">Záloha ↓</button>
       <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">Nahrát zálohu</button>
@@ -614,6 +645,22 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
   </div>
 </div>
 
+<!-- Modal: Nastavení checklistu (editor struktury) -->
+<div class="modal-overlay" id="structModal">
+  <div class="modal modal-lg" style="width:760px;">
+    <h2>Nastavení checklistu</h2>
+    <p style="color:var(--gray-text);font-size:13px;margin-bottom:16px;">
+      Upravte si kostru checklistu podle aktuální praxe. Změny se ukládají okamžitě a platí pro všechny knihy —
+      u rozpracovaných knih se nové kroky objeví jako nesplněné, smazané kroky zmizí (jejich odškrtnutí zůstane uložené, kdybyste krok vrátila).
+    </p>
+    <div id="structEditor"></div>
+    <div class="modal-actions">
+      <button class="btn btn-danger" onclick="seReset()">Obnovit výchozí strukturu</button>
+      <button class="btn btn-primary" onclick="closeModal('structModal')">Hotovo</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal: Archivace -->
 <div class="modal-overlay" id="archiveModal">
   <div class="modal" style="width:380px;">
@@ -668,8 +715,9 @@ const EDICE_LABELS = {
 };
 
 // ===== FÁZE A KROKY =====
-// Kroky odpovídají přesně procesu dle uživatelky – žádné kroky nepřidávat bez potvrzení
-const PHASES = [
+// Výchozí kostra. Uživatelka si strukturu upravuje v Nastavení checklistu;
+// upravená verze se ukládá do localStorage a má přednost.
+const DEFAULT_PHASES = [
   {
     id: 'p1', title: 'Smlouva a onboarding',
     steps: [
@@ -767,6 +815,17 @@ const PHASES = [
     ]
   },
 ];
+
+const PHASES_KEY = 'redakcni-phases-v1';
+let PHASES = loadPhases();
+function loadPhases() {
+  try {
+    const r = localStorage.getItem(PHASES_KEY);
+    if (r) { const p = JSON.parse(r); if (Array.isArray(p) && p.length) return p; }
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(DEFAULT_PHASES));
+}
+function savePhases() { localStorage.setItem(PHASES_KEY, JSON.stringify(PHASES)); }
 
 const DEFAULT_TEMPLATES = {
   a: `Předmět: Návrh smlouvy – {{nazev}}
@@ -1640,9 +1699,116 @@ function loadTplEditorContent() { document.getElementById('tplEditorLabel').text
 function saveCurrentTemplate() { templates[tplEditorKey]=document.getElementById('tplEditorArea').value; saveTemplates(); showToast(); }
 function resetCurrentTemplate() { if(!confirm('Obnovit výchozí šablonu?')) return; templates[tplEditorKey]=DEFAULT_TEMPLATES[tplEditorKey]; saveTemplates(); loadTplEditorContent(); }
 
+// ===== Editor struktury checklistu =====
+function openStructEditor() { renderStructEditor(); openModal('structModal'); }
+
+function structChanged() {
+  savePhases();
+  state.books.forEach(migrateBook);
+  saveState();
+  renderStructEditor();
+  renderMain(); renderBookList();
+}
+
+function renderStructEditor() {
+  const el = document.getElementById('structEditor');
+  el.innerHTML = PHASES.map((ph, pi) => {
+    const rows = ph.steps.map((st, si) => {
+      const flags =
+        (st.template ? `<span class="se-flag tpl" title="Krok má napojenou e-mailovou šablonu">✉ e-mail</span>` : '') +
+        (st.repeatable ? `<span class="se-flag rep" title="Krok umožňuje přidávat opakování">opakovatelný</span>` : '') +
+        (st.archiveStep ? `<span class="se-flag arch" title="Speciální krok s archivací knihy — nelze smazat">archivace</span>` : '');
+      const subRows = (st.subSteps || []).map((ss, ssi) => `
+        <div class="se-row sub">
+          <input class="se-label" value="${escapeHtml(ss.label)}" onchange="seEditLabel(${pi},${si},${ssi},this.value)">
+          <span class="se-opt ${ss.optional?'on':''}" onclick="seToggleOptional(${pi},${si},${ssi})" title="Podmíněný krok se v checklistu objeví šedý a musí se nejdřív aktivovat">${ss.optional?'podmíněný':'aktivní'}</span>
+          <button class="se-ctl" onclick="seMoveSub(${pi},${si},${ssi},-1)" title="Posunout výš">↑</button>
+          <button class="se-ctl" onclick="seMoveSub(${pi},${si},${ssi},1)" title="Posunout níž">↓</button>
+          <button class="se-ctl del" onclick="seDeleteSub(${pi},${si},${ssi})" title="Smazat podkrok">✕</button>
+        </div>`).join('');
+      return `
+        <div class="se-step">
+          <div class="se-row">
+            <input class="se-label" value="${escapeHtml(st.label)}" onchange="seEditLabel(${pi},${si},null,this.value)">
+            ${flags}
+            <span class="se-opt ${st.optional?'on':''}" onclick="seToggleOptional(${pi},${si},null)" title="Podmíněný krok se v checklistu objeví šedý a musí se nejdřív aktivovat">${st.optional?'podmíněný':'aktivní'}</span>
+            <button class="se-ctl" onclick="seMove(${pi},${si},-1)" title="Posunout výš">↑</button>
+            <button class="se-ctl" onclick="seMove(${pi},${si},1)" title="Posunout níž">↓</button>
+            <button class="se-ctl del" onclick="seDeleteStep(${pi},${si})" title="Smazat krok">✕</button>
+          </div>
+          ${subRows}
+          <button class="se-add-sub" onclick="seAddSub(${pi},${si})">+ podkrok</button>
+        </div>`;
+    }).join('');
+    return `
+      <div class="se-phase">
+        <div class="se-phase-head">
+          <span class="se-phase-num">${pi+1}</span>
+          <input class="se-phase-title" value="${escapeHtml(ph.title)}" onchange="seRenamePhase(${pi},this.value)">
+        </div>
+        <div class="se-steps">${rows}</div>
+        <button class="se-add-step" onclick="seAddStep(${pi})">+ Nový krok</button>
+      </div>`;
+  }).join('');
+}
+
+function seRenamePhase(pi, val) { const v = val.trim(); if (v) PHASES[pi].title = v; structChanged(); }
+function seEditLabel(pi, si, ssi, val) {
+  const v = val.trim(); if (!v) { renderStructEditor(); return; }
+  if (ssi === null) PHASES[pi].steps[si].label = v;
+  else PHASES[pi].steps[si].subSteps[ssi].label = v;
+  structChanged();
+}
+function seToggleOptional(pi, si, ssi) {
+  const t = ssi === null ? PHASES[pi].steps[si] : PHASES[pi].steps[si].subSteps[ssi];
+  if (t.optional) delete t.optional; else t.optional = true;
+  structChanged();
+}
+function seMove(pi, si, dir) {
+  const arr = PHASES[pi].steps; const ni = si + dir;
+  if (ni < 0 || ni >= arr.length) return;
+  [arr[si], arr[ni]] = [arr[ni], arr[si]];
+  structChanged();
+}
+function seMoveSub(pi, si, ssi, dir) {
+  const arr = PHASES[pi].steps[si].subSteps; const ni = ssi + dir;
+  if (ni < 0 || ni >= arr.length) return;
+  [arr[ssi], arr[ni]] = [arr[ni], arr[ssi]];
+  structChanged();
+}
+function seAddStep(pi) {
+  PHASES[pi].steps.push({ id: uuid(), label: 'Nový krok' });
+  structChanged();
+}
+function seAddSub(pi, si) {
+  const st = PHASES[pi].steps[si];
+  if (!st.subSteps) st.subSteps = [];
+  st.subSteps.push({ id: uuid(), label: 'Nový podkrok' });
+  structChanged();
+}
+function seDeleteStep(pi, si) {
+  const st = PHASES[pi].steps[si];
+  if (st.archiveStep) { alert('Tento krok obsahuje archivaci knihy a nelze ho smazat.'); return; }
+  const subCount = (st.subSteps || []).length;
+  if (!confirm(`Smazat krok „${st.label}"${subCount ? ` včetně ${subCount} podkroků` : ''}?`)) return;
+  PHASES[pi].steps.splice(si, 1);
+  structChanged();
+}
+function seDeleteSub(pi, si, ssi) {
+  const ss = PHASES[pi].steps[si].subSteps[ssi];
+  if (!confirm(`Smazat podkrok „${ss.label}"?`)) return;
+  PHASES[pi].steps[si].subSteps.splice(ssi, 1);
+  structChanged();
+}
+function seReset() {
+  if (!confirm('Obnovit výchozí strukturu checklistu? Všechny vaše úpravy kostry (přidané, smazané i přejmenované kroky) se vrátí do původního stavu. Odškrtnutí u knih zůstane zachováno.')) return;
+  PHASES = JSON.parse(JSON.stringify(DEFAULT_PHASES));
+  structChanged();
+}
+
 // Export / Import
 function exportData() {
-  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const blob=new Blob([JSON.stringify({ books: state.books, phases: PHASES },null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url; a.download=`redakcni-zaloha-${new Date().toISOString().slice(0,10)}.json`; a.click();
@@ -1657,7 +1823,10 @@ function importData(event) {
       if(!imp.books||!Array.isArray(imp.books)) { alert('Neplatný formát souboru.'); return; }
       const choice=prompt('1 = Přepsat vše\n2 = Sloučit (přidat nové)\n(Enter = zrušit)','2');
       if(!choice) return;
-      if(choice==='1') { state=imp; }
+      if(choice==='1') {
+        state={ books: imp.books };
+        if(Array.isArray(imp.phases) && imp.phases.length) { PHASES=imp.phases; savePhases(); }
+      }
       else if(choice==='2') { const ids=new Set(state.books.map(b=>b.id)); imp.books.forEach(b=>{ if(!ids.has(b.id)) state.books.push(b); }); }
       saveState(); initApp(); alert('Import dokončen.');
     } catch(err) { alert('Chyba: '+err.message); }
