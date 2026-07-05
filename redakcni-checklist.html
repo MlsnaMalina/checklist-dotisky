@@ -481,7 +481,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
       </div>
       <div class="modal-field">
         <label>Redaktorka</label>
-        <input type="text" id="nb_editor" value="Kateřina Schmiedtová">
+        <input type="text" id="nb_editor" value="Kateřina Mlsnová">
       </div>
       <div class="modal-field">
         <label>Jazyková korektorka</label>
@@ -492,8 +492,14 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
         <input type="text" id="nb_sazec" value="Tomáš Brejcha">
       </div>
       <div class="modal-field">
-        <label>ISBN</label>
-        <input type="text" id="nb_isbn" placeholder="978-80-…">
+        <label>ISBN čísla</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;">
+          <div><div style="font-size:11px;color:var(--gray-text);margin-bottom:3px;">Tištěná brož.</div><input type="text" id="nb_isbn_broz" placeholder="978-80-…"></div>
+          <div><div style="font-size:11px;color:var(--gray-text);margin-bottom:3px;">Tištěná váz.</div><input type="text" id="nb_isbn_vaz" placeholder="978-80-…"></div>
+          <div><div style="font-size:11px;color:var(--gray-text);margin-bottom:3px;">PDF</div><input type="text" id="nb_isbn_pdf" placeholder="978-80-…"></div>
+          <div><div style="font-size:11px;color:var(--gray-text);margin-bottom:3px;">ePub</div><input type="text" id="nb_isbn_epub" placeholder="978-80-…"></div>
+          <div><div style="font-size:11px;color:var(--gray-text);margin-bottom:3px;">Mobi</div><input type="text" id="nb_isbn_mobi" placeholder="978-80-…"></div>
+        </div>
       </div>
       <div class="modal-field">
         <label>NAV č. <span style="font-weight:300;text-transform:none;letter-spacing:0;">(přidělí se až po odevzdání)</span></label>
@@ -624,9 +630,9 @@ const PHASES = [
         { id: 'p1_7e', label: 'Seznam zkratek', optional: true },
       ]},
       { id: 'p1_8', label: 'E-mail: Podepsaný autorský formulář zaslat Elišce, Filip v kopii', optional: true },
-      { id: 'p1_9', label: 'Podepsaný Zápůjční protokol ASPI odeslat Ivě' },
+      { id: 'p1_9', label: 'Podepsaný Zápůjční protokol ASPI odeslat Ivě', optional: true },
       { id: 'p1_3', label: 'Legisway tabulka + e-mail Elišce' },
-      { id: 'p1_4', label: 'Autorům FOUNDED složku v PublishOnu' },
+      { id: 'p1_4', label: 'Autorům založit složku v PublishOnu' },
       { id: 'p1_10', label: 'Autorům FOUNDED účty v PublishOnu', optional: true },
       { id: 'p1_5', label: 'Smlouva podepsána a uložena' },
       { id: 'p1_6', label: 'Dodatek ke smlouvě', optional: true, repeatable: true },
@@ -660,8 +666,8 @@ const PHASES = [
       { id: 'p3_1', label: 'Kontrola sazby — konce řádků, obsah, záhlaví' },
       { id: 'p3_2', label: 'Vytvoření kalkulace' },
       { id: 'p3_3', label: 'Zaslání kalkulace na schválení', template: 'h' },
-      { id: 'p3_4', label: 'Žádost Filipovi o vytvoření složky pro knihu', template: 'i' },
       { id: 'p3_5', label: 'Vytvoření záznamu pro knihu v Edičním plánu' },
+      { id: 'p3_4', label: 'Žádost Filipovi o vytvoření složky pro knihu', template: 'i' },
       { id: 'p3_6', label: 'Odeslání sazby autorům ke kontrole' },
       { id: 'p3_7', label: 'Zapracování posledních poznámek k opravě sazby a odeslání sazeči' },
       { id: 'p3_8', label: 'Kontrola opravené sazby' },
@@ -700,6 +706,7 @@ const PHASES = [
       { id: 'p5_1', label: 'Výplata honoráře — kontrola podkladů' },
       { id: 'p5_2', label: 'E-mail: Filip — uzavření účetnictví', template: 'o' },
       { id: 'p5_3', label: 'Archivace složky v PublishOnu' },
+      { id: 'p5_7', label: 'Vytvořit příspěvek o knize na LinkedIn' },
       { id: 'p5_4', label: 'Přesunout knihu do archivu', archiveStep: true },
     ]
   },
@@ -1147,7 +1154,11 @@ function renderMain() {
             <div class="bh-field"><label>Autor</label><input type="text" value="${escapeHtml(book.author)}" ${ro} onchange="updateBook('author',this.value)"></div>
             <div class="bh-field"><label>Redaktorka</label><input type="text" value="${escapeHtml(book.editor||'')}" ${ro} onchange="updateBook('editor',this.value)"></div>
             <div class="bh-field"><label>Ediční řada</label><input type="text" value="${escapeHtml(ediceLabel(book))}" readonly style="background:var(--gray-bg);color:var(--gray-text);"></div>
-            <div class="bh-field"><label>ISBN</label><input type="text" value="${escapeHtml(book.isbn||'')}" ${ro} onchange="updateBook('isbn',this.value)"></div>
+            <div class="bh-field"><label>ISBN brož.</label><input type="text" value="${escapeHtml(book.isbnBroz||'')}" ${ro} onchange="updateBook('isbnBroz',this.value)" placeholder="978-80-…"></div>
+            <div class="bh-field"><label>ISBN váz.</label><input type="text" value="${escapeHtml(book.isbnVaz||'')}" ${ro} onchange="updateBook('isbnVaz',this.value)" placeholder="978-80-…"></div>
+            <div class="bh-field"><label>ISBN PDF</label><input type="text" value="${escapeHtml(book.isbnPdf||'')}" ${ro} onchange="updateBook('isbnPdf',this.value)" placeholder="978-80-…"></div>
+            <div class="bh-field"><label>ISBN ePub</label><input type="text" value="${escapeHtml(book.isbnEpub||'')}" ${ro} onchange="updateBook('isbnEpub',this.value)" placeholder="978-80-…"></div>
+            <div class="bh-field"><label>ISBN Mobi</label><input type="text" value="${escapeHtml(book.isbnMobi||'')}" ${ro} onchange="updateBook('isbnMobi',this.value)" placeholder="978-80-…"></div>
             <div class="bh-field"><label>NAV č.</label><input type="text" value="${escapeHtml(book.nav||'')}" ${ro} onchange="updateBook('nav',this.value)" onblur="renderMain()" placeholder="přidělí se po odevzdání"></div>
             <div class="bh-field"><label>Jazyková korektorka</label><input type="text" value="${escapeHtml(book.jazykovaKorektorka||'')}" ${ro} onchange="updateBook('jazykovaKorektorka',this.value)"></div>
             <div class="bh-field"><label>Sazeč</label><input type="text" value="${escapeHtml(book.sazec||'')}" ${ro} onchange="updateBook('sazec',this.value)"></div>
@@ -1360,7 +1371,7 @@ function deleteTodo(idx) {
 
 // Book CRUD
 function openNewBook() {
-  ['nb_title','nb_author','nb_isbn','nb_nav','nb_edice_custom'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  ['nb_title','nb_author','nb_isbn_broz','nb_isbn_vaz','nb_isbn_pdf','nb_isbn_epub','nb_isbn_mobi','nb_nav','nb_edice_custom'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('nb_editor').value='Kateřina Schmiedtová';
   document.getElementById('nb_korektorka').value='Daniela Schmiedtová';
   document.getElementById('nb_sazec').value='Tomáš Brejcha';
@@ -1388,7 +1399,11 @@ function createBook() {
   const book={
     id:uuid(), title, author, editor, edice,
     ediceCustom: edice==='edice'?document.getElementById('nb_edice_custom').value.trim():'',
-    isbn:document.getElementById('nb_isbn').value.trim(),
+    isbnBroz:document.getElementById('nb_isbn_broz').value.trim(),
+    isbnVaz:document.getElementById('nb_isbn_vaz').value.trim(),
+    isbnPdf:document.getElementById('nb_isbn_pdf').value.trim(),
+    isbnEpub:document.getElementById('nb_isbn_epub').value.trim(),
+    isbnMobi:document.getElementById('nb_isbn_mobi').value.trim(),
     nav:document.getElementById('nb_nav').value.trim(),
     jazykovaKorektorka:document.getElementById('nb_korektorka').value.trim(),
     sazec:document.getElementById('nb_sazec').value.trim(),
@@ -1468,7 +1483,7 @@ function renderTemplate(tpl, book) {
     .replaceAll('{{nazev}}', book.title||'')
     .replaceAll('{{autor}}', book.author||'')
     .replaceAll('{{edice}}', ediceLabel(book))
-    .replaceAll('{{isbn}}', book.isbn||'[nevyplněno]')
+    .replaceAll('{{isbn}}', book.isbnBroz||book.isbnVaz||book.isbnPdf||book.isbnEpub||book.isbnMobi||'[nevyplněno]')
     .replaceAll('{{nav}}', book.nav||'[nevyplněno]')
     .replaceAll('{{redaktor}}', book.editor||'')
     .replaceAll('{{korektorka}}', book.jazykovaKorektorka||'')
