@@ -92,6 +92,10 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 }
 .s-tab { flex: 1; padding: 6px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.45); transition: var(--transition); text-align: center; }
 .s-tab.active { background: rgba(255,255,255,0.12); color: #fff; }
+.sidebar-filters { display: flex; gap: 6px; margin: 0 12px 10px; flex-wrap: wrap; flex-shrink: 0; }
+.f-chip { padding: 4px 11px; border-radius: 20px; font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.15); transition: var(--transition); }
+.f-chip:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+.f-chip.active { background: rgba(177,30,84,0.85); border-color: transparent; color: #fff; }
 
 /* Calendar */
 .calendar-wrap {
@@ -133,8 +137,11 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .book-item.cancelled-item.active { background: rgba(192,96,106,0.20); border-color: rgba(192,96,106,0.25); }
 .bi-title { font-size: 13px; font-weight: 500; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
 .bi-author { font-size: 11px; color: rgba(255,255,255,0.4); margin-bottom: 6px; }
-.bi-bar { height: 2px; background: rgba(255,255,255,0.1); border-radius: 1px; overflow: hidden; }
-.bi-bar-fill { height: 100%; border-radius: 1px; transition: width 0.4s ease; }
+.bi-dots { display: flex; gap: 5px; padding: 2px 0 1px; }
+.bi-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.14); flex-shrink: 0; }
+.bi-dot.d-half { background: linear-gradient(90deg, var(--blue-light) 50%, rgba(255,255,255,0.14) 50%); }
+.bi-dot.d-full { background: var(--green); }
+.cancelled-item .bi-dot.d-half, .cancelled-item .bi-dot.d-full { background: rgba(192,96,106,0.6); }
 .bi-meta { display: flex; justify-content: space-between; margin-top: 4px; }
 .bi-pct { font-size: 10px; color: rgba(255,255,255,0.3); }
 .bi-rok { font-size: 10px; color: rgba(255,255,255,0.35); font-style: italic; }
@@ -174,7 +181,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .chip-cancelled { background: rgba(192,96,106,0.12); color: var(--rose); }
 .bh-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .bh-info { flex: 1; min-width: 0; }
-.bh-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600; color: var(--black); margin-bottom: 4px; line-height: 1.3; }
+.bh-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 600; color: var(--black); margin-bottom: 2px; line-height: 1.25; }
 .bh-author { font-size: 14px; color: var(--gray-text); margin-bottom: 14px; font-style: italic; }
 .bh-fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px,1fr)); gap: 10px; }
 .bh-field { display: flex; flex-direction: column; gap: 3px; }
@@ -187,6 +194,15 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .bh-field input[readonly] { background: var(--gray-bg); color: var(--gray-text); cursor: default; }
 .bh-notes { grid-column: 1 / -1; }
 .bh-notes textarea { resize: vertical; min-height: 60px; width: 100%; }
+.bh-notes-row { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
+.bh-notes-row textarea { flex: 1; min-width: 220px; }
+.ms-toggle { display: flex; align-items: center; gap: 9px; padding: 10px 16px; border: 1px solid var(--gray-border); border-radius: var(--radius-sm); cursor: pointer; flex-shrink: 0; font-size: 13px; color: var(--gray-text); transition: var(--transition); background: var(--white); user-select: none; }
+.ms-toggle:hover { border-color: #B83066; }
+.ms-toggle.locked { cursor: default; opacity: 0.6; }
+.ms-box { width: 18px; height: 18px; border: 2px solid var(--gray-border); border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: var(--transition); background: var(--white); flex-shrink: 0; }
+.ms-toggle.on { border-color: rgba(184,48,102,0.35); color: #B83066; font-weight: 500; background: rgba(184,48,102,0.04); }
+.ms-toggle.on .ms-box { background: #B83066; border-color: #B83066; }
+.ms-toggle.on .ms-box::after { content: '✓'; color: #fff; font-size: 12px; font-weight: 700; }
 .bh-progress { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
 .circ-progress { position: relative; width: 68px; height: 68px; }
 .circ-progress svg { transform: rotate(-90deg); }
@@ -196,6 +212,15 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .bh-done-count { font-size: 11px; color: var(--gray-text); text-align: center; }
 .bh-actions { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
 .archived-notice { background: #fff8e6; border: 1px solid #f2c47b; color: #7a5000; border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+
+/* Colophon — tichá oslava vydané / dokončené knihy */
+.colophon { text-align: center; padding: 22px 24px 20px; margin-bottom: 16px; background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); }
+.colophon-rule { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0 auto 10px; }
+.colophon-rule::before, .colophon-rule::after { content: ''; width: 70px; height: 1px; background: #d9c78a; }
+.colophon-rule span { color: #c9ab55; font-size: 11px; line-height: 1; }
+.colophon h3 { font-family: 'Playfair Display', serif; font-size: 21px; font-weight: 600; color: var(--black); margin-bottom: 3px; }
+.colophon p { font-size: 12.5px; color: var(--gray-text); }
+.colophon-rule.bottom { margin: 10px auto 0; }
 .cancelled-notice { background: rgba(192,96,106,0.07); border: 1px solid rgba(192,96,106,0.25); color: #7a2832; border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
 
 /* Sticky note ToDo */
@@ -232,9 +257,9 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .phase-head { display: flex; align-items: center; gap: 14px; padding: 16px 22px; cursor: pointer; user-select: none; position: relative; transition: background var(--transition); }
 .phase-head:hover { background: var(--cream); }
 .phase-accent { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
-.phase-num { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 700; color: var(--black); opacity: 0.05; line-height: 1; flex-shrink: 0; width: 32px; letter-spacing: -0.02em; }
+.phase-num { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 700; color: var(--black); opacity: 0.14; line-height: 1; flex-shrink: 0; width: 32px; letter-spacing: -0.02em; }
 .phase-title-wrap { flex: 1; }
-.phase-title { font-size: 15px; font-weight: 600; color: var(--black); }
+.phase-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 600; color: var(--black); letter-spacing: 0.01em; }
 .phase-subtitle { font-size: 12px; color: var(--gray-text); margin-top: 1px; }
 .phase-mini-bar { width: 80px; height: 3px; background: var(--gray-border); border-radius: 2px; overflow: hidden; margin-top: 6px; }
 .phase-mini-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
@@ -254,17 +279,31 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .phase-done .phase-subtitle, .phase-active .phase-subtitle, .phase-pending .phase-subtitle { color: rgba(255,255,255,.55); }
 .phase-done .phase-stat, .phase-active .phase-stat, .phase-pending .phase-stat { color: rgba(255,255,255,.7); }
 .phase-done .phase-chevron, .phase-active .phase-chevron, .phase-pending .phase-chevron { color: rgba(255,255,255,.6); }
-.phase-done .phase-num, .phase-active .phase-num, .phase-pending .phase-num { color: #fff; opacity: 0.10; }
+.phase-done .phase-num, .phase-active .phase-num, .phase-pending .phase-num { color: #fff; opacity: 0.18; }
 .phase-done .phase-mini-bar, .phase-active .phase-mini-bar, .phase-pending .phase-mini-bar { background: rgba(255,255,255,.18); }
 .phase-done .phase-mini-fill, .phase-active .phase-mini-fill, .phase-pending .phase-mini-fill { background: rgba(255,255,255,.80) !important; }
 .phase-done .phase-accent, .phase-active .phase-accent, .phase-pending .phase-accent { display: none; }
 .phase-badge { font-size: 11px; font-weight: 600; color: #fff; background: rgba(255,255,255,.22); padding: 3px 10px; border-radius: 20px; flex-shrink: 0; margin-right: 4px; }
-.phase-body { display: none; padding: 4px 22px 16px; }
-.phase.open .phase-body { display: block; }
+
+/* Dokončení fáze — jemný záblesk přes hlavičku + badge s prodlevou */
+.phase-just-done .phase-head::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.30) 50%, transparent 65%);
+  transform: translateX(-100%); animation: phaseShine 0.9s 0.15s ease-out forwards;
+}
+@keyframes phaseShine { to { transform: translateX(100%); } }
+.phase-just-done .phase-badge { animation: badgeIn 0.45s 0.55s cubic-bezier(0.2,0.8,0.3,1) backwards; }
+@keyframes badgeIn { from { opacity: 0; transform: translateY(5px) scale(0.85); } }
+
+/* Plynulé rozbalování těla fáze */
+.phase-body { display: grid; grid-template-rows: 0fr; padding: 0 22px; transition: grid-template-rows 0.3s ease, padding 0.3s ease; }
+.phase.open .phase-body { grid-template-rows: 1fr; padding: 4px 22px 16px; }
+.phase-body-inner { overflow: hidden; min-height: 0; }
 
 /* Steps */
-.step { padding: 10px 0; border-bottom: 1px solid var(--cream); transition: opacity var(--transition); }
+.step { padding: 10px 8px; margin: 0 -8px; border-bottom: 1px solid var(--cream); transition: opacity var(--transition), background-color var(--transition); }
 .step:last-child { border-bottom: none; }
+.step:not(.is-done):hover { background-color: rgba(27,45,82,0.025); border-radius: 4px; }
 .step-row { display: flex; align-items: flex-start; gap: 10px; }
 .step-check {
   width: 20px; height: 20px; border: 2px solid var(--gray-border); border-radius: 4px;
@@ -277,7 +316,15 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .step-check.locked { cursor: default; opacity: 0.5; }
 .step-content { flex: 1; min-width: 0; }
 .step-label { font-size: 13px; color: var(--black); cursor: pointer; display: inline; transition: var(--transition); }
-.step.is-done { background: linear-gradient(90deg, rgba(184,48,102,.07) 0%, rgba(184,48,102,.02) 70%, transparent 100%); box-shadow: inset 3px 0 0 #B83066; border-radius: 4px; }
+.step.is-done { background-image: linear-gradient(90deg, rgba(184,48,102,.07) 0%, rgba(184,48,102,.02) 70%, transparent 100%); background-repeat: no-repeat; background-size: 100% 100%; box-shadow: inset 3px 0 0 #B83066; border-radius: 4px; }
+
+/* Mikro-animace odškrtnutí (jen pro právě přepnutý krok) */
+@keyframes checkPop { 0% { transform: scale(0.72); } 55% { transform: scale(1.1); } 100% { transform: scale(1); } }
+@keyframes tickIn { from { opacity: 0; transform: scale(0.35); } to { opacity: 1; transform: scale(1); } }
+@keyframes washIn { from { background-size: 0% 100%; } to { background-size: 100% 100%; } }
+.step-check.anim-check, .sub-step-check.anim-check { animation: checkPop 0.28s cubic-bezier(0.2,0.8,0.4,1); }
+.step-check.anim-check::after, .sub-step-check.anim-check::after { animation: tickIn 0.2s 0.06s ease-out backwards; }
+.step.is-done.anim-row { animation: washIn 0.45s ease-out; }
 .step.is-done .step-label { text-decoration: line-through; color: #B83066; }
 .step-date { font-size: 11px; color: var(--gray-dim); margin-left: 6px; }
 .step.is-done .step-date { color: #B83066; opacity: 0.7; }
@@ -380,8 +427,12 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .tpl-tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
 .gen-output { width: 100%; min-height: 260px; padding: 12px; font-size: 13px; border: 1px solid #e2e2e2; border-radius: var(--radius-sm); resize: vertical; background: var(--white); font-family: 'DM Sans', sans-serif; line-height: 1.6; }
 .gen-output:focus { outline: none; border-color: #B83066; }
-.copy-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--green); color: #fff; padding: 10px 20px; border-radius: var(--radius-sm); box-shadow: var(--shadow-md); z-index: 300; opacity: 0; transition: opacity 200ms; pointer-events: none; font-size: 13px; font-weight: 500; }
-.copy-toast.show { opacity: 1; }
+.copy-toast { position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 8px); background: var(--navy); color: #fff; padding: 10px 22px; border-radius: 20px; box-shadow: var(--shadow-md); z-index: 300; opacity: 0; transition: opacity 220ms ease, transform 220ms cubic-bezier(0.2,0.8,0.3,1); pointer-events: none; font-size: 13px; font-weight: 500; letter-spacing: 0.01em; }
+.copy-toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; }
+}
 
 @media print {
   body { background: var(--white); }
@@ -391,7 +442,8 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
   .detail-wrap, .detail { display: block; overflow: visible; height: auto; }
   .detail { padding: 0; }
   .book-header, .phase { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
-  .phase-body { display: block !important; }
+  .phase-body { display: block !important; padding: 4px 22px 16px !important; }
+  .phase-body-inner { overflow: visible !important; }
   .note-area { display: block !important; }
   .phase-note-area { display: block !important; }
 }
@@ -425,6 +477,10 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
     <div class="sidebar-tabs">
       <button class="s-tab active" id="tabActive" onclick="switchTab('active')">Aktivní</button>
       <button class="s-tab" id="tabArchived" onclick="switchTab('archived')">Archiv</button>
+    </div>
+    <div class="sidebar-filters">
+      <button class="f-chip" id="fltKomentare" onclick="toggleFilter('komentare')">Komentáře</button>
+      <button class="f-chip" id="fltOdevzdane" onclick="toggleFilter('odevzdane')">Odevzdané rukopisy</button>
     </div>
     <div class="calendar-wrap">
       <div class="cal-header">
@@ -913,6 +969,10 @@ let searchQ = '';
 let calYear, calMonth;
 let openPhaseId = null;
 let tplEditorKey = 'a';
+let filterKomentare = false;
+let filterOdevzdane = false;
+let justToggledStep = null;   // id kroku pro mikro-animaci odškrtnutí
+const prevWidths = {};        // předchozí hodnoty progressu pro plynulé animace
 
 function initCal() { const n = new Date(); calYear = n.getFullYear(); calMonth = n.getMonth(); }
 
@@ -959,7 +1019,9 @@ function migrateBook(b) {
   if (!b.phaseNotes) b.phaseNotes = {};
   if (!b.additionals) b.additionals = {};
   if (!b.todos) b.todos = [];
+  b.todos.forEach(t => { if (!t.id) t.id = uuid(); });
   if (b.cancelled === undefined) b.cancelled = false;
+  if (b.rukopisOdevzdan === undefined) b.rukopisOdevzdan = false;
 }
 
 // Progress
@@ -1044,8 +1106,17 @@ function selectBookFromCal(id) { if (currentTab!=='active') switchTab('active');
 // Book list
 function filteredBooks() {
   let books = state.books.filter(b => currentTab==='active' ? !b.archivedAt : !!b.archivedAt);
+  if (filterKomentare) books = books.filter(b => b.edice==='komentar' || b.edice==='praktickyKomentar');
+  if (filterOdevzdane) books = books.filter(b => !!b.rukopisOdevzdan);
   if (searchQ) { const q = searchQ.toLowerCase(); books = books.filter(b => b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q)); }
   return books;
+}
+function toggleFilter(which) {
+  if (which==='komentare') filterKomentare = !filterKomentare;
+  if (which==='odevzdane') filterOdevzdane = !filterOdevzdane;
+  document.getElementById('fltKomentare').classList.toggle('active', filterKomentare);
+  document.getElementById('fltOdevzdane').classList.toggle('active', filterOdevzdane);
+  renderBookList();
 }
 function renderBookList() {
   const list = filteredBooks();
@@ -1061,10 +1132,16 @@ function renderBookList() {
       if (days !== null && days >= 0 && days <= 30) extra += `<div class="bi-deadline">⏰ Odevzdání za ${days} ${dnyCz(days)}</div>`;
     }
     if (b.cancelled) extra += `<div class="bi-cancelled">Zrušeno${b.cancelReason?' · '+escapeHtml(b.cancelReason):''}</div>`;
+    const dots = PHASES.map(ph => {
+      const pp = phaseProgress(b, ph);
+      const dpct = pp.total ? pp.done / pp.total : 0;
+      const dcls = dpct >= 1 ? 'd-full' : dpct > 0 ? 'd-half' : '';
+      return `<span class="bi-dot ${dcls}" title="${ph.title}: ${pp.done}/${pp.total}"></span>`;
+    }).join('');
     html += `<div class="${cls}" onclick="selectBook('${b.id}')">
       <div class="bi-title" title="${escapeHtml(b.title)}">${escapeHtml(b.title)}</div>
       <div class="bi-author">${escapeHtml(b.author)}</div>
-      <div class="bi-bar"><div class="bi-bar-fill" style="width:${p.pct}%;background:${b.cancelled?'var(--rose)':progressColor(p.pct)};"></div></div>
+      <div class="bi-dots">${dots}</div>
       <div class="bi-meta"><span class="bi-pct">${p.pct}% (${p.done}/${p.total})</span>${b.archivedAt?`<span class="bi-rok">${b.rokVydani||''}</span>`:''}</div>
       ${extra}
     </div>`;
@@ -1090,16 +1167,24 @@ function daysUntil(iso) {
 }
 function dnyCz(n) { const a=Math.abs(n); if(a===1)return'den'; if(a>=2&&a<=4)return'dny'; return'dní'; }
 
-// Circular SVG
-function circSvg(pct, cancelled) {
+// Circular SVG — vykreslí se s předchozí hodnotou a plynule se dotáhne na novou
+function circSvg(pct, cancelled, fromPct) {
   const r=28,cx=34,cy=34,circ=2*Math.PI*r;
   const col = cancelled ? 'var(--rose)' : progressColor(pct);
+  const from = fromPct === undefined ? pct : fromPct;
   return `<svg viewBox="0 0 68 68" width="68" height="68">
     <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--gray-border)" stroke-width="5"/>
     <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${col}" stroke-width="5"
-      stroke-dasharray="${circ*pct/100} ${circ}" stroke-linecap="round"
-      transform="rotate(-90 ${cx} ${cy})" style="transition:stroke-dasharray 0.4s ease;"/>
+      stroke-dasharray="${circ*from/100} ${circ}" data-ad="${circ*pct/100} ${circ}" stroke-linecap="round"
+      transform="rotate(-90 ${cx} ${cy})" style="transition:stroke-dasharray 0.5s ease;"/>
   </svg>`;
+}
+// Po překreslení DOM dotáhne progress prvky z počáteční hodnoty na cílovou
+function animateProgress() {
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    document.querySelectorAll('[data-ad]').forEach(el => { el.style.strokeDasharray = el.dataset.ad; });
+    document.querySelectorAll('[data-aw]').forEach(el => { el.style.width = el.dataset.aw; });
+  }));
 }
 
 // ===== Render main =====
@@ -1107,30 +1192,46 @@ function renderMain() {
   const detail = document.getElementById('detail');
   const book = state.books.find(b => b.id === currentBookId);
   if (!book) {
-    detail.innerHTML = `<div class="empty-state"><div class="empty-ornament">📖</div><h2>Vyberte knihu</h2><p>V levém panelu vyberte knihu pro zobrazení checklistu, nebo vytvořte novou.</p><button class="btn btn-primary" onclick="openNewBook()">+ Nová kniha</button></div>`;
+    detail.innerHTML = `<div class="empty-state"><div class="empty-ornament"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div><h2>Vyberte knihu</h2><p>V levém panelu vyberte knihu pro zobrazení checklistu, nebo vytvořte novou.</p><button class="btn btn-primary" onclick="openNewBook()">+ Nová kniha</button></div>`;
     return;
   }
   const archived = !!book.archivedAt;
   const cancelled = !!book.cancelled;
   const ro = archived ? 'readonly' : '';
   const p = calcProgress(book);
+  const ringKey = 'ring:' + book.id;
+  const ringFrom = prevWidths[ringKey];
+  prevWidths[ringKey] = p.pct;
 
   let html = '';
   if (cancelled) html += `<div class="cancelled-notice">⚠ Spolupráce zrušena ${fmtDate(book.archivedAt)}${book.cancelReason?' · Důvod: '+escapeHtml(book.cancelReason):''}. Checklist je zachován jen ke čtení.</div>`;
-  else if (archived) html += `<div class="archived-notice">Archivováno ${fmtDate(book.archivedAt)}${book.rokVydani?' · vydáno '+book.rokVydani:''}. Checklist je jen ke čtení.</div>`;
+  else if (archived) html += `
+    <div class="colophon">
+      <div class="colophon-rule"><span>❦</span></div>
+      <h3>Kniha vydána${book.rokVydani?' · '+book.rokVydani:''}</h3>
+      <p>Archivováno ${fmtDate(book.archivedAt)} · checklist je jen ke čtení</p>
+      <div class="colophon-rule bottom"><span>❦</span></div>
+    </div>`;
+  else if (p.pct >= 100) html += `
+    <div class="colophon">
+      <div class="colophon-rule"><span>❦</span></div>
+      <h3>Vše dokončeno</h3>
+      <p>Všech ${p.total} kroků je splněno — kniha je připravena k archivaci</p>
+      <div class="colophon-rule bottom"><span>❦</span></div>
+    </div>`;
 
   let chips = `<span class="chip chip-edice">${escapeHtml(ediceLabel(book))}</span>`;
   if (book.nav) chips += `<span class="chip chip-nav">NAV: ${escapeHtml(book.nav)}</span>`;
   if (book.odevzdaniRukopisu) chips += `<span class="chip chip-odevzdani">Odevzdání: ${fmtDate(book.odevzdaniRukopisu)}</span>`;
   if (cancelled) chips += `<span class="chip chip-cancelled">Zrušeno</span>`;
 
-  // ToDo list
-  const todos = book.todos || [];
-  const todoItems = todos.map((t,i) => `
+  // ToDo list — nesplněné nahoře, odškrtnuté dole
+  const todos = (book.todos || []).slice().sort((a,b) => (a.done?1:0) - (b.done?1:0));
+  const todoItems = todos.map(t => `
     <div class="todo-item">
-      <div class="todo-check ${t.done?'done':''}" onclick="${archived?'':'toggleTodo('+i+')'}"></div>
+      <div class="todo-check ${t.done?'done':''}" onclick="${archived?'':`toggleTodoById('${t.id}')`}"></div>
       <span class="todo-text ${t.done?'done':''}">${escapeHtml(t.text)}</span>
-      ${!archived ? `<span class="todo-del" onclick="deleteTodo(${i})">×</span>` : ''}
+      ${!archived ? `<span class="todo-del" onclick="deleteTodoById('${t.id}')">×</span>` : ''}
     </div>`).join('');
   const todoHtml = `
     <div class="todo-wrap">
@@ -1164,12 +1265,19 @@ function renderMain() {
             <div class="bh-field"><label>Sazeč</label><input type="text" value="${escapeHtml(book.sazec||'')}" ${ro} onchange="updateBook('sazec',this.value)"></div>
             <div class="bh-field"><label>Datum odevzdání rukopisu</label><input type="date" value="${fmtDateInput(book.odevzdaniRukopisu)}" ${ro} onchange="updateBook('odevzdaniRukopisu',this.value?new Date(this.value).toISOString():'');renderCalendar();renderMain();"></div>
             <div class="bh-field"><label>Vytvořeno</label><input type="text" value="${fmtDate(book.createdAt)}" readonly></div>
-            <div class="bh-field bh-notes"><label>Poznámky ke knize</label><textarea ${ro} onchange="updateBook('notes',this.value)">${escapeHtml(book.notes||'')}</textarea></div>
+            <div class="bh-field bh-notes"><label>Poznámky ke knize</label>
+              <div class="bh-notes-row">
+                <textarea ${ro} onchange="updateBook('notes',this.value)">${escapeHtml(book.notes||'')}</textarea>
+                <div class="ms-toggle ${book.rukopisOdevzdan?'on':''} ${archived?'locked':''}" ${archived?'':'onclick="toggleRukopis()"'}>
+                  <div class="ms-box"></div><span>Rukopis odevzdán</span>
+                </div>
+              </div>
+            </div>
           </div>
           ${todoHtml}
         </div>
         <div class="bh-progress">
-          <div class="circ-progress">${circSvg(p.pct, cancelled)}<div class="circ-label"><span class="circ-pct">${p.pct}%</span><span class="circ-sub">hotovo</span></div></div>
+          <div class="circ-progress">${circSvg(p.pct, cancelled, ringFrom)}<div class="circ-label"><span class="circ-pct">${p.pct}%</span><span class="circ-sub">hotovo</span></div></div>
           <div class="bh-done-count">${p.done} / ${p.total}</div>
         </div>
       </div>
@@ -1186,38 +1294,46 @@ function renderMain() {
   PHASES.forEach((ph, idx) => {
     const pp = phaseProgress(book, ph);
     const ppct = pp.total===0 ? 0 : Math.round(pp.done/pp.total*100);
+    const phKey = 'ph:' + book.id + ':' + ph.id;
+    const phFrom = prevWidths[phKey];
+    prevWidths[phKey] = ppct;
+    const justDone = phFrom !== undefined && phFrom < 100 && ppct >= 100;
     const isOpen = openPhaseId===ph.id || (openPhaseId===null && idx===0);
     const accent = cancelled ? 'var(--rose)' : (ppct>=100?'var(--green)':ppct>0?'var(--blue)':'var(--gray-border)');
     const hasNote = !!book.phaseNotes[ph.id];
     const phaseStatusCls = cancelled ? '' : (ppct>=100 ? 'phase-done' : ppct>0 ? 'phase-active' : 'phase-pending');
     const phaseBadge = ppct>=100 ? `<span class="phase-badge">✓ Hotovo</span>` : '';
     html += `
-      <div class="phase ${isOpen?'open':''} ${phaseStatusCls}" id="phase-${ph.id}">
+      <div class="phase ${isOpen?'open':''} ${phaseStatusCls} ${justDone?'phase-just-done':''}" id="phase-${ph.id}">
         <div class="phase-head" onclick="togglePhase('${ph.id}')">
           <div class="phase-accent" style="background:${accent};"></div>
           <div class="phase-num">${idx+1}</div>
           <div class="phase-title-wrap">
             <div class="phase-title">${ph.title}</div>
             <div class="phase-subtitle">${pp.done} / ${pp.total} kroků</div>
-            <div class="phase-mini-bar"><div class="phase-mini-fill" style="width:${ppct}%;background:${accent};"></div></div>
+            <div class="phase-mini-bar"><div class="phase-mini-fill" style="width:${phFrom!==undefined?phFrom:ppct}%;background:${accent};" data-aw="${ppct}%"></div></div>
           </div>
           <div class="phase-stat">${ppct}%</div>
           ${phaseBadge}
           <div class="phase-chevron">${SVG_CHEVRON}</div>
         </div>
         <div class="phase-body">
-          <button class="phase-note-toggle" onclick="togglePhaseNote('${ph.id}',event)">
-            ${SVG_FILE} Poznámka k fázi
-          </button>
-          <div class="phase-note-area ${hasNote?'open':''}" id="phnote-${ph.id}">
-            <textarea ${ro} placeholder="Poznámky, čekám na…" onchange="updatePhaseNote('${ph.id}',this.value)">${escapeHtml(book.phaseNotes[ph.id]||'')}</textarea>
+          <div class="phase-body-inner">
+            <button class="phase-note-toggle" onclick="togglePhaseNote('${ph.id}',event)">
+              ${SVG_FILE} Poznámka k fázi
+            </button>
+            <div class="phase-note-area ${hasNote?'open':''}" id="phnote-${ph.id}">
+              <textarea ${ro} placeholder="Poznámky, čekám na…" onchange="updatePhaseNote('${ph.id}',this.value)">${escapeHtml(book.phaseNotes[ph.id]||'')}</textarea>
+            </div>
+            ${ph.steps.map(st => renderStep(book, st, archived)).join('')}
           </div>
-          ${ph.steps.map(st => renderStep(book, st, archived)).join('')}
         </div>
       </div>`;
   });
 
   detail.innerHTML = html;
+  justToggledStep = null;
+  animateProgress();
   // attach todo Enter key
   const ti = document.getElementById('todoInput');
   if (ti) ti.addEventListener('keydown', e => { if (e.key==='Enter') addTodo(); });
@@ -1231,13 +1347,15 @@ function renderStep(book, st, archived) {
   const isActive = !isOpt || book.activeOptional.includes(st.id);
   const checkLocked = archived || (isOpt && !isActive);
 
+  const isJustToggled = s.done && st.id === justToggledStep;
   const classes = ['step',
     s.done ? 'is-done' : '',
+    isJustToggled ? 'anim-row' : '',
     isOpt ? 'opt-step' : '',
     isOpt && isActive ? 'opt-on' : '',
   ].filter(Boolean).join(' ');
 
-  const checkCls = `step-check ${s.done?'checked':''} ${checkLocked?'locked':''}`;
+  const checkCls = `step-check ${s.done?'checked':''} ${isJustToggled?'anim-check':''} ${checkLocked?'locked':''}`;
   const checkClick = (!archived && (!isOpt || isActive)) ? `onclick="toggleStep('${st.id}')"` : '';
   const labelClick = (!archived && (!isOpt || isActive)) ? `onclick="toggleStep('${st.id}')"` : '';
   const dateHtml = s.completedAt ? `<span class="step-date">✓ ${fmtDate(s.completedAt)}</span>` : '';
@@ -1276,7 +1394,7 @@ function renderStep(book, st, archived) {
       const isActiveSS = !isOptSS || book.activeOptional.includes(ss.id);
       const ssCheckLocked = archived || (isOptSS && !isActiveSS);
       const ssCls = ['sub-step', isOptSS ? 'opt-sub' : '', isOptSS && isActiveSS ? 'opt-on' : '', ssData.done ? 'is-done' : ''].filter(Boolean).join(' ');
-      const ssCheckCls = `sub-step-check ${ssData.done ? 'checked' : ''} ${ssCheckLocked ? 'locked' : ''}`;
+      const ssCheckCls = `sub-step-check ${ssData.done ? 'checked' : ''} ${ssData.done && ss.id === justToggledStep ? 'anim-check' : ''} ${ssCheckLocked ? 'locked' : ''}`;
       const ssClick = (!archived && (!isOptSS || isActiveSS)) ? `onclick="toggleStep('${ss.id}')"` : '';
       const ssOptBtn = (!archived && isOptSS && !isActiveSS) ? `<button class="opt-activate-btn" onclick="activateOptional('${ss.id}')">+ aktivovat</button>` : '';
       return `<div class="${ssCls}"><div class="${ssCheckCls}" ${ssClick}></div><span class="sub-step-label">${escapeHtml(ss.label)}</span>${ssOptBtn}</div>`;
@@ -1319,6 +1437,7 @@ function updateBook(field, value) { const b=getBook(); if(!b||b.archivedAt) retu
 function toggleStep(stepId) {
   const b=getBook(); if(!b||b.archivedAt) return;
   const s=b.steps[stepId]; s.done=!s.done; s.completedAt=s.done?todayISO():null;
+  justToggledStep = s.done ? stepId : null;
   saveState(); renderMain(); renderBookList();
 }
 function activateOptional(stepId) {
@@ -1341,6 +1460,10 @@ function removeAdditional(stepId,idx) {
   const b=getBook(); if(!b||b.archivedAt) return;
   b.additionals[stepId].splice(idx,1); saveState(); renderMain();
 }
+function toggleRukopis() {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  b.rukopisOdevzdan=!b.rukopisOdevzdan; saveState(); renderMain(); renderBookList();
+}
 function updatePhaseNote(phId,val) { const b=getBook(); if(!b||b.archivedAt) return; b.phaseNotes[phId]=val; saveState(); }
 function toggleStepNote(stepId) {
   const el=document.getElementById('snote-'+stepId);
@@ -1360,19 +1483,20 @@ function addTodo() {
   b.todos.push({id:uuid(),text,done:false});
   saveState(); renderMain();
 }
-function toggleTodo(idx) {
+function toggleTodoById(id) {
   const b=getBook(); if(!b||b.archivedAt) return;
-  b.todos[idx].done=!b.todos[idx].done; saveState(); renderMain();
+  const t=b.todos.find(x=>x.id===id); if(!t) return;
+  t.done=!t.done; saveState(); renderMain();
 }
-function deleteTodo(idx) {
+function deleteTodoById(id) {
   const b=getBook(); if(!b||b.archivedAt) return;
-  b.todos.splice(idx,1); saveState(); renderMain();
+  b.todos=b.todos.filter(x=>x.id!==id); saveState(); renderMain();
 }
 
 // Book CRUD
 function openNewBook() {
   ['nb_title','nb_author','nb_isbn_broz','nb_isbn_vaz','nb_isbn_pdf','nb_isbn_epub','nb_isbn_mobi','nb_nav','nb_edice_custom'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
-  document.getElementById('nb_editor').value='Kateřina Schmiedtová';
+  document.getElementById('nb_editor').value='Kateřina Mlsnová';
   document.getElementById('nb_korektorka').value='Daniela Schmiedtová';
   document.getElementById('nb_sazec').value='Tomáš Brejcha';
   document.getElementById('nb_edice').value='komentar';
@@ -1409,7 +1533,7 @@ function createBook() {
     sazec:document.getElementById('nb_sazec').value.trim(),
     odevzdaniRukopisu:ov?new Date(ov).toISOString():'',
     notes:'', createdAt:todayISO(), archivedAt:null, rokVydani:null,
-    cancelled:false, cancelReason:'',
+    cancelled:false, cancelReason:'', rukopisOdevzdan:false,
     activeOptional:[], additionals:{}, phaseNotes:{}, todos:[], steps:emptySteps(),
   };
   state.books.unshift(book); saveState();
