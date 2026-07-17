@@ -152,13 +152,60 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 /* Main */
 .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .main-topbar {
-  display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+  display: flex; align-items: center; justify-content: flex-start; gap: 8px;
   padding: 12px 28px; background: var(--white); border-bottom: 1px solid var(--gray-border); flex-shrink: 0;
 }
+.tb-spacer { flex: 1; }
+.view-toggle { display: flex; gap: 3px; background: var(--gray-bg); border-radius: var(--radius-sm); padding: 3px; }
+.vt { padding: 6px 16px; border-radius: 4px; font-size: 12.5px; font-weight: 500; color: var(--gray-text); border: none; background: none; cursor: pointer; transition: var(--transition); }
+.vt:hover { color: var(--black); }
+.vt.active { background: var(--navy); color: #fff; }
 .detail-wrap { flex: 1; overflow-y: auto; }
 .detail { padding: 28px 32px 48px; }
+.detail.board { padding: 0; }
 .detail-wrap::-webkit-scrollbar { width: 5px; }
 .detail-wrap::-webkit-scrollbar-thumb { background: var(--gray-border); border-radius: 3px; }
+
+/* ===== Kanban přehled ===== */
+.kb-stats { display: flex; align-items: center; gap: 24px; padding: 20px 28px 12px; flex-wrap: wrap; }
+.kb-stat { display: flex; align-items: baseline; gap: 8px; }
+.kb-stat b { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--navy); }
+.kb-stat span { font-size: 12px; color: var(--gray-text); }
+.kb-stat.hot b { color: var(--raspberry); }
+.kb-sep { width: 1px; height: 24px; background: var(--gray-border); }
+.kb-board { display: flex; gap: 14px; padding: 6px 28px 32px; overflow-x: auto; align-items: flex-start; }
+.kb-board::-webkit-scrollbar { height: 8px; }
+.kb-board::-webkit-scrollbar-thumb { background: var(--gray-border); border-radius: 4px; }
+.kb-col { width: 244px; min-width: 244px; flex-shrink: 0; }
+.kb-col-head { display: flex; align-items: center; gap: 8px; padding: 8px 4px; border-bottom: 2px solid var(--navy); margin-bottom: 10px; }
+.kb-col-num { font-family: 'Playfair Display', serif; font-size: 21px; font-weight: 700; color: var(--navy); opacity: .28; flex-shrink: 0; }
+.kb-col-title { font-size: 12.5px; font-weight: 600; letter-spacing: .01em; color: var(--navy); flex: 1; line-height: 1.2; }
+.kb-col-count { font-size: 11px; font-weight: 600; background: var(--navy); color: #fff; border-radius: 12px; padding: 1px 8px; flex-shrink: 0; }
+.kb-col.done .kb-col-head { border-bottom-color: var(--gray-border); }
+.kb-col.done .kb-col-num, .kb-col.done .kb-col-title { color: var(--gray-text); }
+.kb-col.done .kb-col-count { background: var(--gray-dim); }
+.kb-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 13px 14px 12px; margin-bottom: 10px; cursor: pointer; transition: box-shadow 160ms ease, transform 160ms ease, border-color 160ms ease; border: 1px solid transparent; }
+.kb-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: rgba(27,45,82,.10); }
+.kb-card-title { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; line-height: 1.3; color: var(--black); margin-bottom: 1px; }
+.kb-card-author { font-size: 11.5px; font-style: italic; color: var(--gray-text); margin-bottom: 9px; }
+.kb-dots { display: flex; gap: 5px; margin-bottom: 9px; }
+.kb-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gray-border); }
+.kb-dot.d-full { background: var(--green); }
+.kb-dot.d-half { background: linear-gradient(90deg, var(--blue-light) 50%, var(--gray-border) 50%); }
+.kb-note { font-size: 11.5px; color: var(--gray-text); display: flex; gap: 6px; align-items: flex-start; margin-bottom: 9px; line-height: 1.4; }
+.kb-note svg { flex-shrink: 0; margin-top: 1px; color: var(--gray-dim); }
+.kb-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.kb-foot-steps { font-size: 11px; color: var(--gray-dim); }
+.kb-chip { font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: 10px; flex-shrink: 0; white-space: nowrap; }
+.kb-chip.dl { background: rgba(177,30,84,.08); color: var(--raspberry); }
+.kb-chip.dl.hot { background: var(--raspberry); color: #fff; }
+.kb-chip.odev { background: var(--gray-bg); color: var(--gray-text); }
+.kb-chip.year { background: rgba(152,196,81,.16); color: #5a8a1a; }
+.kb-card.done { opacity: .82; }
+.kb-card.done .kb-card-title { font-size: 14px; }
+.kb-col-empty { border: 1px dashed var(--gray-border); border-radius: var(--radius); padding: 15px 10px; text-align: center; font-size: 11.5px; color: var(--gray-dim); }
+.kb-board-empty { padding: 56px 28px; text-align: center; color: var(--gray-text); }
+.kb-board-empty h2 { font-family: 'Playfair Display', serif; color: var(--black); margin-bottom: 8px; font-size: 22px; }
 
 /* Empty state */
 .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70vh; text-align: center; color: var(--gray-text); }
@@ -527,6 +574,11 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 
   <div class="main">
     <header class="main-topbar">
+      <div class="view-toggle">
+        <button class="vt active" id="vtBoard" onclick="showBoard()">Přehled</button>
+        <button class="vt" id="vtDetail" onclick="showDetail()">Checklist</button>
+      </div>
+      <div class="tb-spacer"></div>
       <button class="btn btn-secondary" onclick="openStructEditor()">Nastavení checklistu</button>
       <button class="btn btn-secondary" onclick="openTemplatesEditor()">Šablony e-mailů</button>
       <button class="btn btn-secondary" onclick="exportData()">Záloha ↓</button>
@@ -1023,6 +1075,7 @@ const TEMPLATE_LABELS = {
 let state = loadState();
 let templates = loadTemplates();
 let currentTab = 'active';
+let currentView = 'board';   // 'board' = kanban přehled, 'detail' = checklist knihy
 let currentBookId = null;
 let searchQ = '';
 let calYear, calMonth;
@@ -1160,7 +1213,7 @@ function renderCalendar() {
   }
   grid.innerHTML = html;
 }
-function selectBookFromCal(id) { if (currentTab!=='active') switchTab('active'); currentBookId=id; render(); }
+function selectBookFromCal(id) { if (currentTab!=='active') switchTab('active'); currentBookId=id; currentView='detail'; render(); }
 
 // Book list
 function filteredBooks() {
@@ -1176,6 +1229,7 @@ function toggleFilter(which) {
   document.getElementById('fltKomentare').classList.toggle('active', filterKomentare);
   document.getElementById('fltOdevzdane').classList.toggle('active', filterOdevzdane);
   renderBookList();
+  if (currentView==='board') renderBoard();
 }
 function renderBookList() {
   const list = filteredBooks();
@@ -1207,7 +1261,18 @@ function renderBookList() {
   });
   el.innerHTML = html;
 }
-function selectBook(id) { currentBookId=id; renderMain(); renderBookList(); }
+function selectBook(id) { currentBookId=id; currentView='detail'; render(); }
+function openBook(id) { currentBookId=id; currentView='detail'; render(); }
+function showBoard() { currentView='board'; render(); }
+function showDetail() {
+  currentView='detail';
+  if (!currentBookId) currentBookId = filteredBooks()[0]?.id || state.books.find(b=>!b.archivedAt && !b.cancelled)?.id || null;
+  render();
+}
+function updateViewToggle() {
+  document.getElementById('vtBoard').classList.toggle('active', currentView==='board');
+  document.getElementById('vtDetail').classList.toggle('active', currentView==='detail');
+}
 function switchTab(tab) {
   currentTab=tab;
   document.getElementById('tabActive').classList.toggle('active', tab==='active');
@@ -1215,7 +1280,7 @@ function switchTab(tab) {
   currentBookId = filteredBooks()[0]?.id || null;
   render();
 }
-function onSearch() { searchQ=document.getElementById('searchInput').value.trim(); renderBookList(); }
+function onSearch() { searchQ=document.getElementById('searchInput').value.trim(); renderBookList(); if (currentView==='board') renderBoard(); }
 
 // Date utils
 function daysUntil(iso) {
@@ -1247,8 +1312,119 @@ function animateProgress() {
 }
 
 // ===== Render main =====
+// ===== Kanban přehled =====
+function boardActiveBooks() {
+  let books = state.books.filter(b => !b.archivedAt && !b.cancelled);
+  if (filterKomentare) books = books.filter(b => b.edice==='komentar' || b.edice==='praktickyKomentar');
+  if (filterOdevzdane) books = books.filter(b => !!b.rukopisOdevzdan);
+  if (searchQ) { const q = searchQ.toLowerCase(); books = books.filter(b => b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q)); }
+  return books;
+}
+// Index první nedokončené fáze (přeskakuje prázdné fáze); je-li vše hotové, poslední fáze
+function currentPhaseIndex(b) {
+  for (let i = 0; i < PHASES.length; i++) {
+    const pp = phaseProgress(b, PHASES[i]);
+    if (pp.total === 0) continue;
+    if (pp.done < pp.total) return i;
+  }
+  return PHASES.length - 1;
+}
+function boardCard(b, phaseIdx) {
+  const ph = PHASES[phaseIdx];
+  const pp = phaseProgress(b, ph);
+  const dots = PHASES.map(p => {
+    const q = phaseProgress(b, p);
+    const dpct = q.total ? q.done / q.total : 0;
+    const dc = dpct >= 1 ? 'd-full' : dpct > 0 ? 'd-half' : '';
+    return `<span class="kb-dot ${dc}" title="${escapeHtml(p.title)}: ${q.done}/${q.total}"></span>`;
+  }).join('');
+  const note = (b.phaseNotes && b.phaseNotes[ph.id]) ? b.phaseNotes[ph.id] : '';
+  const noteHtml = note ? `<div class="kb-note">${SVG_NOTE}<span>${escapeHtml(note)}</span></div>` : '';
+  let chip = '';
+  if (b.rukopisOdevzdan) {
+    chip = `<span class="kb-chip odev">odevzdáno</span>`;
+  } else if (b.odevzdaniRukopisu) {
+    const d = daysUntil(b.odevzdaniRukopisu);
+    if (d !== null) {
+      const hot = d <= 5;
+      const lbl = d < 0 ? `${Math.abs(d)} ${dnyCz(d)} po termínu` : d === 0 ? 'dnes' : `za ${d} ${dnyCz(d)}`;
+      chip = `<span class="kb-chip dl ${hot?'hot':''}">${hot?'⏰ ':''}${lbl}</span>`;
+    }
+  }
+  return `<div class="kb-card" onclick="openBook('${b.id}')">
+    <div class="kb-card-title">${escapeHtml(b.title)}</div>
+    <div class="kb-card-author">${escapeHtml(b.author)}</div>
+    <div class="kb-dots">${dots}</div>
+    ${noteHtml}
+    <div class="kb-foot"><span class="kb-foot-steps">${pp.done} / ${pp.total} kroků</span>${chip}</div>
+  </div>`;
+}
+function renderBoard() {
+  const detail = document.getElementById('detail');
+  detail.classList.add('board');
+  const activeAll = state.books.filter(b => !b.archivedAt && !b.cancelled);
+  const nowYear = new Date().getFullYear();
+  const vydYear = b => String(b.rokVydani || new Date(b.archivedAt).getFullYear());
+
+  // Statistiky
+  let nearest = null;
+  activeAll.forEach(b => {
+    if (b.rukopisOdevzdan || !b.odevzdaniRukopisu) return;
+    const d = daysUntil(b.odevzdaniRukopisu);
+    if (d === null || d < 0) return;
+    if (nearest === null || d < nearest.d) nearest = { d, title: b.title };
+  });
+  const vydanoLetos = state.books.filter(b => b.archivedAt && vydYear(b) === String(nowYear)).length;
+  const knihyCz = n => n === 1 ? 'aktivní kniha' : (n >= 2 && n <= 4 ? 'aktivní knihy' : 'aktivních knih');
+  let stats = `<div class="kb-stat"><b>${activeAll.length}</b><span>${knihyCz(activeAll.length)}</span></div>`;
+  if (nearest) {
+    const lbl = nearest.d === 0 ? 'dnes' : `za ${nearest.d} ${dnyCz(nearest.d)}`;
+    stats += `<div class="kb-sep"></div><div class="kb-stat hot"><b>${lbl}</b><span>do odevzdání — ${escapeHtml(nearest.title)}</span></div>`;
+  }
+  stats += `<div class="kb-sep"></div><div class="kb-stat"><b>${vydanoLetos}</b><span>vydáno letos</span></div>`;
+
+  const bookSvg = `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`;
+  const books = boardActiveBooks();
+  const anyArchived = state.books.some(b => b.archivedAt);
+  if (!books.length && !anyArchived && !state.books.length) {
+    detail.innerHTML = `<div class="kb-stats">${stats}</div><div class="kb-board-empty"><div class="empty-ornament" style="margin:0 auto 16px">${bookSvg}</div><h2>Zatím tu nic není</h2><p>Vytvořte první knihu tlačítkem „+ Nová kniha" v levém panelu.</p></div>`;
+    return;
+  }
+
+  // Rozřazení do sloupců podle aktuální fáze
+  const cols = PHASES.map(() => []);
+  books.forEach(b => { cols[currentPhaseIndex(b)].push(b); });
+
+  let colsHtml = PHASES.map((ph, i) => {
+    const items = cols[i].length ? cols[i].map(b => boardCard(b, i)).join('') : `<div class="kb-col-empty">—</div>`;
+    return `<div class="kb-col">
+      <div class="kb-col-head"><span class="kb-col-num">${i+1}</span><span class="kb-col-title">${escapeHtml(ph.title)}</span><span class="kb-col-count">${cols[i].length}</span></div>
+      ${items}
+    </div>`;
+  }).join('');
+
+  // Sloupec Vydáno letos (archiv aktuálního roku)
+  const vyd = state.books
+    .filter(b => b.archivedAt && vydYear(b) === String(nowYear))
+    .filter(b => !filterKomentare || b.edice==='komentar' || b.edice==='praktickyKomentar')
+    .filter(b => !searchQ || b.title.toLowerCase().includes(searchQ.toLowerCase()) || b.author.toLowerCase().includes(searchQ.toLowerCase()))
+    .sort((a, b) => new Date(b.archivedAt) - new Date(a.archivedAt));
+  const vydItems = vyd.length ? vyd.map(b => `
+    <div class="kb-card done" onclick="openBook('${b.id}')">
+      <div class="kb-card-title">${escapeHtml(b.title)}</div>
+      <div class="kb-foot" style="margin-top:5px"><span class="kb-card-author" style="margin:0">${escapeHtml(b.author)}</span><span class="kb-chip year">${escapeHtml(vydYear(b))}</span></div>
+    </div>`).join('') : `<div class="kb-col-empty">letos zatím nic</div>`;
+  colsHtml += `<div class="kb-col done">
+    <div class="kb-col-head"><span class="kb-col-num">✓</span><span class="kb-col-title">Vydáno letos</span><span class="kb-col-count">${vyd.length}</span></div>
+    ${vydItems}
+  </div>`;
+
+  detail.innerHTML = `<div class="kb-stats">${stats}</div><div class="kb-board">${colsHtml}</div>`;
+}
+
 function renderMain() {
   const detail = document.getElementById('detail');
+  detail.classList.remove('board');
   const book = state.books.find(b => b.id === currentBookId);
   if (!book) {
     detail.innerHTML = `<div class="empty-state"><div class="empty-ornament"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div><h2>Vyberte knihu</h2><p>V levém panelu vyberte knihu pro zobrazení checklistu, nebo vytvořte novou.</p><button class="btn btn-primary" onclick="openNewBook()">+ Nová kniha</button></div>`;
@@ -1596,7 +1772,7 @@ function createBook() {
     activeOptional:[], additionals:{}, phaseNotes:{}, todos:[], steps:emptySteps(),
   };
   state.books.unshift(book); saveState();
-  currentBookId=book.id; currentTab='active';
+  currentBookId=book.id; currentTab='active'; currentView='detail';
   document.getElementById('tabActive').classList.add('active');
   document.getElementById('tabArchived').classList.remove('active');
   closeModal('newBookModal'); render();
@@ -1847,8 +2023,12 @@ function tryUnlock() {
 function showApp() { document.getElementById('lockOverlay').style.display='none'; document.getElementById('app').style.display='flex'; initApp(); }
 
 // Init
-function initApp() { state.books.forEach(migrateBook); openPhaseId=null; initCal(); currentBookId=filteredBooks()[0]?.id||null; render(); }
-function render() { renderCalendar(); renderBookList(); renderMain(); }
+function initApp() { state.books.forEach(migrateBook); openPhaseId=null; initCal(); currentView='board'; currentBookId=filteredBooks()[0]?.id||null; render(); }
+function render() {
+  renderCalendar(); renderBookList(); updateViewToggle();
+  if (currentView==='board') renderBoard();
+  else renderMain();
+}
 
 (function start() {
   if(localStorage.getItem(UNLOCK_KEY)==='1') { showApp(); }
