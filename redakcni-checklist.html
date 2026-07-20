@@ -214,6 +214,14 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .kb-stat span { font-size: 12px; color: var(--gray-text); }
 .kb-stat.hot b { color: var(--raspberry); }
 .kb-sep { width: 1px; height: 24px; background: var(--gray-border); }
+.dl-wrap { padding: 0 28px 14px; }
+.expand-hint { font-size: 11px; color: var(--blue); cursor: pointer; display: inline-block; }
+.expand-hint:hover { text-decoration: underline; }
+.dl-list { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--gray-border); max-width: 420px; }
+.dl-list.open { display: block; }
+.dl-row { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; font-size: 12.5px; }
+.dl-row b { color: var(--navy); font-weight: 600; }
+.dl-row span { color: var(--gray-text); flex-shrink: 0; }
 .kb-board { display: flex; gap: 14px; padding: 6px 28px 32px; overflow-x: auto; align-items: flex-start; }
 .kb-board::-webkit-scrollbar { height: 8px; }
 .kb-board::-webkit-scrollbar-thumb { background: var(--gray-border); border-radius: 4px; }
@@ -1288,6 +1296,13 @@ function filteredBooks() {
   if (filterKomentare) books = books.filter(isKomentar);
   if (filterOdevzdane) books = books.filter(b => !!b.rukopisOdevzdan);
   if (searchQ) { const q = searchQ.toLowerCase(); books = books.filter(b => b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q)); }
+  if (currentTab === 'active') {
+    books = books.slice().sort((a, c) => {
+      const pa = calcProgress(a).pct, pc = calcProgress(c).pct;
+      if (pc !== pa) return pc - pa;
+      return (isKomentar(c)?1:0) - (isKomentar(a)?1:0);
+    });
+  }
   return books;
 }
 function toggleFilter(which) {
@@ -1332,6 +1347,7 @@ function selectBook(id) { currentBookId=id; currentView='detail'; render(); }
 function openBook(id) { currentBookId=id; currentView='detail'; render(); }
 function showBoard() { currentView='board'; render(); }
 function setVydYear(y) { vydActiveYear = y; renderBoard(); }
+function toggleDeadlineList() { document.getElementById('dlList')?.classList.toggle('open'); }
 function showDetail() {
   currentView='detail';
   if (!currentBookId) currentBookId = filteredBooks()[0]?.id || state.books.find(b=>!b.archivedAt && !b.cancelled)?.id || null;
@@ -1456,19 +1472,29 @@ function renderBoard() {
   const vydYear = b => String(b.rokVydani || new Date(b.archivedAt).getFullYear());
 
   // Statistiky
-  let nearest = null;
+  const upcoming = [];
   activeAll.forEach(b => {
     if (b.rukopisOdevzdan || !b.odevzdaniRukopisu) return;
     const d = daysUntil(b.odevzdaniRukopisu);
     if (d === null || d < 0) return;
-    if (nearest === null || d < nearest.d) nearest = { d, title: b.title };
+    upcoming.push({ d, title: b.title });
   });
+  upcoming.sort((a, c) => a.d - c.d);
+  const nearest = upcoming[0] || null;
+  const restDeadlines = upcoming.slice(1);
   const vydanoLetos = state.books.filter(b => b.archivedAt && vydYear(b) === String(nowYear)).length;
   const knihyCz = n => n === 1 ? 'aktivní kniha' : (n >= 2 && n <= 4 ? 'aktivní knihy' : 'aktivních knih');
+  const terminCz = n => n === 1 ? 'termín' : (n >= 2 && n <= 4 ? 'termíny' : 'termínů');
   let stats = `<div class="kb-stat"><b>${activeAll.length}</b><span>${knihyCz(activeAll.length)}</span></div>`;
+  let dlWrapHtml = '';
   if (nearest) {
     const lbl = nearest.d === 0 ? 'dnes' : `za ${nearest.d} ${dnyCz(nearest.d)}`;
-    stats += `<div class="kb-sep"></div><div class="kb-stat hot"><b>${lbl}</b><span>do odevzdání — ${escapeHtml(nearest.title)}</span></div>`;
+    const clickable = restDeadlines.length ? ` onclick="toggleDeadlineList()" style="cursor:pointer"` : '';
+    stats += `<div class="kb-sep"></div><div class="kb-stat hot"${clickable}><b>${lbl}</b><span>do odevzdání — ${escapeHtml(nearest.title)}</span></div>`;
+    if (restDeadlines.length) {
+      const rows = restDeadlines.map(x => `<div class="dl-row"><b>${escapeHtml(x.title)}</b><span>${x.d===0?'dnes':`za ${x.d} ${dnyCz(x.d)}`}</span></div>`).join('');
+      dlWrapHtml = `<div class="dl-wrap"><span class="expand-hint" onclick="toggleDeadlineList()">Zobrazit dalších ${restDeadlines.length} ${terminCz(restDeadlines.length)} ▾</span><div class="dl-list" id="dlList">${rows}</div></div>`;
+    }
   }
   stats += `<div class="kb-sep"></div><div class="kb-stat"><b>${vydanoLetos}</b><span>vydáno letos</span></div>`;
 
@@ -1515,7 +1541,7 @@ function renderBoard() {
     ${vydItems}
   </div>`;
 
-  detail.innerHTML = `<div class="kb-stats">${stats}</div><div class="kb-board">${colsHtml}</div>`;
+  detail.innerHTML = `<div class="kb-stats">${stats}</div>${dlWrapHtml}<div class="kb-board">${colsHtml}</div>`;
 }
 
 function renderMain() {
