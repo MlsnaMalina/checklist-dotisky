@@ -227,6 +227,8 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .kb-col.done .kb-col-count { background: var(--gray-dim); }
 .kb-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 13px 14px 12px; margin-bottom: 10px; cursor: pointer; transition: box-shadow 160ms ease, transform 160ms ease, border-color 160ms ease; border: 1px solid transparent; }
 .kb-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: rgba(27,45,82,.10); }
+.kb-card.priority { border: 2px solid var(--raspberry); padding: 12px 13px 11px; }
+.kb-card.priority:hover { border-color: var(--raspberry); }
 .kb-card-title { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; line-height: 1.3; color: var(--black); margin-bottom: 1px; }
 .kb-card-author { font-size: 11.5px; font-style: italic; color: var(--gray-text); margin-bottom: 9px; }
 .kb-dots { display: flex; gap: 5px; margin-bottom: 9px; }
@@ -1269,9 +1271,10 @@ function renderCalendar() {
 function selectBookFromCal(id) { if (currentTab!=='active') switchTab('active'); currentBookId=id; currentView='detail'; render(); }
 
 // Book list
+function isKomentar(b) { return b.edice==='komentar' || b.edice==='praktickyKomentar'; }
 function filteredBooks() {
   let books = state.books.filter(b => currentTab==='active' ? !b.archivedAt : !!b.archivedAt);
-  if (filterKomentare) books = books.filter(b => b.edice==='komentar' || b.edice==='praktickyKomentar');
+  if (filterKomentare) books = books.filter(isKomentar);
   if (filterOdevzdane) books = books.filter(b => !!b.rukopisOdevzdan);
   if (searchQ) { const q = searchQ.toLowerCase(); books = books.filter(b => b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q)); }
   return books;
@@ -1368,7 +1371,7 @@ function animateProgress() {
 // ===== Kanban přehled =====
 function boardActiveBooks() {
   let books = state.books.filter(b => !b.archivedAt && !b.cancelled);
-  if (filterKomentare) books = books.filter(b => b.edice==='komentar' || b.edice==='praktickyKomentar');
+  if (filterKomentare) books = books.filter(isKomentar);
   if (filterOdevzdane) books = books.filter(b => !!b.rukopisOdevzdan);
   if (searchQ) { const q = searchQ.toLowerCase(); books = books.filter(b => b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q)); }
   return books;
@@ -1404,7 +1407,7 @@ function boardCard(b, phaseIdx) {
       chip = `<span class="kb-chip dl ${hot?'hot':''}">${hot?'⏰ ':''}${lbl}</span>`;
     }
   }
-  return `<div class="kb-card" onclick="openBook('${b.id}')">
+  return `<div class="kb-card ${isKomentar(b)?'priority':''}" onclick="openBook('${b.id}')">
     <div class="kb-card-title">${escapeHtml(b.title)}</div>
     <div class="kb-card-author">${escapeHtml(b.author)}</div>
     <div class="kb-dots">${dots}</div>
@@ -1459,11 +1462,11 @@ function renderBoard() {
   // Sloupec Vydáno letos (archiv aktuálního roku)
   const vyd = state.books
     .filter(b => b.archivedAt && vydYear(b) === String(nowYear))
-    .filter(b => !filterKomentare || b.edice==='komentar' || b.edice==='praktickyKomentar')
+    .filter(b => !filterKomentare || isKomentar(b))
     .filter(b => !searchQ || b.title.toLowerCase().includes(searchQ.toLowerCase()) || b.author.toLowerCase().includes(searchQ.toLowerCase()))
     .sort((a, b) => new Date(b.archivedAt) - new Date(a.archivedAt));
   const vydItems = vyd.length ? vyd.map(b => `
-    <div class="kb-card done" onclick="openBook('${b.id}')">
+    <div class="kb-card done ${isKomentar(b)?'priority':''}" onclick="openBook('${b.id}')">
       <div class="kb-card-title">${escapeHtml(b.title)}</div>
       <div class="kb-foot" style="margin-top:5px"><span class="kb-card-author" style="margin:0">${escapeHtml(b.author)}</span><span class="kb-chip year">${escapeHtml(vydYear(b))}</span></div>
     </div>`).join('') : `<div class="kb-col-empty">letos zatím nic</div>`;
