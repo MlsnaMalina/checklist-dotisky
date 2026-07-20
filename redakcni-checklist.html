@@ -225,6 +225,9 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .kb-col.done .kb-col-head { border-bottom-color: var(--gray-border); }
 .kb-col.done .kb-col-num, .kb-col.done .kb-col-title { color: var(--gray-text); }
 .kb-col.done .kb-col-count { background: var(--gray-dim); }
+.year-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.year-btn { border: none; background: var(--green); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 11px; border-radius: 20px; transition: var(--transition); font-variant-numeric: tabular-nums; }
+.year-btn:hover { background: var(--green-dark); }
 .kb-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 13px 14px 12px; margin-bottom: 10px; cursor: pointer; transition: box-shadow 160ms ease, transform 160ms ease, border-color 160ms ease; border: 1px solid transparent; }
 .kb-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: rgba(27,45,82,.10); }
 .kb-card.priority { border: 2px solid var(--raspberry); padding: 12px 13px 11px; }
@@ -330,6 +333,9 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .todo-check.done::after { content: '✓'; color: #fff; font-size: 10px; font-weight: 700; }
 .todo-text { flex: 1; font-size: 13px; color: var(--black); transition: var(--transition); }
 .todo-text.done { text-decoration: line-through; color: var(--gray-dim); }
+.todo-date { font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: 10px; flex-shrink: 0; background: var(--gray-bg); color: var(--gray-text); }
+.todo-date.soon { background: rgba(224,123,0,.12); color: var(--amber); }
+.todo-date.late { background: var(--raspberry); color: #fff; }
 .todo-del { color: var(--gray-dim); cursor: pointer; font-size: 14px; transition: var(--transition); flex-shrink: 0; line-height: 1; padding: 2px; }
 .todo-del:hover { color: var(--raspberry); }
 .todo-add { display: flex; gap: 6px; }
@@ -339,6 +345,9 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 }
 .todo-add input:focus { outline: none; border-color: #B83066; }
 .todo-add input::placeholder { color: var(--gray-dim); }
+.todo-due-input { flex: 0 0 auto; width: 130px; font-size: 12px; color: var(--gray-text); }
+.kb-note.todo-note svg { color: var(--amber); }
+.kb-note.todo-note.late svg, .kb-note.todo-note.late span { color: var(--raspberry); }
 .todo-add-btn { width: 32px; height: 32px; background: none; border: none; display: flex; align-items: center; justify-content: center; color: var(--gray-dim); cursor: pointer; border-radius: var(--radius-sm); transition: var(--transition); flex-shrink: 0; }
 .todo-add-btn:hover { color: #B83066; background: rgba(184,48,102,0.06); }
 
@@ -803,6 +812,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 <script>
 const SVG_CHEVRON = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`;
 const SVG_NOTE = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
+const SVG_CHECK = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`;
 const SVG_MAIL = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>`;
 const SVG_PLUS = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
 const SVG_FILE = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>`;
@@ -1130,6 +1140,7 @@ let state = loadState();
 let templates = loadTemplates();
 let currentTab = 'active';
 let currentView = 'board';   // 'board' = kanban přehled, 'detail' = checklist knihy
+let vydActiveYear = null;    // rok rozepsaný ve sloupci Vydáno (null = aktuální rok)
 let currentBookId = null;
 let sidebarPinned = localStorage.getItem(SIDEBAR_PIN_KEY) === '1';
 let searchQ = '';
@@ -1320,6 +1331,7 @@ function renderBookList() {
 function selectBook(id) { currentBookId=id; currentView='detail'; render(); }
 function openBook(id) { currentBookId=id; currentView='detail'; render(); }
 function showBoard() { currentView='board'; render(); }
+function setVydYear(y) { vydActiveYear = y; renderBoard(); }
 function showDetail() {
   currentView='detail';
   if (!currentBookId) currentBookId = filteredBooks()[0]?.id || state.books.find(b=>!b.archivedAt && !b.cancelled)?.id || null;
@@ -1346,6 +1358,23 @@ function daysUntil(iso) {
   return Math.round((t-today)/86400000);
 }
 function dnyCz(n) { const a=Math.abs(n); if(a===1)return'den'; if(a>=2&&a<=4)return'dny'; return'dní'; }
+
+// To-do upomínky
+function todoDueClass(iso) {
+  const d = daysUntil(iso);
+  if (d === null) return '';
+  if (d < 0) return 'late';
+  if (d <= 14) return 'soon';
+  return '';
+}
+function nearestDueTodo(b) {
+  const list = (b.todos || []).filter(t => !t.done && t.due);
+  if (!list.length) return null;
+  list.sort((a, c) => new Date(a.due) - new Date(c.due));
+  const t = list[0];
+  const d = daysUntil(t.due);
+  return (d !== null && d <= 14) ? t : null;
+}
 
 // Circular SVG — vykreslí se s předchozí hodnotou a plynule se dotáhne na novou
 function circSvg(pct, cancelled, fromPct) {
@@ -1395,7 +1424,11 @@ function boardCard(b, phaseIdx) {
     return `<span class="kb-dot ${dc}" title="${escapeHtml(p.title)}: ${q.done}/${q.total}"></span>`;
   }).join('');
   const note = (b.phaseNotes && b.phaseNotes[ph.id]) ? b.phaseNotes[ph.id] : '';
-  const noteHtml = note ? `<div class="kb-note">${SVG_NOTE}<span>${escapeHtml(note)}</span></div>` : '';
+  let noteHtml = note ? `<div class="kb-note">${SVG_NOTE}<span>${escapeHtml(note)}</span></div>` : '';
+  if (!noteHtml) {
+    const dueTodo = nearestDueTodo(b);
+    if (dueTodo) noteHtml = `<div class="kb-note todo-note ${todoDueClass(dueTodo.due)}">${SVG_CHECK}<span>${escapeHtml(dueTodo.text)} · ${fmtDate(dueTodo.due)}</span></div>`;
+  }
   let chip = '';
   if (b.rukopisOdevzdan) {
     chip = `<span class="kb-chip odev">odevzdáno</span>`;
@@ -1459,19 +1492,26 @@ function renderBoard() {
     </div>`;
   }).join('');
 
-  // Sloupec Vydáno letos (archiv aktuálního roku)
-  const vyd = state.books
-    .filter(b => b.archivedAt && vydYear(b) === String(nowYear))
+  // Sloupec Vydáno (archiv, přepínatelné roky)
+  const vydAll = state.books
+    .filter(b => b.archivedAt)
     .filter(b => !filterKomentare || isKomentar(b))
-    .filter(b => !searchQ || b.title.toLowerCase().includes(searchQ.toLowerCase()) || b.author.toLowerCase().includes(searchQ.toLowerCase()))
-    .sort((a, b) => new Date(b.archivedAt) - new Date(a.archivedAt));
-  const vydItems = vyd.length ? vyd.map(b => `
+    .filter(b => !searchQ || b.title.toLowerCase().includes(searchQ.toLowerCase()) || b.author.toLowerCase().includes(searchQ.toLowerCase()));
+  const vydByYear = {};
+  vydAll.forEach(b => { const y = vydYear(b); (vydByYear[y] = vydByYear[y] || []).push(b); });
+  const vydYears = Object.keys(vydByYear).sort((a, b) => b - a);
+  const vydActive = (vydActiveYear && vydByYear[vydActiveYear]) ? vydActiveYear
+    : (vydByYear[String(nowYear)] ? String(nowYear) : (vydYears[0] || String(nowYear)));
+  const vydShown = (vydByYear[vydActive] || []).sort((a, b) => new Date(b.archivedAt) - new Date(a.archivedAt));
+  const vydYearBtns = vydYears.filter(y => y !== vydActive).map(y => `<button class="year-btn" onclick="setVydYear('${y}')">${y}</button>`).join('');
+  const vydItems = vydShown.length ? vydShown.map(b => `
     <div class="kb-card done ${isKomentar(b)?'priority':''}" onclick="openBook('${b.id}')">
       <div class="kb-card-title">${escapeHtml(b.title)}</div>
-      <div class="kb-foot" style="margin-top:5px"><span class="kb-card-author" style="margin:0">${escapeHtml(b.author)}</span><span class="kb-chip year">${escapeHtml(vydYear(b))}</span></div>
-    </div>`).join('') : `<div class="kb-col-empty">letos zatím nic</div>`;
+      <div class="kb-foot" style="margin-top:5px"><span class="kb-card-author" style="margin:0">${escapeHtml(b.author)}</span><span class="kb-chip year">${escapeHtml(vydActive)}</span></div>
+    </div>`).join('') : `<div class="kb-col-empty">${vydActive === String(nowYear) ? 'letos zatím nic' : 'nic'}</div>`;
   colsHtml += `<div class="kb-col done">
-    <div class="kb-col-head"><span class="kb-col-num">✓</span><span class="kb-col-title">Vydáno letos</span><span class="kb-col-count">${vyd.length}</span></div>
+    <div class="kb-col-head"><span class="kb-col-num">✓</span><span class="kb-col-title">Vydáno</span><span class="kb-col-count">${vydShown.length}</span></div>
+    ${vydYearBtns ? `<div class="year-btns">${vydYearBtns}</div>` : ''}
     ${vydItems}
   </div>`;
 
@@ -1522,6 +1562,7 @@ function renderMain() {
     <div class="todo-item">
       <div class="todo-check ${t.done?'done':''}" onclick="${archived?'':`toggleTodoById('${t.id}')`}"></div>
       <span class="todo-text ${t.done?'done':''}">${escapeHtml(t.text)}</span>
+      ${t.due ? `<span class="todo-date ${todoDueClass(t.due)}">${fmtDate(t.due)}</span>` : ''}
       ${!archived ? `<span class="todo-del" onclick="deleteTodoById('${t.id}')">×</span>` : ''}
     </div>`).join('');
   const todoHtml = `
@@ -1530,6 +1571,7 @@ function renderMain() {
       <div class="todo-list">${todoItems}</div>
       ${!archived ? `<div class="todo-add">
         <input type="text" id="todoInput" placeholder="Přidat úkol… (Enter)">
+        <input type="date" id="todoDueInput" class="todo-due-input" title="Upomínka (volitelné)">
         <button class="todo-add-btn" onclick="addTodo()" title="Přidat úkol">${SVG_PLUS}</button>
       </div>` : ''}
     </div>`;
@@ -1771,7 +1813,9 @@ function addTodo() {
   const b=getBook(); if(!b||b.archivedAt) return;
   const inp=document.getElementById('todoInput'); if(!inp) return;
   const text=inp.value.trim(); if(!text) return;
-  b.todos.push({id:uuid(),text,done:false});
+  const dueInp=document.getElementById('todoDueInput');
+  const due=dueInp&&dueInp.value ? dueInp.value : null;
+  b.todos.push({id:uuid(),text,done:false,due});
   saveState(); renderMain();
 }
 function toggleTodoById(id) {
