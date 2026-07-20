@@ -40,7 +40,12 @@ header.topbar {
   border-bottom: 1px solid var(--gray-border);
 }
 header.topbar h1 { font-size: 20px; }
+.topbar-left { display: flex; align-items: center; gap: 16px; }
 .top-actions { display: flex; gap: 8px; }
+.app-switch { display: flex; gap: 3px; background: var(--gray-bg); border-radius: var(--radius); padding: 3px; }
+.as-btn { padding: 6px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 500; color: var(--gray-text); transition: var(--transition); text-decoration: none; cursor: pointer; }
+.as-btn:hover { color: var(--black); }
+.as-btn.active { background: var(--blue); color: var(--white); cursor: default; }
 
 .main { display: flex; flex: 1; overflow: hidden; }
 
@@ -373,7 +378,13 @@ footer.app-footer {
 
 <div class="app" id="app" style="display:none;">
   <header class="topbar">
-    <h1>Checklist dotisků</h1>
+    <div class="topbar-left">
+      <h1>Checklist dotisků</h1>
+      <div class="app-switch">
+        <a class="as-btn" href="redakcni-checklist.html">Redakční checklist</a>
+        <span class="as-btn active">Checklist dotisků</span>
+      </div>
+    </div>
     <div class="top-actions">
       <button class="btn btn-secondary" onclick="openTemplates()">Nastavení šablon</button>
       <button class="btn btn-secondary" onclick="exportData()">Stažení zálohy</button>
