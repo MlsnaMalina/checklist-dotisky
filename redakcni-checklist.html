@@ -88,9 +88,21 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .collapse-arrow {
   display: none; position: absolute; top: 50%; left: 0; width: 14px; height: 44px;
   transform: translateY(-50%); align-items: center; justify-content: center;
-  color: rgba(255,255,255,0.32); font-size: 12px; cursor: pointer;
+  color: rgba(255,255,255,0.55); font-size: 13px; cursor: pointer;
 }
 .sidebar.collapsed .collapse-arrow { display: flex; }
+.sidebar-hint {
+  position: absolute; left: 22px; top: 50%; transform: translateY(-50%) translateX(-6px);
+  background: var(--raspberry); color: #fff; font-size: 12px; font-weight: 500;
+  padding: 8px 13px; border-radius: 6px; white-space: nowrap; pointer-events: none;
+  opacity: 0; transition: opacity 400ms ease, transform 400ms ease; z-index: 45;
+  box-shadow: var(--shadow-md);
+}
+.sidebar-hint::before {
+  content: ''; position: absolute; right: 100%; top: 50%; transform: translateY(-50%);
+  border: 5px solid transparent; border-right-color: var(--raspberry);
+}
+.sidebar-hint.show { opacity: 1; transform: translateY(-50%) translateX(0); }
 .pin-btn {
   position: absolute; top: 14px; right: 10px; width: 26px; height: 26px; border-radius: 6px;
   display: flex; align-items: center; justify-content: center; font-size: 13px;
@@ -608,6 +620,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
     </div>
     </div>
   </aside>
+  <div class="sidebar-hint" id="sidebarHint">☰ Menu se otevře najetím myší</div>
 
   <div class="main">
     <header class="main-topbar">
@@ -796,7 +809,8 @@ const APP_PASSWORD  = 'dotisky2025';
 const STORAGE_KEY   = 'redakcni-checklist-v1';
 const TEMPLATES_KEY = 'redakcni-templates-v1';
 const UNLOCK_KEY    = 'redakcni-unlocked';
-const SIDEBAR_PIN_KEY = 'redakcni-sidebar-pinned';
+const SIDEBAR_PIN_KEY  = 'redakcni-sidebar-pinned';
+const SIDEBAR_HINT_KEY = 'redakcni-sidebar-hint-seen';
 
 const EDICE_LABELS = {
   komentar: 'Komentář',
@@ -2071,6 +2085,7 @@ function togglePin() {
   localStorage.setItem(SIDEBAR_PIN_KEY, sidebarPinned ? '1' : '0');
   if (sidebarPinned) document.getElementById('sidebar').classList.remove('peeking');
   applySidebarPin();
+  dismissSidebarHint();
 }
 function peekSidebar() { document.getElementById('sidebar').classList.toggle('peeking'); }
 document.addEventListener('click', (e) => {
@@ -2078,8 +2093,24 @@ document.addEventListener('click', (e) => {
   if (sb && sb.classList.contains('peeking') && !sb.contains(e.target)) sb.classList.remove('peeking');
 });
 
+// Nápověda na sbalený panel — ukáže se jen dokud ji uživatel poprvé neobjeví
+function maybeShowSidebarHint() {
+  if (sidebarPinned || localStorage.getItem(SIDEBAR_HINT_KEY) === '1') return;
+  const hint = document.getElementById('sidebarHint');
+  if (!hint) return;
+  setTimeout(() => hint.classList.add('show'), 600);
+  setTimeout(() => hint.classList.remove('show'), 5000);
+}
+function dismissSidebarHint() {
+  if (localStorage.getItem(SIDEBAR_HINT_KEY) === '1') return;
+  localStorage.setItem(SIDEBAR_HINT_KEY, '1');
+  const hint = document.getElementById('sidebarHint');
+  if (hint) hint.classList.remove('show');
+}
+document.getElementById('sidebar').addEventListener('mouseenter', dismissSidebarHint);
+
 // Init
-function initApp() { state.books.forEach(migrateBook); openPhaseId=null; initCal(); currentView='board'; currentBookId=filteredBooks()[0]?.id||null; applySidebarPin(); render(); }
+function initApp() { state.books.forEach(migrateBook); openPhaseId=null; initCal(); currentView='board'; currentBookId=filteredBooks()[0]?.id||null; applySidebarPin(); maybeShowSidebarHint(); render(); }
 function render() {
   renderCalendar(); renderBookList(); updateViewToggle();
   if (currentView==='board') renderBoard();
