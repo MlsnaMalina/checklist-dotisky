@@ -1422,7 +1422,9 @@ function boardActiveBooks() {
   return books;
 }
 // Index první nedokončené fáze (přeskakuje prázdné fáze); je-li vše hotové, poslední fáze
+// Dokud není odevzdán rukopis, kniha zůstává v 1. fázi bez ohledu na to, kolik kroků má hotových
 function currentPhaseIndex(b) {
+  if (!b.rukopisOdevzdan) return 0;
   for (let i = 0; i < PHASES.length; i++) {
     const pp = phaseProgress(b, PHASES[i]);
     if (pp.total === 0) continue;
