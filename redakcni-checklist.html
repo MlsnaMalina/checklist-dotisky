@@ -916,6 +916,11 @@ const DEFAULT_PHASES = [
       { id: 'p4_7', label: 'E-mail Martině: připravená karta v E-shopu', template: 'n' },
       { id: 'p3_14', label: 'Doplnění chyb ze sazby do PublishOnu' },
       { id: 'p4_2', label: 'Kontrola metadat v PublishOnu + nahrání obálky do příloh v PublishOnu („cover.jpg")' },
+      { id: 'p4_11', label: 'Založení Mersz složky v PublishOnu', subSteps: [
+        { id: 'p4_11a', label: 'doplnit metadata: č. NAV, název, vydání, popis, rok vydání, ISBN e-pubu, kategorie, autoři' },
+        { id: 'p4_11b', label: 'zkopírování dokumentů ze složky knihy do složky Mersz' },
+        { id: 'p4_11c', label: 'odeslat informaci na publishone@wolterskluwer.cz s odkazem do archivu a s případnou informací, pokud v PublishOnu chybí autoři' },
+      ]},
       { id: 'p4_3', label: 'E-mail: vytvoření e-knihy Lukášovi', template: 'l' },
       { id: 'p4_4', label: 'Vizuálně zkontrolovat hotový epub' },
       { id: 'p4_5', label: 'Odeslat epub na vytvoření do hotline (Jiří Nezbeda, Jiří Soukup)' },
