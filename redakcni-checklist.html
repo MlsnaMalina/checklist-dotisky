@@ -848,21 +848,21 @@ const DEFAULT_PHASES = [
     steps: [
       { id: 'p1_1', label: 'E-mail: oslovení autora', template: 'b' },
       { id: 'p1_2', label: 'E-mail: návrh smlouvy autorovi', template: 'a', subSteps: [
-        { id: 'p1_2a', label: 'Vysvětlení způsobu uzavírání smluv' },
-        { id: 'p1_2b', label: 'Zaslání manuálu k uzavření smlouvy' },
+        { id: 'p1_2a', label: 'Vysvětlení způsobu uzavírání smluv', optional: true },
+        { id: 'p1_2b', label: 'Zaslání manuálu k uzavření smlouvy', optional: true },
       ]},
       { id: 'p1_7', label: 'E-mail: informace o procesu autorům', template: 'c', subSteps: [
         { id: 'p1_7a', label: 'Autorský formulář', optional: true },
         { id: 'p1_7b', label: 'Zápůjční protokol ASPI', optional: true },
         { id: 'p1_7c', label: 'Manuál k ediční řadě', optional: true },
-        { id: 'p1_7d', label: 'Tabulka vztahů monografie k předpisům', optional: true },
         { id: 'p1_7e', label: 'Seznam zkratek', optional: true },
+        { id: 'p1_7d', label: 'Tabulka vztahů monografie k předpisům', optional: true },
       ]},
       { id: 'p1_8', label: 'E-mail: Podepsaný autorský formulář zaslat Elišce, Filip v kopii', optional: true },
       { id: 'p1_9', label: 'Podepsaný Zápůjční protokol ASPI odeslat Ivě', optional: true },
       { id: 'p1_3', label: 'Legisway tabulka + e-mail Elišce' },
       { id: 'p1_4', label: 'Autorům založit složku v PublishOnu' },
-      { id: 'p1_10', label: 'Autorům FOUNDED účty v PublishOnu', optional: true },
+      { id: 'p1_10', label: 'Autorům založit účty v PublishOnu', optional: true },
       { id: 'p1_5', label: 'Smlouva podepsána a uložena' },
       { id: 'p1_6', label: 'Dodatek ke smlouvě', optional: true, repeatable: true },
     ]
@@ -870,9 +870,9 @@ const DEFAULT_PHASES = [
   {
     id: 'p2', title: 'Redakce',
     steps: [
-      { id: 'p2_1', label: 'E-mail: žádost o ISBN čísla Ivě', template: 'e' },
       { id: 'p2_2', label: 'Kontrola stylů v PublishOnu' },
       { id: 'p2_3', label: 'Spuštění nástroje CHT v PublishOnu' },
+      { id: 'p2_1', label: 'E-mail: žádost o ISBN čísla Ivě', template: 'e' },
       { id: 'p2_4', label: 'E-mail: předání rukopisu jazykové korektorce', template: 'd' },
       { id: 'p2_5', label: 'Vytvoření záznamu v Edičním plánu' },
       { id: 'p2_6', label: 'Redakční kontrola + kontrola jazykové korektorky' },
@@ -880,7 +880,7 @@ const DEFAULT_PHASES = [
       { id: 'p2_6b', label: 'Seznam literatury', optional: true },
       { id: 'p2_6c', label: 'Seznam předpisů a judikatury', optional: true },
       { id: 'p2_7', label: 'E-mail: odeslání upraveného rukopisu na kontrolu autorům', template: 'f' },
-      { id: 'p2_8', label: 'Zapracování oprav od autorů' },
+      { id: 'p2_8', label: 'Zpracování oprav od autorů' },
       { id: 'p2_9', label: 'Příprava rejstříku', optional: true },
       { id: 'p2_10', label: 'E-mail: oslovit sazeče, zda má prostor pro sazbu', template: 'g' },
       { id: 'p2_14', label: 'Připravit podklady pro sazeče (před stavem „odsouhlaseno" v PublishOnu) a zadat sazeče do role Sazeč – ve složce v PublishOnu je třeba mít dokumenty jen pro sazbu, pokud je tam něco navíc, je třeba výslovně sazeče informovat', subSteps: [
@@ -893,50 +893,49 @@ const DEFAULT_PHASES = [
     id: 'p3', title: 'Sazba a tisk',
     steps: [
       { id: 'p3_1', label: 'Kontrola sazby — konce řádků, obsah, záhlaví' },
-      { id: 'p3_2', label: 'Vytvoření kalkulace' },
-      { id: 'p3_3', label: 'Zaslání kalkulace na schválení', template: 'h' },
-      { id: 'p3_5', label: 'Vytvoření záznamu pro knihu v Edičním plánu' },
-      { id: 'p3_4', label: 'Žádost Filipovi o vytvoření složky pro knihu', template: 'i' },
       { id: 'p3_6', label: 'Odeslání sazby autorům ke kontrole' },
+      { id: 'p3_5', label: 'Vytvoření záznamu pro knihu v Edičním plánu' },
+      { id: 'p3_2', label: 'Vytvoření kalkulace' },
+      { id: 'p3_3', label: 'Zaslání kalkulace na schválení Ivě', template: 'h' },
+      { id: 'p3_4', label: 'Žádost Filipovi o vytvoření složky pro knihu', template: 'i' },
       { id: 'p3_7', label: 'Zapracování posledních poznámek k opravě sazby a odeslání sazeči' },
       { id: 'p3_8', label: 'Kontrola opravené sazby' },
-      { id: 'p3_9', label: 'Doplnění kalkulace' },
       { id: 'p3_10', label: 'Kontrola obálky a tiskových materiálů' },
-      { id: 'p3_11', label: 'Odeslání knihy do tisku' },
-      { id: 'p3_12', label: 'Potvrzení tisku' },
-      { id: 'p3_14', label: 'Doplnění chyb ze sazby do PublishOnu' },
+      { id: 'p3_9', label: 'Doplnění kalkulace' },
       { id: 'p3_15', label: 'Vytvoření objednávkových čísel — tisk, obálka + sazba, jazyková korektura' },
-      { id: 'p3_16', label: 'Doplnění edičního plánu (doplnit cenu + procenta u autorského honoráře)' },
-      { id: 'p3_13', label: 'Výtisky autorům, povinné výtisky a výtisk do archivu' },
+      { id: 'p3_11', label: 'Odeslání knihy do tisku' },
+      { id: 'p4_10', label: 'Vytvoření anotace' },
     ]
   },
   {
     id: 'p4', title: 'Vydání',
     steps: [
+      { id: 'p3_12', label: 'Potvrzení tisku' },
+      { id: 'p3_16', label: 'Doplnění edičního plánu (doplnit cenu + procenta u autorského honoráře, datum vydání)' },
       { id: 'p4_1', label: 'Vytvoření záznamu v e-shopu' },
+      { id: 'p4_7', label: 'E-mail Martině: připravená karta v E-shopu', template: 'n' },
+      { id: 'p3_14', label: 'Doplnění chyb ze sazby do PublishOnu' },
       { id: 'p4_2', label: 'Kontrola metadat v PublishOnu + nahrání obálky do příloh v PublishOnu („cover.jpg")' },
-      { id: 'p4_10', label: 'Vytvoření anotace' },
       { id: 'p4_3', label: 'E-mail: vytvoření e-knihy Lukášovi', template: 'l' },
       { id: 'p4_4', label: 'Vizuálně zkontrolovat hotový epub' },
-      { id: 'p4_5', label: 'Odeslat epub na vytvoření do hotline (Jiří Nezbeda, Jiří Svoboda)' },
-      { id: 'p4_6', label: 'Aktualizace Edičního plánu — datum vydání' },
-      { id: 'p4_7', label: 'E-mail Martině — připravená karta v E-shopu', template: 'n' },
-      { id: 'p4_9', label: 'Vydání oznámeno na Yammer', template: 'm' },
+      { id: 'p4_5', label: 'Odeslat epub na vytvoření do hotline (Jiří Nezbeda, Jiří Soukup)' },
     ]
   },
   {
     id: 'p5', title: 'Závěr a administrativa',
     steps: [
       { id: 'p5_5', label: 'Oznámení knihy v Národní knihovně' },
-      { id: 'p5_6', label: 'E-mail: odeslat objednávková čísla externistům', subSteps: [
+      { id: 'p4_9', label: 'Oznámení o vydání na Yammer', template: 'm' },
+      { id: 'p5_6', label: 'E-mail: odeslat objednávková čísla externistům', optional: true, subSteps: [
         { id: 'p5_6a', label: 'obálka + sazba', optional: true },
         { id: 'p5_6b', label: 'jazyková korektura', optional: true },
       ]},
       { id: 'p5_1', label: 'Výplata honoráře — kontrola podkladů' },
+      { id: 'p5_4', label: 'Přesunout knihu do archivu', archiveStep: true },
       { id: 'p5_2', label: 'E-mail: Filip — uzavření účetnictví', template: 'o' },
       { id: 'p5_3', label: 'Archivace složky v PublishOnu' },
       { id: 'p5_7', label: 'Vytvořit příspěvek o knize na LinkedIn' },
-      { id: 'p5_4', label: 'Přesunout knihu do archivu', archiveStep: true },
+      { id: 'p3_13', label: 'Výtisky autorům, povinné výtisky a výtisk do archivu' },
     ]
   },
 ];
