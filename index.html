@@ -105,6 +105,9 @@ header.topbar h1 { font-size: 20px; }
 .book-item .b-deadline {
   margin-top: 4px; font-size: 11px; color: #e07b00; font-weight: 500;
 }
+.book-item .b-waiting {
+  margin-top: 4px; font-size: 11px; color: var(--blue); font-weight: 500;
+}
 
 /* Návoz warning banner */
 .deadline-banner {
@@ -225,6 +228,7 @@ header.topbar h1 { font-size: 20px; }
 .step-label { flex: 1; cursor: pointer; min-width: 200px; }
 .step.done .step-label { text-decoration: line-through; color: var(--gray-text); }
 .step-completed-date { font-size: 11px; color: var(--gray-text); margin-left: 8px; }
+.step-waiting { display: inline-block; font-size: 10.5px; font-weight: 600; color: var(--blue); background: rgba(64,114,173,0.08); padding: 2px 8px; border-radius: 10px; margin-left: 8px; white-space: nowrap; }
 .step-input {
   padding: 6px 10px; border: 1px solid var(--gray-border);
   border-radius: 4px; font-size: 13px; min-width: 140px;
@@ -533,7 +537,7 @@ const SECTIONS = [
   {
     id: 's2', title: '2. Schválení',
     steps: [
-      { id: 'approved', label: 'Kalkulace schválena šéfredaktorkou' }
+      { id: 'approved', label: 'Kalkulace schválena šéfredaktorkou', waitingOn: 'Šéfredaktorka' }
     ]
   },
   {
@@ -785,6 +789,16 @@ function calcProgress(book) {
   });
   return { total, done, pct: total === 0 ? 0 : Math.round(done / total * 100) };
 }
+// První nesplněný krok napříč sekcemi (vypnuté volitelné sekce se přeskočí) — pro štítek "čeká se na" v sidebaru
+function firstActionableStep(book) {
+  for (const s of SECTIONS) {
+    if (s.optional && !book.optionalSections[s.optKey]) continue;
+    for (const st of s.steps) {
+      if (!book.steps[st.id] || !book.steps[st.id].done) return st;
+    }
+  }
+  return null;
+}
 function progressColor(pct) {
   if (pct <= 33) return 'var(--raspberry)';
   if (pct <= 66) return 'var(--blue)';
@@ -812,6 +826,8 @@ function renderSidebar() {
         deadlineHtml = `<div class="b-deadline">⚠️ Návoz za ${days} ${dniText(days)}</div>`;
       }
     }
+    const nextStep = firstActionableStep(b);
+    const waitingHtml = (nextStep && nextStep.waitingOn) ? `<div class="b-waiting">⏳ čeká se na: ${escapeHtml(nextStep.waitingOn)}</div>` : '';
     return `
       <div class="book-item ${b.id === currentBookId ? 'active' : ''}" onclick="selectBook('${b.id}')">
         <div class="b-title">${escapeHtml(b.title)}</div>
@@ -819,6 +835,7 @@ function renderSidebar() {
         <div class="b-progress"><div class="b-progress-fill" style="width:${p.pct}%; background:${progressColor(p.pct)};"></div></div>
         <div class="b-status"><span class="status-dot ${dotClass}"></span>${p.done} / ${p.total} kroků</div>
         ${deadlineHtml}
+        ${waitingHtml}
       </div>`;
   }).join('');
 }
@@ -935,7 +952,7 @@ function renderStep(book, st, archived) {
     <div class="step ${stState.done ? 'done' : ''}" data-step="${st.id}">
       <div class="step-row">
         <div class="step-check ${stState.done ? 'done' : ''}" onclick="${archived ? '' : `toggleStep('${st.id}')`}"></div>
-        <div class="step-label" onclick="${archived ? '' : `toggleStep('${st.id}')`}">${escapeHtml(st.label)}${stState.completedAt ? `<span class="step-completed-date">✓ ${fmtDate(stState.completedAt)}</span>` : ''}</div>
+        <div class="step-label" onclick="${archived ? '' : `toggleStep('${st.id}')`}">${escapeHtml(st.label)}${stState.completedAt ? `<span class="step-completed-date">✓ ${fmtDate(stState.completedAt)}</span>` : ''}${(!stState.done && st.waitingOn) ? `<span class="step-waiting">⏳ čeká se na: ${escapeHtml(st.waitingOn)}</span>` : ''}</div>
         ${inputHtml}
         ${genHtml}
         <button class="note-btn ${hasNote ? 'has-note' : ''}" onclick="toggleNote('${st.id}')" title="Poznámka">📝</button>
