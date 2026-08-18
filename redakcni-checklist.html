@@ -251,12 +251,15 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .kb-note svg { flex-shrink: 0; margin-top: 1px; color: var(--gray-dim); }
 .kb-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .kb-foot-steps { font-size: 11px; color: var(--gray-dim); }
-.kb-chip-group { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
 .kb-chip { font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: 10px; flex-shrink: 0; white-space: nowrap; }
 .kb-chip.dl { background: rgba(177,30,84,.08); color: var(--raspberry); }
 .kb-chip.dl.hot { background: var(--raspberry); color: #fff; }
 .kb-chip.odev { background: var(--gray-bg); color: var(--gray-text); }
-.kb-chip.wait { background: rgba(64,114,173,.10); color: var(--blue); }
+/* „Čeká se na" — vlastní řádek na kartě, ať se vejde celý text */
+.kb-wait { display: flex; align-items: flex-start; gap: 4px; background: rgba(64,114,173,.09); color: var(--blue); font-size: 11.5px; font-weight: 600; padding: 5px 6px 5px 9px; border-radius: var(--radius-sm); margin-bottom: 9px; line-height: 1.35; }
+.kb-wait span { flex: 1; min-width: 0; }
+.kb-wait-x { flex-shrink: 0; color: var(--blue); opacity: .45; font-size: 12px; line-height: 1; padding: 1px 3px; border-radius: 3px; transition: var(--transition); }
+.kb-wait-x:hover { opacity: 1; background: rgba(64,114,173,.16); }
 .kb-chip.year { background: rgba(152,196,81,.16); color: #5a8a1a; }
 .kb-card.done { opacity: .82; }
 .kb-card.done .kb-card-title { font-size: 14px; }
@@ -438,7 +441,9 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .step.is-done .step-label { text-decoration: line-through; color: #B83066; }
 .step-date { font-size: 11px; color: var(--gray-dim); margin-left: 6px; }
 .step.is-done .step-date { color: #B83066; opacity: 0.7; }
-.step-waiting { display: inline-block; font-size: 10.5px; font-weight: 600; color: var(--blue); background: rgba(64,114,173,0.08); padding: 2px 8px; border-radius: 10px; margin-left: 8px; white-space: nowrap; }
+.step-waiting { display: inline-flex; align-items: center; gap: 3px; font-size: 10.5px; font-weight: 600; color: var(--blue); background: rgba(64,114,173,0.08); padding: 2px 5px 2px 8px; border-radius: 10px; margin-left: 8px; white-space: nowrap; }
+.step-waiting-x { color: var(--blue); opacity: .45; font-size: 11px; line-height: 1; padding: 1px 3px; border-radius: 3px; transition: var(--transition); }
+.step-waiting-x:hover { opacity: 1; background: rgba(64,114,173,.18); }
 .step-end { display: flex; align-items: center; gap: 2px; flex-shrink: 0; margin-left: auto; padding-left: 8px; }
 .step-note-btn { width: 26px; height: 26px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--gray-dim); transition: var(--transition); flex-shrink: 0; }
 .step-note-btn:hover { background: var(--gray-bg); color: var(--black); }
@@ -580,7 +585,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 
 @media print {
   body { background: var(--white); }
-  .sidebar, .main-topbar, .bh-actions, .step-end, .phase-note-toggle, .add-rep-btn, .todo-add, .modal-overlay, .copy-toast { display: none !important; }
+  .sidebar, .main-topbar, .bh-actions, .step-end, .step-waiting-x, .phase-note-toggle, .add-rep-btn, .todo-add, .modal-overlay, .copy-toast { display: none !important; }
   .app { display: block; }
   .main { display: block; }
   .detail-wrap, .detail { display: block; overflow: visible; height: auto; }
@@ -852,12 +857,12 @@ const DEFAULT_PHASES = [
   {
     id: 'p1', title: 'Smlouva a onboarding',
     steps: [
-      { id: 'p1_1', label: 'E-mail: oslovení autora', template: 'b' },
-      { id: 'p1_2', label: 'E-mail: návrh smlouvy autorovi', template: 'a', subSteps: [
+      { id: 'p1_1', label: 'E-mail: oslovení autora', template: 'b', waitingOn: 'autora' },
+      { id: 'p1_2', label: 'E-mail: návrh smlouvy autorovi', template: 'a', waitingOn: 'autora', subSteps: [
         { id: 'p1_2a', label: 'Vysvětlení způsobu uzavírání smluv', optional: true },
         { id: 'p1_2b', label: 'Zaslání manuálu k uzavření smlouvy', optional: true },
       ]},
-      { id: 'p1_7', label: 'E-mail: informace o procesu autorům', template: 'c', subSteps: [
+      { id: 'p1_7', label: 'E-mail: informace o procesu autorům', template: 'c', waitingOn: 'autora', subSteps: [
         { id: 'p1_7a', label: 'Autorský formulář', optional: true },
         { id: 'p1_7b', label: 'Zápůjční protokol ASPI', optional: true },
         { id: 'p1_7c', label: 'Manuál k ediční řadě', optional: true },
@@ -869,7 +874,7 @@ const DEFAULT_PHASES = [
       { id: 'p1_3', label: 'Legisway tabulka + e-mail Elišce' },
       { id: 'p1_4', label: 'Autorům založit složku v PublishOnu' },
       { id: 'p1_10', label: 'Autorům založit účty v PublishOnu', optional: true },
-      { id: 'p1_5', label: 'Smlouva podepsána a uložena', waitingOn: 'Autor' },
+      { id: 'p1_5', label: 'Smlouva podepsána a uložena' },
       { id: 'p1_6', label: 'Dodatek ke smlouvě', optional: true, repeatable: true },
     ]
   },
@@ -878,33 +883,33 @@ const DEFAULT_PHASES = [
     steps: [
       { id: 'p2_2', label: 'Kontrola stylů v PublishOnu' },
       { id: 'p2_3', label: 'Spuštění nástroje CHT v PublishOnu' },
-      { id: 'p2_1', label: 'E-mail: žádost o ISBN čísla Ivě', template: 'e', waitingOn: 'Iva' },
-      { id: 'p2_4', label: 'E-mail: předání rukopisu jazykové korektorce', template: 'd' },
+      { id: 'p2_1', label: 'E-mail: žádost o ISBN čísla Ivě', template: 'e', waitingOn: 'Ivu' },
+      { id: 'p2_4', label: 'E-mail: předání rukopisu jazykové korektorce', template: 'd', waitingOn: 'jazykovou korektorku' },
       { id: 'p2_5', label: 'Vytvoření záznamu v Edičním plánu' },
-      { id: 'p2_6', label: 'Redakční kontrola + kontrola jazykové korektorky', waitingOn: 'Korektorka' },
+      { id: 'p2_6', label: 'Redakční kontrola + kontrola jazykové korektorky' },
       { id: 'p2_6a', label: 'Seznam zkratek', optional: true },
       { id: 'p2_6b', label: 'Seznam literatury', optional: true },
       { id: 'p2_6c', label: 'Seznam předpisů a judikatury', optional: true },
-      { id: 'p2_7', label: 'E-mail: odeslání upraveného rukopisu na kontrolu autorům', template: 'f' },
-      { id: 'p2_8', label: 'Zpracování oprav od autorů', waitingOn: 'Autoři' },
+      { id: 'p2_7', label: 'E-mail: odeslání upraveného rukopisu na kontrolu autorům', template: 'f', waitingOn: 'autora' },
+      { id: 'p2_8', label: 'Zpracování oprav od autorů' },
       { id: 'p2_9', label: 'Příprava rejstříku', optional: true },
-      { id: 'p2_10', label: 'E-mail: oslovit sazeče, zda má prostor pro sazbu', template: 'g' },
+      { id: 'p2_10', label: 'E-mail: oslovit sazeče, zda má prostor pro sazbu', template: 'g', waitingOn: 'sazeče' },
       { id: 'p2_14', label: 'Připravit podklady pro sazeče (před stavem „odsouhlaseno" v PublishOnu) a zadat sazeče do role Sazeč – ve složce v PublishOnu je třeba mít dokumenty jen pro sazbu, pokud je tam něco navíc, je třeba výslovně sazeče informovat', subSteps: [
         { id: 'p2_14a', label: 'U dokumentů v PublishOnu změnit stav na „odsouhlaseno"' },
       ]},
-      { id: 'p2_13', label: 'Předání rukopisu sazeči' },
+      { id: 'p2_13', label: 'Předání rukopisu sazeči', waitingOn: 'sazeče' },
     ]
   },
   {
     id: 'p3', title: 'Sazba a tisk',
     steps: [
-      { id: 'p3_1', label: 'Kontrola sazby — konce řádků, obsah, záhlaví', waitingOn: 'Sazeč' },
-      { id: 'p3_6', label: 'Odeslání sazby autorům ke kontrole' },
+      { id: 'p3_1', label: 'Kontrola sazby — konce řádků, obsah, záhlaví' },
+      { id: 'p3_6', label: 'Odeslání sazby autorům ke kontrole', waitingOn: 'autory' },
       { id: 'p3_5', label: 'Vytvoření záznamu pro knihu v Edičním plánu' },
       { id: 'p3_2', label: 'Vytvoření kalkulace' },
-      { id: 'p3_3', label: 'Zaslání kalkulace na schválení Ivě', template: 'h' },
-      { id: 'p3_4', label: 'Žádost Filipovi o vytvoření složky pro knihu', template: 'i', waitingOn: 'Filip' },
-      { id: 'p3_7', label: 'Zapracování posledních poznámek k opravě sazby a odeslání sazeči' },
+      { id: 'p3_3', label: 'Zaslání kalkulace na schválení Ivě', template: 'h', waitingOn: 'Ivu' },
+      { id: 'p3_4', label: 'Žádost Filipovi o vytvoření složky pro knihu', template: 'i', waitingOn: 'Filipa' },
+      { id: 'p3_7', label: 'Zapracování posledních poznámek k opravě sazby a odeslání sazeči', waitingOn: 'sazeče' },
       { id: 'p3_8', label: 'Kontrola opravené sazby' },
       { id: 'p3_10', label: 'Kontrola obálky a tiskových materiálů' },
       { id: 'p3_9', label: 'Doplnění kalkulace' },
@@ -919,7 +924,7 @@ const DEFAULT_PHASES = [
       { id: 'p3_12', label: 'Potvrzení tisku' },
       { id: 'p3_16', label: 'Doplnění edičního plánu (doplnit cenu + procenta u autorského honoráře, datum vydání)' },
       { id: 'p4_1', label: 'Vytvoření záznamu v e-shopu' },
-      { id: 'p4_7', label: 'E-mail Martině: připravená karta v E-shopu', template: 'n', waitingOn: 'Martina' },
+      { id: 'p4_7', label: 'E-mail Martině: připravená karta v E-shopu', template: 'n' },
       { id: 'p3_14', label: 'Doplnění chyb ze sazby do PublishOnu' },
       { id: 'p4_2', label: 'Kontrola metadat v PublishOnu + nahrání obálky do příloh v PublishOnu („cover.jpg")' },
       { id: 'p4_11', label: 'Založení Mersz složky v PublishOnu', subSteps: [
@@ -927,9 +932,9 @@ const DEFAULT_PHASES = [
         { id: 'p4_11b', label: 'zkopírování dokumentů ze složky knihy do složky Mersz' },
         { id: 'p4_11c', label: 'odeslat informaci na publishone@wolterskluwer.cz s odkazem do archivu a s případnou informací, pokud v PublishOnu chybí autoři' },
       ]},
-      { id: 'p4_3', label: 'E-mail: vytvoření e-knihy Lukášovi', template: 'l', waitingOn: 'Lukáš' },
+      { id: 'p4_3', label: 'E-mail: vytvoření e-knihy Lukášovi', template: 'l', waitingOn: 'Lukáše' },
       { id: 'p4_4', label: 'Vizuálně zkontrolovat hotový epub' },
-      { id: 'p4_5', label: 'Odeslat epub na vytvoření do hotline (Jiří Nezbeda, Jiří Soukup)' },
+      { id: 'p4_5', label: 'Odeslat epub na vytvoření do hotline (Jiří Nezbeda, Jiří Soukup)', waitingOn: 'hotline' },
     ]
   },
   {
@@ -943,7 +948,7 @@ const DEFAULT_PHASES = [
       ]},
       { id: 'p5_1', label: 'Výplata honoráře — kontrola podkladů' },
       { id: 'p5_4', label: 'Přesunout knihu do archivu', archiveStep: true },
-      { id: 'p5_2', label: 'E-mail: Filip — uzavření účetnictví', template: 'o', waitingOn: 'Filip' },
+      { id: 'p5_2', label: 'E-mail: Filip — uzavření účetnictví', template: 'o' },
       { id: 'p5_3', label: 'Archivace složky v PublishOnu' },
       { id: 'p5_7', label: 'Vytvořit příspěvek o knize na LinkedIn' },
       { id: 'p3_13', label: 'Výtisky autorům, povinné výtisky a výtisk do archivu' },
@@ -952,23 +957,65 @@ const DEFAULT_PHASES = [
 ];
 
 const PHASES_KEY = 'redakcni-phases-v1';
+
+// Kroky, po jejichž odškrtnutí se čeká na někoho dalšího. Páruje se podle id kroku,
+// a když id nesedí (krok si uživatelka v Nastavení vytvořila znovu), tak podle textu kroku.
+const WAITING_RULES = [
+  { id: 'p1_1',  match: 'osloveni autora',                 who: 'autora' },
+  { id: 'p1_2',  match: 'navrh smlouvy autorovi',           who: 'autora' },
+  { id: 'p1_7',  match: 'informace o procesu autor',        who: 'autora' },
+  { id: 'p2_1',  match: 'zadost o isbn',                    who: 'Ivu' },
+  { id: 'p2_4',  match: 'rukopisu jazykove korektorce',     who: 'jazykovou korektorku' },
+  { id: 'p2_7',  match: 'odeslani upraveneho rukopisu',     who: 'autora' },
+  { id: 'p2_10', match: 'oslovit sazece',                   who: 'sazeče' },
+  { id: 'p2_13', match: 'predani rukopisu sazeci',          who: 'sazeče' },
+  { id: 'p3_6',  match: 'odeslani sazby autorum',           who: 'autory' },
+  { id: 'p3_3',  match: 'zaslani kalkulace',                who: 'Ivu' },
+  { id: 'p3_4',  match: 'zadost filipovi',                  who: 'Filipa' },
+  { id: 'p3_7',  match: 'zapracovani poslednich poznamek',  who: 'sazeče' },
+  {              match: 'navod na propagaci',               who: 'autory' },
+  { id: 'p4_3',  match: 'vytvoreni e-knihy',                who: 'Lukáše' },
+  { id: 'p4_5',  match: 'do hotline',                       who: 'hotline' },
+];
+// Jednorázové srovnání uložené struktury s pravidly výše. Proběhne jen jednou;
+// od té chvíle je „čeká se na" plně v rukou uživatelky přes Nastavení checklistu.
+const WAITING_RESET_KEY = 'redakcni-waiting-reset-v2';
+// Text kroku bez diakritiky a malými písmeny, aby párování podle textu nebylo křehké.
+// Musí být deklarované PŘED loadPhases() — to se volá hned při načtení skriptu.
+const DIACRITICS_RE = new RegExp('[\\u0300-\\u036f]', 'g');
+
 let PHASES = loadPhases();
 function loadPhases() {
+  let saved = null;
   try {
     const r = localStorage.getItem(PHASES_KEY);
-    if (r) { const p = JSON.parse(r); if (Array.isArray(p) && p.length) { migrateWaitingOn(p); return p; } }
+    if (r) { const p = JSON.parse(r); if (Array.isArray(p) && p.length) saved = p; }
   } catch(e) {}
-  return JSON.parse(JSON.stringify(DEFAULT_PHASES));
+  if (!saved) {
+    localStorage.setItem(WAITING_RESET_KEY, '1');
+    return JSON.parse(JSON.stringify(DEFAULT_PHASES));
+  }
+  // Kdyby migrace z jakéhokoli důvodu selhala, uloženou strukturu vrátíme beze změny —
+  // nikdy se kvůli ní nesmí přepsat vlastními úpravami uživatelky.
+  try {
+    if (resetWaitingOnce(saved)) localStorage.setItem(PHASES_KEY, JSON.stringify(saved));
+  } catch(e) {}
+  return saved;
 }
 function savePhases() { localStorage.setItem(PHASES_KEY, JSON.stringify(PHASES)); }
-// Doplní waitingOn z DEFAULT_PHASES do už uložené (případně upravené) struktury podle id kroku,
-// beze změny hodnot, které si uživatelka už sama nastavila.
-function migrateWaitingOn(phases) {
-  const defaults = {};
-  DEFAULT_PHASES.forEach(ph => ph.steps.forEach(st => { if (st.waitingOn) defaults[st.id] = st.waitingOn; }));
+function normLabel(s) {
+  return String(s || '').toLowerCase().normalize('NFD').replace(DIACRITICS_RE, '');
+}
+function resetWaitingOnce(phases) {
+  if (localStorage.getItem(WAITING_RESET_KEY) === '1') return false;
   phases.forEach(ph => (ph.steps || []).forEach(st => {
-    if (!st.waitingOn && defaults[st.id]) st.waitingOn = defaults[st.id];
+    delete st.waitingOn;
+    const lbl = normLabel(st.label);
+    const rule = WAITING_RULES.find(r => (r.id && r.id === st.id) || lbl.includes(r.match));
+    if (rule) st.waitingOn = rule.who;
   }));
+  localStorage.setItem(WAITING_RESET_KEY, '1');
+  return true;
 }
 
 const DEFAULT_TEMPLATES = {
@@ -1178,6 +1225,7 @@ let tplEditorKey = 'a';
 let filterKomentare = false;
 let filterOdevzdane = false;
 let justToggledStep = null;   // id kroku pro mikro-animaci odškrtnutí
+let curWaitId = null;         // id kroku, u kterého se právě čeká (nastavuje renderMain)
 const prevWidths = {};        // předchozí hodnoty progressu pro plynulé animace
 
 function initCal() { const n = new Date(); calYear = n.getFullYear(); calMonth = n.getMonth(); }
@@ -1225,6 +1273,7 @@ function migrateBook(b) {
   if (!b.phaseNotes) b.phaseNotes = {};
   if (!b.additionals) b.additionals = {};
   if (!b.todos) b.todos = [];
+  if (!b.waitingDismissed) b.waitingDismissed = [];
   b.todos.forEach(t => { if (!t.id) t.id = uuid(); });
   if (b.cancelled === undefined) b.cancelled = false;
   if (b.rukopisOdevzdan === undefined) b.rukopisOdevzdan = false;
@@ -1265,13 +1314,25 @@ function phaseProgress(b, ph) {
   });
   return { total, done };
 }
-// První nesplněný (a aktivní) krok fáze — pro štítek "čeká se na" na kartě v Přehledu
-function firstActionableStep(b, ph) {
-  for (const st of ph.steps) {
-    if (st.optional && !b.activeOptional.includes(st.id)) continue;
-    if (!b.steps[st.id] || !b.steps[st.id].done) return st;
-  }
-  return null;
+// Poslední předání = naposledy odškrtnutý krok s vyplněným „čeká se na" (napříč všemi fázemi).
+// Jakmile se odškrtne další takový krok, štítek se přepne na něj.
+function lastHandoffStep(b) {
+  let best = null, bestAt = -1, bestIdx = -1, idx = 0;
+  PHASES.forEach(ph => ph.steps.forEach(st => {
+    idx++;
+    if (!st.waitingOn) return;
+    const s = b.steps[st.id];
+    if (!s || !s.done) return;
+    const at = s.completedAt ? new Date(s.completedAt).getTime() : 0;
+    if (at > bestAt || (at === bestAt && idx > bestIdx)) { best = st; bestAt = at; bestIdx = idx; }
+  }));
+  return best;
+}
+// Totéž, ale null i tehdy, když uživatelka štítek u toho kroku odklikla křížkem.
+function currentWaitingStep(b) {
+  const st = lastHandoffStep(b);
+  if (!st) return null;
+  return (b.waitingDismissed || []).includes(st.id) ? null : st;
 }
 function progressColor(pct) {
   if (pct >= 100) return 'var(--green)';
@@ -1503,14 +1564,15 @@ function boardCard(b, phaseIdx) {
       chip = `<span class="kb-chip dl ${hot?'hot':''}">${hot?'⏰ ':''}${lbl}</span>`;
     }
   }
-  const nextStep = firstActionableStep(b, ph);
-  const waitChip = nextStep && nextStep.waitingOn ? `<span class="kb-chip wait">⏳ ${escapeHtml(nextStep.waitingOn)}</span>` : '';
+  const wait = currentWaitingStep(b);
+  const waitHtml = wait ? `<div class="kb-wait"><span>⏳ čeká se na ${escapeHtml(wait.waitingOn)}</span><button class="kb-wait-x" onclick="event.stopPropagation();dismissWaiting('${b.id}','${wait.id}')" title="Už mám odpověď — skrýt štítek">✕</button></div>` : '';
   return `<div class="kb-card ${isKomentar(b)?'priority':''}" onclick="openBook('${b.id}')">
     <div class="kb-card-title">${escapeHtml(b.title)}</div>
     <div class="kb-card-author">${escapeHtml(b.author)}</div>
     <div class="kb-dots">${dots}</div>
+    ${waitHtml}
     ${noteHtml}
-    <div class="kb-foot"><span class="kb-foot-steps">${pp.done} / ${pp.total} kroků</span><span class="kb-chip-group">${waitChip}${chip}</span></div>
+    <div class="kb-foot"><span class="kb-foot-steps">${pp.done} / ${pp.total} kroků</span>${chip}</div>
   </div>`;
 }
 function renderBoard() {
@@ -1604,6 +1666,8 @@ function renderMain() {
   const archived = !!book.archivedAt;
   const cancelled = !!book.cancelled;
   const ro = archived ? 'readonly' : '';
+  const curWait = currentWaitingStep(book);
+  curWaitId = curWait ? curWait.id : null;
   const p = calcProgress(book);
   const ringKey = 'ring:' + book.id;
   const ringFrom = prevWidths[ringKey];
@@ -1767,7 +1831,11 @@ function renderStep(book, st, archived) {
   const checkClick = (!archived && (!isOpt || isActive)) ? `onclick="toggleStep('${st.id}')"` : '';
   const labelClick = (!archived && (!isOpt || isActive)) ? `onclick="toggleStep('${st.id}')"` : '';
   const dateHtml = s.completedAt ? `<span class="step-date">✓ ${fmtDate(s.completedAt)}</span>` : '';
-  const waitingHtml = (!s.done && st.waitingOn) ? `<span class="step-waiting">⏳ čeká se na: ${escapeHtml(st.waitingOn)}</span>` : '';
+  // Štítek se objeví až po odškrtnutí kroku (předala jsem to dál — teď čekám na odpověď)
+  // a jen u toho kroku, který je zrovna to poslední předání.
+  const waitingHtml = (st.id === curWaitId && st.waitingOn)
+    ? `<span class="step-waiting">⏳ čeká se na ${escapeHtml(st.waitingOn)}<button class="step-waiting-x" onclick="event.stopPropagation();dismissWaiting('${book.id}','${st.id}')" title="Už mám odpověď — skrýt štítek">✕</button></span>`
+    : '';
 
   const hasNote = !!s.note;
   const optBtn = (!archived && isOpt && !isActive) ? `<button class="opt-activate-btn" onclick="activateOptional('${st.id}')">+ aktivovat</button>` : '';
@@ -1847,7 +1915,16 @@ function toggleStep(stepId) {
   const b=getBook(); if(!b||b.archivedAt) return;
   const s=b.steps[stepId]; s.done=!s.done; s.completedAt=s.done?todayISO():null;
   justToggledStep = s.done ? stepId : null;
+  // Odškrtnutí kroku zpět zruší i skrytí štítku „čeká se na" — při novém odškrtnutí se zase objeví.
+  if (!s.done && b.waitingDismissed) b.waitingDismissed = b.waitingDismissed.filter(x => x !== stepId);
   saveState(); renderMain(); renderBookList();
+}
+// Křížek u štítku: odpověď už dorazila, štítek schovej (dokud se krok neodškrtne znovu).
+function dismissWaiting(bookId, stepId) {
+  const b = state.books.find(x => x.id === bookId); if (!b || b.archivedAt) return;
+  if (!b.waitingDismissed) b.waitingDismissed = [];
+  if (!b.waitingDismissed.includes(stepId)) b.waitingDismissed.push(stepId);
+  saveState(); render();
 }
 function activateOptional(stepId) {
   const b=getBook(); if(!b||b.archivedAt) return;
@@ -1945,7 +2022,7 @@ function createBook() {
     odevzdaniRukopisu:ov?new Date(ov).toISOString():'',
     notes:'', createdAt:todayISO(), archivedAt:null, rokVydani:null,
     cancelled:false, cancelReason:'', rukopisOdevzdan:false,
-    activeOptional:[], additionals:{}, phaseNotes:{}, todos:[], steps:emptySteps(),
+    activeOptional:[], additionals:{}, phaseNotes:{}, todos:[], waitingDismissed:[], steps:emptySteps(),
   };
   state.books.unshift(book); saveState();
   currentBookId=book.id; currentTab='active'; currentView='detail';
@@ -2084,7 +2161,7 @@ function renderStructEditor() {
             <input class="se-label" value="${escapeHtml(st.label)}" onchange="seEditLabel(${pi},${si},null,this.value)">
             ${flags}
             <span class="se-opt ${st.optional?'on':''}" onclick="seToggleOptional(${pi},${si},null)" title="Podmíněný krok se v checklistu objeví šedý a musí se nejdřív aktivovat">${st.optional?'podmíněný':'aktivní'}</span>
-            <input class="se-wait" placeholder="čeká se na…" value="${escapeHtml(st.waitingOn||'')}" onchange="seEditWaitingOn(${pi},${si},this.value)" title="Kdo/co teď brzdí tento krok — zobrazí se jako štítek, dokud krok nebude odškrtnutý">
+            <input class="se-wait" placeholder="čeká se na…" value="${escapeHtml(st.waitingOn||'')}" onchange="seEditWaitingOn(${pi},${si},this.value)" title="Na koho se čeká po odškrtnutí tohoto kroku. Štítek se objeví na kartě v Přehledu a zůstane, dokud neodškrtnete další krok s vyplněným čekáním.">
             <button class="se-ctl" onclick="seMove(${pi},${si},-1)" title="Posunout výš">↑</button>
             <button class="se-ctl" onclick="seMove(${pi},${si},1)" title="Posunout níž">↓</button>
             <button class="se-ctl del" onclick="seDeleteStep(${pi},${si})" title="Smazat krok">✕</button>

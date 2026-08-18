@@ -537,7 +537,7 @@ const SECTIONS = [
   {
     id: 's2', title: '2. Schválení',
     steps: [
-      { id: 'approved', label: 'Kalkulace schválena šéfredaktorkou', waitingOn: 'Šéfredaktorka' }
+      { id: 'approved', label: 'Kalkulace schválena šéfredaktorkou' }
     ]
   },
   {
@@ -789,15 +789,23 @@ function calcProgress(book) {
   });
   return { total, done, pct: total === 0 ? 0 : Math.round(done / total * 100) };
 }
-// První nesplněný krok napříč sekcemi (vypnuté volitelné sekce se přeskočí) — pro štítek "čeká se na" v sidebaru
-function firstActionableStep(book) {
-  for (const s of SECTIONS) {
-    if (s.optional && !book.optionalSections[s.optKey]) continue;
-    for (const st of s.steps) {
-      if (!book.steps[st.id] || !book.steps[st.id].done) return st;
-    }
-  }
-  return null;
+// Poslední předání = naposledy odškrtnutý krok s vyplněným waitingOn.
+// Štítek se tedy objeví až POTOM, co krok odškrtnu (předala jsem to dál a čekám na odpověď),
+// a zůstane, dokud neodškrtnu další takový krok. Zatím žádný krok dotisků waitingOn nemá.
+function lastHandoffStep(book) {
+  let best = null, bestAt = -1, bestIdx = -1, idx = 0;
+  SECTIONS.forEach(s => {
+    if (s.optional && !book.optionalSections[s.optKey]) return;
+    s.steps.forEach(st => {
+      idx++;
+      if (!st.waitingOn) return;
+      const stState = book.steps[st.id];
+      if (!stState || !stState.done) return;
+      const at = stState.completedAt ? new Date(stState.completedAt).getTime() : 0;
+      if (at > bestAt || (at === bestAt && idx > bestIdx)) { best = st; bestAt = at; bestIdx = idx; }
+    });
+  });
+  return best;
 }
 function progressColor(pct) {
   if (pct <= 33) return 'var(--raspberry)';
@@ -826,8 +834,8 @@ function renderSidebar() {
         deadlineHtml = `<div class="b-deadline">⚠️ Návoz za ${days} ${dniText(days)}</div>`;
       }
     }
-    const nextStep = firstActionableStep(b);
-    const waitingHtml = (nextStep && nextStep.waitingOn) ? `<div class="b-waiting">⏳ čeká se na: ${escapeHtml(nextStep.waitingOn)}</div>` : '';
+    const waitStep = lastHandoffStep(b);
+    const waitingHtml = waitStep ? `<div class="b-waiting">⏳ čeká se na ${escapeHtml(waitStep.waitingOn)}</div>` : '';
     return `
       <div class="book-item ${b.id === currentBookId ? 'active' : ''}" onclick="selectBook('${b.id}')">
         <div class="b-title">${escapeHtml(b.title)}</div>
@@ -952,7 +960,7 @@ function renderStep(book, st, archived) {
     <div class="step ${stState.done ? 'done' : ''}" data-step="${st.id}">
       <div class="step-row">
         <div class="step-check ${stState.done ? 'done' : ''}" onclick="${archived ? '' : `toggleStep('${st.id}')`}"></div>
-        <div class="step-label" onclick="${archived ? '' : `toggleStep('${st.id}')`}">${escapeHtml(st.label)}${stState.completedAt ? `<span class="step-completed-date">✓ ${fmtDate(stState.completedAt)}</span>` : ''}${(!stState.done && st.waitingOn) ? `<span class="step-waiting">⏳ čeká se na: ${escapeHtml(st.waitingOn)}</span>` : ''}</div>
+        <div class="step-label" onclick="${archived ? '' : `toggleStep('${st.id}')`}">${escapeHtml(st.label)}${stState.completedAt ? `<span class="step-completed-date">✓ ${fmtDate(stState.completedAt)}</span>` : ''}${(stState.done && st.waitingOn) ? `<span class="step-waiting">⏳ čeká se na ${escapeHtml(st.waitingOn)}</span>` : ''}</div>
         ${inputHtml}
         ${genHtml}
         <button class="note-btn ${hasNote ? 'has-note' : ''}" onclick="toggleNote('${st.id}')" title="Poznámka">📝</button>
