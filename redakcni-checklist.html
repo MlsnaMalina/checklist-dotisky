@@ -307,6 +307,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .bh-field input:focus, .bh-field select:focus, .bh-field textarea:focus { outline: none; border-color: #B83066; }
 .bh-field input[readonly] { background: var(--gray-bg); color: var(--gray-text); cursor: default; }
 .bh-notes { grid-column: 1 / -1; }
+.bh-authors { grid-column: 1 / -1; }
 .bh-notes textarea { resize: vertical; min-height: 60px; width: 100%; }
 .bh-notes-row { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
 .bh-notes-row textarea { flex: 1; min-width: 220px; }
@@ -501,6 +502,17 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .add-rep-btn { font-size: 12px; color: var(--blue); background: rgba(64,114,173,0.08); padding: 5px 10px; border-radius: 4px; margin-top: 4px; margin-left: 30px; transition: var(--transition); }
 .add-rep-btn:hover { background: rgba(64,114,173,0.15); }
 
+/* Seznam autorů — modál nové knihy i editace na kartě knihy */
+.authors-list { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+.author-row { display: flex; align-items: center; gap: 6px; }
+.author-row input { flex: 1; padding: 7px 10px; border: 1px solid #e2e2e2; border-radius: var(--radius-sm); background: var(--white); font-size: 13px; transition: var(--transition); }
+.author-row input:focus { outline: none; border-color: #B83066; }
+.author-row input[readonly] { background: var(--gray-bg); color: var(--gray-text); }
+.author-row-del { flex-shrink: 0; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; color: var(--gray-dim); font-size: 14px; border-radius: 4px; transition: var(--transition); }
+.author-row-del:hover { color: var(--raspberry); background: rgba(177,30,84,0.06); }
+.add-author-btn { font-size: 12px; color: var(--blue); background: rgba(64,114,173,0.08); padding: 5px 10px; border-radius: 4px; margin-top: 6px; transition: var(--transition); }
+.add-author-btn:hover { background: rgba(64,114,173,0.15); }
+
 /* Phase notes */
 .phase-note-toggle { font-size: 12px; color: var(--gray-dim); margin-bottom: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: var(--transition); }
 .phase-note-toggle:hover { color: var(--blue); }
@@ -593,7 +605,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 
 @media print {
   body { background: var(--white); }
-  .sidebar, .main-topbar, .bh-actions, .step-end, .step-waiting-x, .phase-note-toggle, .add-rep-btn, .todo-add, .modal-overlay, .copy-toast { display: none !important; }
+  .sidebar, .main-topbar, .bh-actions, .step-end, .step-waiting-x, .phase-note-toggle, .add-rep-btn, .todo-add, .modal-overlay, .copy-toast, .author-row-del, .add-author-btn { display: none !important; }
   .app { display: block; }
   .main { display: block; }
   .detail-wrap, .detail { display: block; overflow: visible; height: auto; }
@@ -690,9 +702,12 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
         <label>Název knihy *</label>
         <input type="text" id="nb_title" placeholder="Název…">
       </div>
-      <div class="modal-field">
+      <div class="modal-field modal-fullrow">
         <label>Autor / autoři *</label>
-        <input type="text" id="nb_author" placeholder="Jméno Příjmení">
+        <div class="authors-list" id="nb_authors_list">
+          <div class="author-row"><input type="text" class="nb-author-input" placeholder="Jméno Příjmení"><button type="button" class="author-row-del" onclick="nbRemoveAuthorRow(this)" title="Odebrat">✕</button></div>
+        </div>
+        <button type="button" class="add-author-btn" onclick="nbAddAuthorRow()">+ Další autor/ka</button>
       </div>
       <div class="modal-field">
         <label>Ediční řada *</label>
@@ -1267,6 +1282,14 @@ function escapeHtml(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 }
 function ediceLabel(b) { return EDICE_LABELS[b.edice] || b.ediceCustom || b.edice || ''; }
+// book.authors je zdroj pravdy (pole jmen); book.author je z něj odvozený spojený řetězec,
+// který beze změny čtou všechna ostatní místa (seznam knih, karty, {{autor}} v šablonách).
+function joinAuthors(list) {
+  const a = (list || []).map(s => s.trim()).filter(Boolean);
+  if (a.length === 0) return '';
+  if (a.length === 1) return a[0];
+  return a.slice(0, -1).join(', ') + ' a ' + a[a.length - 1];
+}
 function allStepIds() {
   const r = [];
   PHASES.forEach(ph => ph.steps.forEach(st => {
@@ -1278,6 +1301,7 @@ function allStepIds() {
 function emptySteps() { const s = {}; allStepIds().forEach(id => { s[id] = { done: false, note: '', completedAt: null }; }); return s; }
 
 function migrateBook(b) {
+  if (!b.authors) b.authors = b.author ? [b.author] : [''];
   if (!b.steps) b.steps = emptySteps();
   allStepIds().forEach(id => { if (!b.steps[id]) b.steps[id] = { done: false, note: '', completedAt: null }; });
   if (!b.activeOptional) b.activeOptional = [];
@@ -1735,7 +1759,13 @@ function renderMain() {
           <div class="bh-author">${escapeHtml(book.author)}</div>
           <div class="bh-fields">
             <div class="bh-field"><label>Název</label><input type="text" value="${escapeHtml(book.title)}" ${ro} onchange="updateBook('title',this.value)" onblur="renderMain()"></div>
-            <div class="bh-field"><label>Autor</label><input type="text" value="${escapeHtml(book.author)}" ${ro} onchange="updateBook('author',this.value)"></div>
+            <div class="bh-field bh-authors">
+              <label>Autor / autoři</label>
+              <div class="authors-list">
+                ${book.authors.map((a,i) => `<div class="author-row"><input type="text" value="${escapeHtml(a)}" ${ro} onchange="updateAuthorAt(${i},this.value)" placeholder="Jméno Příjmení">${ro?'':`<button type="button" class="author-row-del" onclick="removeAuthorAt(${i})" title="Odebrat">✕</button>`}</div>`).join('')}
+              </div>
+              ${ro?'':'<button type="button" class="add-author-btn" onclick="addAuthorRow()">+ Další autor/ka</button>'}
+            </div>
             <div class="bh-field"><label>Redaktorka</label><input type="text" value="${escapeHtml(book.editor||'')}" ${ro} onchange="updateBook('editor',this.value)"></div>
             <div class="bh-field"><label>Ediční řada</label><input type="text" value="${escapeHtml(ediceLabel(book))}" readonly style="background:var(--gray-bg);color:var(--gray-text);"></div>
             <div class="bh-field"><label>ISBN brož.</label><input type="text" value="${escapeHtml(book.isbnBroz||'')}" ${ro} onchange="updateBook('isbnBroz',this.value)" placeholder="978-80-…"></div>
@@ -1922,6 +1952,25 @@ function togglePhaseNote(phId, e) {
 // Mutations
 function getBook() { return state.books.find(b => b.id===currentBookId); }
 function updateBook(field, value) { const b=getBook(); if(!b||b.archivedAt) return; b[field]=value; saveState(); renderBookList(); }
+function updateAuthorAt(i, value) {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  b.authors[i]=value; b.author=joinAuthors(b.authors);
+  saveState(); renderBookList();
+}
+function addAuthorRow() {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  b.authors.push(''); saveState(); renderMain();
+  const inputs=document.querySelectorAll('.bh-authors .author-row input');
+  inputs[inputs.length-1]?.focus();
+}
+// Smazání posledního zbývajícího autora ho jen vyprázdní — pole je povinné.
+function removeAuthorAt(i) {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  if (b.authors.length<=1) { b.authors[i]=''; }
+  else { b.authors.splice(i,1); }
+  b.author=joinAuthors(b.authors);
+  saveState(); renderMain(); renderBookList();
+}
 function toggleStep(stepId) {
   const b=getBook(); if(!b||b.archivedAt) return;
   const s=b.steps[stepId]; s.done=!s.done; s.completedAt=s.done?todayISO():null;
@@ -1994,7 +2043,8 @@ function deleteTodoById(id) {
 
 // Book CRUD
 function openNewBook() {
-  ['nb_title','nb_author','nb_isbn_broz','nb_isbn_vaz','nb_isbn_pdf','nb_isbn_epub','nb_isbn_mobi','nb_nav','nb_edice_custom'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  ['nb_title','nb_isbn_broz','nb_isbn_vaz','nb_isbn_pdf','nb_isbn_epub','nb_isbn_mobi','nb_nav','nb_edice_custom'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('nb_authors_list').innerHTML = '<div class="author-row"><input type="text" class="nb-author-input" placeholder="Jméno Příjmení"><button type="button" class="author-row-del" onclick="nbRemoveAuthorRow(this)" title="Odebrat">✕</button></div>';
   document.getElementById('nb_editor').value='Kateřina Mlsnová';
   document.getElementById('nb_korektorka').value='Daniela Schmiedtová';
   document.getElementById('nb_sazec').value='Tomáš Brejcha';
@@ -2005,6 +2055,22 @@ function openNewBook() {
   openModal('newBookModal');
   setTimeout(()=>document.getElementById('nb_title').focus(),80);
 }
+function nbAddAuthorRow() {
+  const list = document.getElementById('nb_authors_list');
+  const row = document.createElement('div');
+  row.className = 'author-row';
+  row.innerHTML = '<input type="text" class="nb-author-input" placeholder="Jméno Příjmení"><button type="button" class="author-row-del" onclick="nbRemoveAuthorRow(this)" title="Odebrat">✕</button>';
+  list.appendChild(row);
+  row.querySelector('input').focus();
+}
+// Smazání posledního zbývajícího řádku ho jen vyprázdní — pole je povinné,
+// ať v seznamu vždy zůstane aspoň jeden řádek k vyplnění.
+function nbRemoveAuthorRow(btn) {
+  const list = document.getElementById('nb_authors_list');
+  const row = btn.closest('.author-row');
+  if (list.querySelectorAll('.author-row').length <= 1) { row.querySelector('input').value = ''; return; }
+  row.remove();
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('nb_edice')?.addEventListener('change', function() {
@@ -2014,13 +2080,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function createBook() {
   const title=document.getElementById('nb_title').value.trim();
-  const author=document.getElementById('nb_author').value.trim();
+  const authors=Array.from(document.querySelectorAll('#nb_authors_list .nb-author-input')).map(i=>i.value.trim()).filter(Boolean);
+  const author=joinAuthors(authors);
   const editor=document.getElementById('nb_editor').value.trim();
   const edice=document.getElementById('nb_edice').value;
-  if(!title||!author||!editor) { document.getElementById('nb_err').textContent='Vyplňte název, autora a redaktorku.'; return; }
+  if(!title||!authors.length||!editor) { document.getElementById('nb_err').textContent='Vyplňte název, autora a redaktorku.'; return; }
   const ov=document.getElementById('nb_odevzdani').value;
   const book={
-    id:uuid(), title, author, editor, edice,
+    id:uuid(), title, authors, author, editor, edice,
     ediceCustom: edice==='edice'?document.getElementById('nb_edice_custom').value.trim():'',
     isbnBroz:document.getElementById('nb_isbn_broz').value.trim(),
     isbnVaz:document.getElementById('nb_isbn_vaz').value.trim(),
@@ -2254,7 +2321,10 @@ function seReset() {
 
 // Export / Import
 function exportData() {
-  const blob=new Blob([JSON.stringify({ books: state.books, phases: PHASES },null,2)],{type:'application/json'});
+  // Záloha musí obsahovat vše, co si redaktorka sama upravila — knihy, strukturu
+  // checklistu (waitingOn, přejmenované/přidané kroky) i šablony e-mailů. Dřív se
+  // šablony do zálohy vůbec nedostaly a při obnově na jiném počítači by zmizely.
+  const blob=new Blob([JSON.stringify({ books: state.books, phases: PHASES, templates },null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url; a.download=`redakcni-zaloha-${new Date().toISOString().slice(0,10)}.json`; a.click();
@@ -2272,6 +2342,7 @@ function importData(event) {
       if(choice==='1') {
         state={ books: imp.books };
         if(Array.isArray(imp.phases) && imp.phases.length) { PHASES=imp.phases; savePhases(); }
+        if(imp.templates && typeof imp.templates==='object') { templates={ ...DEFAULT_TEMPLATES, ...imp.templates }; saveTemplates(); }
       }
       else if(choice==='2') { const ids=new Set(state.books.map(b=>b.id)); imp.books.forEach(b=>{ if(!ids.has(b.id)) state.books.push(b); }); }
       saveState(); initApp(); alert('Import dokončen.');
