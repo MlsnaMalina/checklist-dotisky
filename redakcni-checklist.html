@@ -18,25 +18,28 @@
   --green-dark: #7aaa38;
   --amber: #e07b00;
   --rose: #c0606a;
-  --cream: #f8f6f2;
+  /* Chladné šedi sdílené s nástrojem Kontrola rukopisu — dřív byly do písku
+     (#f8f6f2 / #e4e1d9 / #8a8880). Bílé plochy proto drží vlasový rámeček,
+     ne stín, a --shadow je jen jemné podsazení. */
+  --page: #f4f6f8;
   --white: #ffffff;
   --black: #1a1a1a;
-  --gray-bg: #f2f1ed;
-  --gray-border: #e4e1d9;
-  --gray-text: #8a8880;
-  --gray-dim: #b5b2aa;
+  --gray-bg: #eef1f4;
+  --gray-border: #e2e6ea;
+  --gray-text: #5b5f66;
+  --gray-dim: #8f949c;
   --sidebar-w: 220px;
   --radius: 10px;
   --radius-sm: 6px;
-  --shadow: 0 2px 10px rgba(0,0,0,0.06);
-  --shadow-md: 0 6px 24px rgba(0,0,0,0.10);
+  --shadow: 0 1px 2px rgba(27,45,82,0.05);
+  --shadow-md: 0 6px 24px rgba(27,45,82,0.12);
   --transition: 180ms ease;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
 body {
   font-family: 'DM Sans', system-ui, sans-serif;
-  background: var(--cream); color: var(--black);
+  background: var(--page); color: var(--black);
   font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased;
 }
 h1,h2,h3,h4 { font-family: 'Playfair Display', Georgia, serif; font-weight: 600; line-height: 1.25; }
@@ -126,7 +129,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 }
 .search-wrap input::placeholder { color: rgba(255,255,255,0.3); }
 .search-wrap input:focus { outline: none; background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.22); }
-.search-icon { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.35); font-size: 14px; pointer-events: none; }
+.search-icon { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.35); display: flex; pointer-events: none; }
 .sidebar-tabs {
   display: flex; gap: 4px; margin: 0 12px 8px;
   background: rgba(0,0,0,0.2); border-radius: var(--radius-sm); padding: 3px; flex-shrink: 0;
@@ -187,7 +190,8 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .bi-meta { display: flex; justify-content: space-between; margin-top: 4px; }
 .bi-pct { font-size: 10px; font-weight: 600; color: #fff; }
 .bi-rok { font-size: 10px; color: rgba(255,255,255,0.35); font-style: italic; }
-.bi-deadline { font-size: 10px; color: #ffd580; margin-top: 3px; }
+.bi-deadline { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #ffd580; margin-top: 3px; }
+.bi-deadline svg { flex-shrink: 0; }
 .bi-cancelled { font-size: 10px; color: rgba(192,96,106,0.7); margin-top: 3px; }
 .sidebar-empty { padding: 20px 12px; text-align: center; color: rgba(255,255,255,0.25); font-size: 12px; }
 
@@ -216,7 +220,8 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .kb-stat.hot b { color: var(--raspberry); }
 .kb-sep { width: 1px; height: 24px; background: var(--gray-border); }
 .dl-wrap { padding: 0 28px 14px; }
-.expand-hint { font-size: 11px; color: var(--blue); cursor: pointer; display: inline-block; }
+.expand-hint { font-size: 11px; color: var(--blue); cursor: pointer; display: inline-flex; align-items: center; gap: 3px; }
+.expand-hint svg { width: 12px; height: 12px; }
 .expand-hint:hover { text-decoration: underline; }
 .dl-list { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--gray-border); max-width: 420px; }
 .dl-list.open { display: block; }
@@ -237,8 +242,8 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .year-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
 .year-btn { border: none; background: var(--green); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 11px; border-radius: 20px; transition: var(--transition); font-variant-numeric: tabular-nums; }
 .year-btn:hover { background: var(--green-dark); }
-.kb-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 13px 14px 12px; margin-bottom: 10px; cursor: pointer; transition: box-shadow 160ms ease, transform 160ms ease, border-color 160ms ease; border: 1px solid transparent; }
-.kb-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: rgba(27,45,82,.10); }
+.kb-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 13px 14px 12px; margin-bottom: 10px; cursor: pointer; transition: box-shadow 160ms ease, transform 160ms ease, border-color 160ms ease; border: 1px solid var(--gray-border); }
+.kb-card:hover { box-shadow: 0 3px 12px rgba(27,45,82,.10); transform: translateY(-2px); border-color: var(--blue); }
 .kb-card.priority { border: 2px solid var(--raspberry); padding: 12px 13px 11px; }
 .kb-card.priority:hover { border-color: var(--raspberry); }
 .kb-card-title { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; line-height: 1.3; color: var(--black); margin-bottom: 1px; }
@@ -251,12 +256,14 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .kb-note svg { flex-shrink: 0; margin-top: 1px; color: var(--gray-dim); }
 .kb-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .kb-foot-steps { font-size: 11px; color: var(--gray-dim); }
-.kb-chip { font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: 10px; flex-shrink: 0; white-space: nowrap; }
+.kb-chip { display: inline-flex; align-items: center; gap: 3px; font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: 10px; flex-shrink: 0; white-space: nowrap; }
+.kb-chip svg { flex-shrink: 0; }
 .kb-chip.dl { background: rgba(177,30,84,.08); color: var(--raspberry); }
 .kb-chip.dl.hot { background: var(--raspberry); color: #fff; }
 .kb-chip.odev { background: var(--gray-bg); color: var(--gray-text); }
 /* „Čeká se na" — vlastní řádek na kartě, ať se vejde celý text */
 .kb-wait { display: flex; align-items: flex-start; gap: 4px; background: rgba(64,114,173,.09); color: var(--blue); font-size: 11.5px; font-weight: 600; padding: 5px 6px 5px 9px; border-radius: var(--radius-sm); margin-bottom: 9px; line-height: 1.35; }
+.kb-wait > svg { flex-shrink: 0; margin-top: 1px; }
 .kb-wait span { flex: 1; min-width: 0; }
 .kb-wait-x { flex-shrink: 0; color: var(--blue); opacity: .45; font-size: 12px; line-height: 1; padding: 1px 3px; border-radius: 3px; transition: var(--transition); }
 .kb-wait-x:hover { opacity: 1; background: rgba(64,114,173,.16); }
@@ -275,7 +282,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 
 /* Book header */
 .book-header {
-  background: var(--white); border-radius: var(--radius); padding: 24px 28px;
+  background: var(--white); border: 1px solid var(--gray-border); border-radius: var(--radius); padding: 24px 28px;
   margin-bottom: 20px; box-shadow: var(--shadow); position: relative; overflow: hidden;
 }
 .book-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--blue) 0%, var(--blue-light) 100%); }
@@ -321,7 +328,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .archived-notice { background: #fff8e6; border: 1px solid #f2c47b; color: #7a5000; border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
 
 /* Colophon — tichá oslava vydané / dokončené knihy */
-.colophon { text-align: center; padding: 22px 24px 20px; margin-bottom: 16px; background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); }
+.colophon { text-align: center; padding: 22px 24px 20px; margin-bottom: 16px; background: var(--white); border: 1px solid var(--gray-border); border-radius: var(--radius); box-shadow: var(--shadow); }
 .colophon-rule { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0 auto 10px; }
 .colophon-rule::before, .colophon-rule::after { content: ''; width: 70px; height: 1px; background: #d9c78a; }
 .colophon-rule span { color: #c9ab55; font-size: 11px; line-height: 1; }
@@ -366,9 +373,9 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .todo-add-btn:hover { color: #B83066; background: rgba(184,48,102,0.06); }
 
 /* Phases */
-.phase { background: var(--white); border-radius: var(--radius); margin-bottom: 12px; box-shadow: var(--shadow); overflow: hidden; }
+.phase { background: var(--white); border: 1px solid var(--gray-border); border-radius: var(--radius); margin-bottom: 12px; box-shadow: var(--shadow); overflow: hidden; }
 .phase-head { display: flex; align-items: center; gap: 14px; padding: 16px 22px; cursor: pointer; user-select: none; position: relative; transition: background var(--transition); }
-.phase-head:hover { background: var(--cream); }
+.phase-head:hover { background: var(--page); }
 .phase-accent { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
 .phase-num { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 700; color: var(--black); opacity: 0.14; line-height: 1; flex-shrink: 0; width: 32px; letter-spacing: -0.02em; }
 .phase-title-wrap { flex: 1; }
@@ -414,7 +421,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .phase-body-inner { overflow: hidden; min-height: 0; }
 
 /* Steps */
-.step { padding: 10px 8px; margin: 0 -8px; border-bottom: 1px solid var(--cream); transition: opacity var(--transition), background-color var(--transition); }
+.step { padding: 10px 8px; margin: 0 -8px; border-bottom: 1px solid var(--page); transition: opacity var(--transition), background-color var(--transition); }
 .step:last-child { border-bottom: none; }
 .step:not(.is-done):hover { background-color: rgba(27,45,82,0.025); border-radius: 4px; }
 .step-row { display: flex; align-items: flex-start; gap: 10px; }
@@ -441,7 +448,8 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .step.is-done .step-label { text-decoration: line-through; color: #B83066; }
 .step-date { font-size: 11px; color: var(--gray-dim); margin-left: 6px; }
 .step.is-done .step-date { color: #B83066; opacity: 0.7; }
-.step-waiting { display: inline-flex; align-items: center; gap: 3px; font-size: 10.5px; font-weight: 600; color: var(--blue); background: rgba(64,114,173,0.08); padding: 2px 5px 2px 8px; border-radius: 10px; margin-left: 8px; white-space: nowrap; }
+.step-waiting { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 600; color: var(--blue); background: rgba(64,114,173,0.08); padding: 2px 5px 2px 7px; border-radius: 10px; margin-left: 8px; white-space: nowrap; }
+.step-waiting svg { flex-shrink: 0; }
 .step-waiting-x { color: var(--blue); opacity: .45; font-size: 11px; line-height: 1; padding: 1px 3px; border-radius: 3px; transition: var(--transition); }
 .step-waiting-x:hover { opacity: 1; background: rgba(64,114,173,.18); }
 .step-end { display: flex; align-items: center; gap: 2px; flex-shrink: 0; margin-left: auto; padding-left: 8px; }
@@ -482,7 +490,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 
 /* Repeatable step (Dodatek) */
 .rep-list { margin-top: 6px; margin-left: 30px; }
-.rep-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: var(--cream); border-radius: var(--radius-sm); margin-bottom: 4px; font-size: 13px; }
+.rep-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: var(--page); border-radius: var(--radius-sm); margin-bottom: 4px; font-size: 13px; }
 .rep-check { width: 18px; height: 18px; border: 2px solid var(--gray-border); border-radius: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: var(--transition); background: var(--white); }
 .rep-check:hover { border-color: var(--blue); }
 .rep-check.checked { background: var(--green); border-color: var(--green); }
@@ -509,11 +517,11 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .archive-step-ui button:hover { background: #921843; }
 
 /* Buttons */
-.btn { padding: 8px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent; transition: var(--transition); cursor: pointer; }
-.btn-primary { background: var(--blue); color: #fff; }
-.btn-primary:hover { background: var(--blue-light); }
-.btn-secondary { background: var(--white); color: var(--black); border-color: var(--gray-border); }
-.btn-secondary:hover { background: var(--cream); }
+.btn { padding: 8px 14px; border-radius: var(--radius-sm); font-size: 12.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent; transition: var(--transition); cursor: pointer; }
+.btn-primary { background: var(--navy); color: #fff; }
+.btn-primary:hover { background: #24396b; }
+.btn-secondary { background: var(--white); color: var(--gray-text); border-color: var(--gray-border); }
+.btn-secondary:hover { border-color: var(--blue); color: var(--blue); }
 .btn-danger { background: transparent; color: var(--raspberry); border-color: rgba(177,30,84,0.25); }
 .btn-danger:hover { background: rgba(177,30,84,0.06); }
 .btn-cancel { background: transparent; color: var(--rose); border-color: rgba(192,96,106,0.25); }
@@ -536,10 +544,10 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 22px; flex-wrap: wrap; }
 .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .modal-fullrow { grid-column: 1 / -1; }
-.tpl-vars { background: var(--cream); padding: 10px 12px; border-radius: var(--radius-sm); font-size: 12px; color: var(--gray-text); margin-bottom: 16px; border-left: 3px solid var(--blue); }
+.tpl-vars { background: var(--page); padding: 10px 12px; border-radius: var(--radius-sm); font-size: 12px; color: var(--gray-text); margin-bottom: 16px; border-left: 3px solid var(--blue); }
 .tpl-vars code { background: rgba(64,114,173,0.10); color: var(--blue); padding: 1px 5px; border-radius: 3px; font-size: 11px; margin: 0 2px; }
 .tpl-select { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
-.tpl-tab { padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: 500; background: var(--cream); color: var(--gray-text); transition: var(--transition); border: 1px solid var(--gray-border); }
+.tpl-tab { padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: 500; background: var(--page); color: var(--gray-text); transition: var(--transition); border: 1px solid var(--gray-border); }
 .tpl-tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
 .gen-output { width: 100%; min-height: 260px; padding: 12px; font-size: 13px; border: 1px solid #e2e2e2; border-radius: var(--radius-sm); resize: vertical; background: var(--white); font-family: 'DM Sans', sans-serif; line-height: 1.6; }
 .gen-output:focus { outline: none; border-color: #B83066; }
@@ -553,7 +561,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .se-phase-title { flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 4px; color: #fff; font-size: 14px; font-weight: 600; padding: 6px 10px; transition: var(--transition); }
 .se-phase-title:focus { outline: none; border-color: rgba(255,255,255,0.35); background: rgba(255,255,255,0.12); }
 .se-steps { padding: 8px 12px; }
-.se-step { border-bottom: 1px solid var(--cream); padding: 5px 0; }
+.se-step { border-bottom: 1px solid var(--page); padding: 5px 0; }
 .se-step:last-child { border-bottom: none; }
 .se-row { display: flex; align-items: center; gap: 6px; }
 .se-row.sub { margin-left: 26px; margin-top: 4px; }
@@ -568,7 +576,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .se-opt { font-size: 11px; padding: 3px 9px; border-radius: 12px; border: 1px dashed var(--gray-border); color: var(--gray-dim); cursor: pointer; flex-shrink: 0; transition: var(--transition); user-select: none; }
 .se-opt:hover { border-color: var(--gray-text); color: var(--gray-text); }
 .se-opt.on { border: 1px solid rgba(184,48,102,0.4); color: #B83066; background: rgba(184,48,102,0.05); font-weight: 600; }
-.se-wait { width: 112px; flex-shrink: 0; padding: 5px 8px; border: 1px solid var(--gray-border); border-radius: 12px; font-size: 11px; background: var(--cream); color: var(--black); transition: var(--transition); }
+.se-wait { width: 112px; flex-shrink: 0; padding: 5px 8px; border: 1px solid var(--gray-border); border-radius: 12px; font-size: 11px; background: var(--page); color: var(--black); transition: var(--transition); }
 .se-wait::placeholder { color: var(--gray-dim); }
 .se-wait:focus { outline: none; border-color: var(--blue); background: var(--white); }
 .se-ctl { width: 24px; height: 24px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--gray-dim); font-size: 13px; flex-shrink: 0; transition: var(--transition); }
@@ -613,8 +621,8 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 
 <div class="app" id="app" style="display:none;">
   <aside class="sidebar" id="sidebar">
-    <div class="collapse-arrow" onclick="peekSidebar()">›</div>
-    <button class="pin-btn" id="pinBtn" onclick="togglePin()" title="Připnout boční panel natrvalo">📌</button>
+    <div class="collapse-arrow" onclick="peekSidebar()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></div>
+    <button class="pin-btn" id="pinBtn" onclick="togglePin()" title="Připnout boční panel natrvalo"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M7 3h10a1 1 0 0 1 1 1v17l-6-4.3L6 21V4a1 1 0 0 1 1-1z"/></svg></button>
     <div class="sidebar-inner">
     <div class="sidebar-brand">
       <div class="brand-label">Wolters Kluwer</div>
@@ -626,7 +634,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
     </div>
     <div class="sidebar-search">
       <div class="search-wrap">
-        <span class="search-icon">⌕</span>
+        <span class="search-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.4 15.4L21 21"/></svg></span>
         <input type="text" id="searchInput" placeholder="Hledat knihu…" oninput="onSearch()">
       </div>
     </div>
@@ -640,9 +648,9 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
     </div>
     <div class="calendar-wrap">
       <div class="cal-header">
-        <button class="cal-nav" onclick="calPrev()">‹</button>
+        <button class="cal-nav" onclick="calPrev()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
         <div class="cal-month" id="calMonthLabel"></div>
-        <button class="cal-nav" onclick="calNext()">›</button>
+        <button class="cal-nav" onclick="calNext()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
       </div>
       <div class="cal-grid" id="calGrid"></div>
     </div>
@@ -651,7 +659,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
     </div>
     </div>
   </aside>
-  <div class="sidebar-hint" id="sidebarHint">☰ Menu se otevře najetím myší</div>
+  <div class="sidebar-hint" id="sidebarHint">Menu se otevře najetím myší</div>
 
   <div class="main">
     <header class="main-topbar">
@@ -836,6 +844,9 @@ const SVG_CHECK = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" s
 const SVG_MAIL = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>`;
 const SVG_PLUS = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
 const SVG_FILE = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+// Praporek u blízkého termínu (dřív ⏰) a „předáno ven" u štítku čeká se na (dřív ⏳).
+const SVG_FLAG = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V4"/><path d="M6 4h11l-2.3 3.6L17 11H6"/></svg>`;
+const SVG_HANDOFF = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/><path d="M12 3v11"/><path d="M8.4 6.6L12 3l3.6 3.6"/></svg>`;
 
 const APP_PASSWORD  = 'dotisky2025';
 const STORAGE_KEY   = 'redakcni-checklist-v1';
@@ -1430,7 +1441,7 @@ function renderBookList() {
     let extra = '';
     if (b.odevzdaniRukopisu && !b.archivedAt) {
       const days = daysUntil(b.odevzdaniRukopisu);
-      if (days !== null && days >= 0 && days <= 30) extra += `<div class="bi-deadline">⏰ Odevzdání za ${days} ${dnyCz(days)}</div>`;
+      if (days !== null && days >= 0 && days <= 30) extra += `<div class="bi-deadline">${SVG_FLAG} Odevzdání za ${days} ${dnyCz(days)}</div>`;
     }
     if (b.cancelled) extra += `<div class="bi-cancelled">Zrušeno${b.cancelReason?' · '+escapeHtml(b.cancelReason):''}</div>`;
     const dots = PHASES.map(ph => {
@@ -1561,11 +1572,11 @@ function boardCard(b, phaseIdx) {
     if (d !== null) {
       const hot = d <= 5;
       const lbl = d < 0 ? `${Math.abs(d)} ${dnyCz(d)} po termínu` : d === 0 ? 'dnes' : `za ${d} ${dnyCz(d)}`;
-      chip = `<span class="kb-chip dl ${hot?'hot':''}">${hot?'⏰ ':''}${lbl}</span>`;
+      chip = `<span class="kb-chip dl ${hot?'hot':''}">${hot?SVG_FLAG:''}${lbl}</span>`;
     }
   }
   const wait = currentWaitingStep(b);
-  const waitHtml = wait ? `<div class="kb-wait"><span>⏳ čeká se na ${escapeHtml(wait.waitingOn)}</span><button class="kb-wait-x" onclick="event.stopPropagation();dismissWaiting('${b.id}','${wait.id}')" title="Už mám odpověď — skrýt štítek">✕</button></div>` : '';
+  const waitHtml = wait ? `<div class="kb-wait">${SVG_HANDOFF}<span>čeká se na ${escapeHtml(wait.waitingOn)}</span><button class="kb-wait-x" onclick="event.stopPropagation();dismissWaiting('${b.id}','${wait.id}')" title="Už mám odpověď — skrýt štítek">✕</button></div>` : '';
   return `<div class="kb-card ${isKomentar(b)?'priority':''}" onclick="openBook('${b.id}')">
     <div class="kb-card-title">${escapeHtml(b.title)}</div>
     <div class="kb-card-author">${escapeHtml(b.author)}</div>
@@ -1604,7 +1615,7 @@ function renderBoard() {
     stats += `<div class="kb-sep"></div><div class="kb-stat hot"${clickable}><b>${lbl}</b><span>do odevzdání — ${escapeHtml(nearest.title)}</span></div>`;
     if (restDeadlines.length) {
       const rows = restDeadlines.map(x => `<div class="dl-row"><b>${escapeHtml(x.title)}</b><span>${x.d===0?'dnes':`za ${x.d} ${dnyCz(x.d)}`}</span></div>`).join('');
-      dlWrapHtml = `<div class="dl-wrap"><span class="expand-hint" onclick="toggleDeadlineList()">Zobrazit dalších ${restDeadlines.length} ${terminCz(restDeadlines.length)} ▾</span><div class="dl-list" id="dlList">${rows}</div></div>`;
+      dlWrapHtml = `<div class="dl-wrap"><span class="expand-hint" onclick="toggleDeadlineList()">Zobrazit dalších ${restDeadlines.length} ${terminCz(restDeadlines.length)}${SVG_CHEVRON}</span><div class="dl-list" id="dlList">${rows}</div></div>`;
     }
   }
   stats += `<div class="kb-sep"></div><div class="kb-stat"><b>${vydanoLetos}</b><span>vydáno letos</span></div>`;
@@ -1834,7 +1845,7 @@ function renderStep(book, st, archived) {
   // Štítek se objeví až po odškrtnutí kroku (předala jsem to dál — teď čekám na odpověď)
   // a jen u toho kroku, který je zrovna to poslední předání.
   const waitingHtml = (st.id === curWaitId && st.waitingOn)
-    ? `<span class="step-waiting">⏳ čeká se na ${escapeHtml(st.waitingOn)}<button class="step-waiting-x" onclick="event.stopPropagation();dismissWaiting('${book.id}','${st.id}')" title="Už mám odpověď — skrýt štítek">✕</button></span>`
+    ? `<span class="step-waiting">${SVG_HANDOFF}čeká se na ${escapeHtml(st.waitingOn)}<button class="step-waiting-x" onclick="event.stopPropagation();dismissWaiting('${book.id}','${st.id}')" title="Už mám odpověď — skrýt štítek">✕</button></span>`
     : '';
 
   const hasNote = !!s.note;
