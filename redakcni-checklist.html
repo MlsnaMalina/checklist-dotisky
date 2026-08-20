@@ -568,6 +568,14 @@ body.kb-dragging { user-select: none; cursor: grabbing; }
 .modal-fullrow { grid-column: 1 / -1; }
 .tpl-vars { background: var(--page); padding: 10px 12px; border-radius: var(--radius-sm); font-size: 12px; color: var(--gray-text); margin-bottom: 16px; border-left: 3px solid var(--blue); }
 .tpl-vars code { background: rgba(64,114,173,0.10); color: var(--blue); padding: 1px 5px; border-radius: 3px; font-size: 11px; margin: 0 2px; }
+.tpl-vars-click { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+.tpl-vars-hint { flex-basis: 100%; margin-bottom: 2px; }
+.tpl-var { background: rgba(64,114,173,0.10); color: var(--blue); padding: 4px 8px; border-radius: 3px; font-size: 11px; font-weight: 500; border: 1px solid transparent; transition: var(--transition); }
+.tpl-var:hover { background: var(--blue); color: #fff; }
+.tpl-var:focus-visible { outline: none; border-color: var(--blue); }
+.tpl-var:active { transform: translateY(1px); }
+/* Na dotyku potřebuje štítek větší plochu na klepnutí */
+@media (hover: none) { .tpl-var { padding: 8px 11px; font-size: 12px; } }
 .tpl-select { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
 .tpl-tab { padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: 500; background: var(--page); color: var(--gray-text); transition: var(--transition); border: 1px solid var(--gray-border); }
 .tpl-tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
@@ -806,11 +814,6 @@ body.kb-dragging { user-select: none; cursor: grabbing; }
       Chybí vám tu e-mail, který posíláte pořád stejný? Přidejte si ho tlačítkem <b>+ Nová šablona</b> a v
       <b>Nastavení checklistu</b> ho napojte na příslušný krok.
     </p>
-    <div class="tpl-vars" style="margin-bottom:14px;">
-      Proměnné: <code>{{nazev}}</code> <code>{{autor}}</code> <code>{{edice}}</code>
-      <code>{{isbn}}</code> <code>{{nav}}</code> <code>{{redaktor}}</code>
-      <code>{{korektorka}}</code> <code>{{sazec}}</code> <code>{{datum_odevzdani}}</code> <code>{{datum_dnes}}</code>
-    </div>
     <div class="tpl-select" id="tplTabRow"></div>
     <div id="tplEditorBody">
       <div class="modal-field">
@@ -818,9 +821,10 @@ body.kb-dragging { user-select: none; cursor: grabbing; }
         <input type="text" id="tplEditorName" placeholder="např. E-mail na hotline" oninput="tplNameInput(this.value)">
       </div>
       <div class="tpl-usage" id="tplUsage"></div>
+      <div class="tpl-vars tpl-vars-click" id="tplVarRow"></div>
       <div class="modal-field">
         <label>Znění e-mailu</label>
-        <textarea class="gen-output" id="tplEditorArea" style="min-height:200px;" oninput="tplTextInput(this.value)"></textarea>
+        <textarea class="gen-output" id="tplEditorArea" style="min-height:200px;" oninput="tplTextInput(this.value);tplSaveCaret(this)" onkeyup="tplSaveCaret(this)" onclick="tplSaveCaret(this)" onselect="tplSaveCaret(this)" onblur="tplSaveCaret(this)"></textarea>
       </div>
     </div>
     <div class="modal-actions">
@@ -1270,6 +1274,19 @@ const DEFAULT_TEMPLATE_LABELS = {
   o: 'Účetnictví (Filip)', q: 'Představení korektorce', r: 'Představení sazeči',
 };
 const TEMPLATE_LABELS_KEY = 'redakcni-template-labels-v1';
+// Proměnné nabízené v editoru šablon. Musí sedět s tím, co nahrazuje renderTemplate().
+const TEMPLATE_VARS = [
+  ['nazev', 'Název knihy'],
+  ['autor', 'Autor, u více autorů všichni'],
+  ['edice', 'Ediční řada'],
+  ['isbn', 'ISBN — první vyplněné (brož., váz., PDF, ePub, Mobi)'],
+  ['nav', 'NAV číslo'],
+  ['redaktor', 'Redaktorka'],
+  ['korektorka', 'Jazyková korektorka'],
+  ['sazec', 'Sazeč'],
+  ['datum_odevzdani', 'Datum odevzdání rukopisu'],
+  ['datum_dnes', 'Dnešní datum'],
+];
 
 // ===== State =====
 let state = loadState();
@@ -1284,6 +1301,7 @@ let searchQ = '';
 let calYear, calMonth;
 let openPhaseId = null;
 let tplEditorKey = 'a';
+let tplCaret = [0, 0];   // poslední pozice kurzoru v editoru šablony
 let filterKomentare = false;
 let filterOdevzdane = false;
 let justToggledStep = null;   // id kroku pro mikro-animaci odškrtnutí
@@ -2383,7 +2401,7 @@ function showToast(msg) {
 function openTemplatesEditor() {
   normalizeTemplates();
   if (!templates[tplEditorKey]) tplEditorKey = templateKeys()[0] || null;
-  renderTplEditorTabs(); loadTplEditorContent(); openModal('tplEditorModal');
+  renderTplVarRow(); renderTplEditorTabs(); loadTplEditorContent(); openModal('tplEditorModal');
 }
 function renderTplEditorTabs() {
   document.getElementById('tplTabRow').innerHTML =
@@ -2391,6 +2409,27 @@ function renderTplEditorTabs() {
     `<button class="tpl-tab tpl-add" onclick="addTemplate()">+ Nová šablona</button>`;
 }
 function selectTplTab(k) { tplEditorKey=k; renderTplEditorTabs(); loadTplEditorContent(); }
+function renderTplVarRow() {
+  document.getElementById('tplVarRow').innerHTML =
+    '<span class="tpl-vars-hint">Proměnné — klepnutím vložíte na místo kurzoru:</span>' +
+    TEMPLATE_VARS.map(([k, popis]) =>
+      // preventDefault na mousedown drží kurzor v textu, ať se proměnná vloží tam, kde stojí
+      `<button class="tpl-var" title="${escapeHtml(popis)}" onmousedown="event.preventDefault()" onclick="insertTplVar('${k}')">{{${k}}}</button>`
+    ).join('');
+}
+// Kurzor si pamatujeme i po odkliknutí z textu — na dotyku focus nezůstává
+function tplSaveCaret(el) { tplCaret = [el.selectionStart, el.selectionEnd]; }
+function insertTplVar(k) {
+  if (!tplEditorKey) return;
+  const area = document.getElementById('tplEditorArea');
+  const live = document.activeElement === area;
+  const from = live ? area.selectionStart : Math.min(tplCaret[0], area.value.length);
+  const to   = live ? area.selectionEnd   : Math.min(tplCaret[1], area.value.length);
+  area.setRangeText('{{' + k + '}}', from, to, 'end');
+  tplSaveCaret(area);
+  tplTextInput(area.value);
+  area.focus();
+}
 function loadTplEditorContent() {
   const k = tplEditorKey;
   const nameInp = document.getElementById('tplEditorName');
@@ -2400,6 +2439,7 @@ function loadTplEditorContent() {
   if (!k) { document.getElementById('tplUsage').innerHTML = 'Zatím tu není žádná šablona. Novou přidáte tlačítkem <b>+ Nová šablona</b>.'; return; }
   nameInp.value = templateLabels[k] || '';
   area.value = templates[k] || '';
+  tplCaret = [area.value.length, area.value.length];
   document.getElementById('tplResetBtn').style.display = DEFAULT_TEMPLATES[k] ? '' : 'none';
   const used = stepsUsingTemplate(k);
   document.getElementById('tplUsage').innerHTML = used.length
