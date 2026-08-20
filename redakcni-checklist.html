@@ -242,11 +242,11 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .year-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
 .year-btn { border: none; background: var(--green); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 11px; border-radius: 20px; transition: var(--transition); font-variant-numeric: tabular-nums; }
 .year-btn:hover { background: var(--green-dark); }
-.kb-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 13px 14px 12px; margin-bottom: 10px; cursor: pointer; transition: box-shadow 160ms ease, transform 160ms ease, border-color 160ms ease; border: 1px solid var(--gray-border); }
+.kb-card { position: relative; background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 13px 14px 12px; margin-bottom: 10px; cursor: pointer; transition: box-shadow 160ms ease, transform 160ms ease, border-color 160ms ease; border: 1px solid var(--gray-border); }
 .kb-card:hover { box-shadow: 0 3px 12px rgba(27,45,82,.10); transform: translateY(-2px); border-color: var(--blue); }
 .kb-card.priority { border: 2px solid var(--raspberry); padding: 12px 13px 11px; }
 .kb-card.priority:hover { border-color: var(--raspberry); }
-.kb-card-title { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; line-height: 1.3; color: var(--black); margin-bottom: 1px; }
+.kb-card-title { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; line-height: 1.3; color: var(--black); margin-bottom: 1px; padding-right: 20px; }
 .kb-card-author { font-size: 11.5px; font-style: italic; color: var(--gray-text); margin-bottom: 9px; }
 .kb-dots { display: flex; gap: 5px; margin-bottom: 9px; }
 .kb-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gray-border); }
@@ -270,6 +270,16 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .kb-chip.year { background: rgba(152,196,81,.16); color: #5a8a1a; }
 .kb-card.done { opacity: .82; }
 .kb-card.done .kb-card-title { font-size: 14px; }
+/* Přetahování karet — jen v rámci jedné fáze */
+.kb-grip { position: absolute; top: 6px; right: 5px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 5px; color: var(--gray-dim); opacity: 0; cursor: grab; touch-action: none; transition: opacity 160ms ease, background 160ms ease, color 160ms ease; }
+.kb-card:hover .kb-grip { opacity: .45; }
+.kb-grip:hover, .kb-grip:focus-visible { opacity: 1; background: var(--gray-bg); color: var(--navy); }
+/* Na dotykových zařízeních není hover — úchyt musí být vidět rovnou */
+@media (hover: none) { .kb-grip { opacity: .4; width: 30px; height: 30px; } }
+.kb-card.kb-dragged { opacity: .3; border-style: dashed; box-shadow: none; }
+.kb-card.kb-dragged:hover { transform: none; box-shadow: none; border-color: var(--gray-border); }
+.kb-card.kb-ghost { position: fixed; z-index: 900; margin: 0; pointer-events: none; box-shadow: 0 12px 30px rgba(27,45,82,.24); border-color: var(--blue); transform: rotate(1.5deg); }
+body.kb-dragging { user-select: none; cursor: grabbing; }
 .kb-col-empty { border: 1px dashed var(--gray-border); border-radius: var(--radius); padding: 15px 10px; text-align: center; font-size: 11.5px; color: var(--gray-dim); }
 .kb-board-empty { padding: 56px 28px; text-align: center; color: var(--gray-text); }
 .kb-board-empty h2 { font-family: 'Playfair Display', serif; color: var(--black); margin-bottom: 8px; font-size: 22px; }
@@ -561,6 +571,10 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .tpl-select { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
 .tpl-tab { padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: 500; background: var(--page); color: var(--gray-text); transition: var(--transition); border: 1px solid var(--gray-border); }
 .tpl-tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+.tpl-tab.tpl-add { background: transparent; border-style: dashed; color: var(--gray-dim); font-weight: 600; }
+.tpl-tab.tpl-add:hover { border-color: var(--blue); color: var(--blue); }
+.tpl-usage { font-size: 12px; color: var(--gray-text); background: var(--page); border-radius: var(--radius-sm); padding: 8px 11px; margin-bottom: 14px; line-height: 1.5; }
+.tpl-usage b { color: var(--navy); font-weight: 600; }
 .gen-output { width: 100%; min-height: 260px; padding: 12px; font-size: 13px; border: 1px solid #e2e2e2; border-radius: var(--radius-sm); resize: vertical; background: var(--white); font-family: 'DM Sans', sans-serif; line-height: 1.6; }
 .gen-output:focus { outline: none; border-color: #B83066; }
 .copy-toast { position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 8px); background: var(--navy); color: #fff; padding: 10px 22px; border-radius: 20px; box-shadow: var(--shadow-md); z-index: 300; opacity: 0; transition: opacity 220ms ease, transform 220ms cubic-bezier(0.2,0.8,0.3,1); pointer-events: none; font-size: 13px; font-weight: 500; letter-spacing: 0.01em; }
@@ -575,9 +589,9 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .se-steps { padding: 8px 12px; }
 .se-step { border-bottom: 1px solid var(--page); padding: 5px 0; }
 .se-step:last-child { border-bottom: none; }
-.se-row { display: flex; align-items: center; gap: 6px; }
+.se-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .se-row.sub { margin-left: 26px; margin-top: 4px; }
-.se-label { flex: 1; min-width: 0; padding: 6px 9px; border: 1px solid transparent; border-radius: 4px; font-size: 13px; background: transparent; transition: var(--transition); }
+.se-label { flex: 1 1 200px; min-width: 160px; padding: 6px 9px; border: 1px solid transparent; border-radius: 4px; font-size: 13px; background: transparent; transition: var(--transition); }
 .se-label:hover { border-color: var(--gray-border); }
 .se-label:focus { outline: none; border-color: #B83066; background: var(--white); }
 .se-row.sub .se-label { font-size: 12px; }
@@ -588,6 +602,10 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .se-opt { font-size: 11px; padding: 3px 9px; border-radius: 12px; border: 1px dashed var(--gray-border); color: var(--gray-dim); cursor: pointer; flex-shrink: 0; transition: var(--transition); user-select: none; }
 .se-opt:hover { border-color: var(--gray-text); color: var(--gray-text); }
 .se-opt.on { border: 1px solid rgba(184,48,102,0.4); color: #B83066; background: rgba(184,48,102,0.05); font-weight: 600; }
+.se-tpl { width: 132px; flex-shrink: 0; padding: 5px 7px; border: 1px solid var(--gray-border); border-radius: 12px; font-size: 11px; background: var(--page); color: var(--gray-dim); transition: var(--transition); cursor: pointer; }
+.se-tpl:hover { border-color: var(--blue); }
+.se-tpl:focus { outline: none; border-color: var(--blue); background: var(--white); }
+.se-tpl.on { border-color: rgba(64,114,173,0.45); background: rgba(64,114,173,0.08); color: var(--blue); font-weight: 600; }
 .se-wait { width: 112px; flex-shrink: 0; padding: 5px 8px; border: 1px solid var(--gray-border); border-radius: 12px; font-size: 11px; background: var(--page); color: var(--black); transition: var(--transition); }
 .se-wait::placeholder { color: var(--gray-dim); }
 .se-wait:focus { outline: none; border-color: var(--blue); background: var(--white); }
@@ -605,7 +623,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 
 @media print {
   body { background: var(--white); }
-  .sidebar, .main-topbar, .bh-actions, .step-end, .step-waiting-x, .phase-note-toggle, .add-rep-btn, .todo-add, .modal-overlay, .copy-toast, .author-row-del, .add-author-btn { display: none !important; }
+  .sidebar, .main-topbar, .bh-actions, .step-end, .step-waiting-x, .phase-note-toggle, .add-rep-btn, .todo-add, .modal-overlay, .copy-toast, .author-row-del, .add-author-btn, .kb-grip { display: none !important; }
   .app { display: block; }
   .main { display: block; }
   .detail-wrap, .detail { display: block; overflow: visible; height: auto; }
@@ -783,18 +801,31 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 <div class="modal-overlay" id="tplEditorModal">
   <div class="modal modal-lg">
     <h2>Šablony e-mailů</h2>
+    <p style="color:var(--gray-text);font-size:13px;margin-bottom:16px;">
+      Znění si upravte, jak potřebujete — proměnné v dvojitých závorkách se při generování nahradí údaji o knize.
+      Chybí vám tu e-mail, který posíláte pořád stejný? Přidejte si ho tlačítkem <b>+ Nová šablona</b> a v
+      <b>Nastavení checklistu</b> ho napojte na příslušný krok.
+    </p>
     <div class="tpl-vars" style="margin-bottom:14px;">
       Proměnné: <code>{{nazev}}</code> <code>{{autor}}</code> <code>{{edice}}</code>
       <code>{{isbn}}</code> <code>{{nav}}</code> <code>{{redaktor}}</code>
       <code>{{korektorka}}</code> <code>{{sazec}}</code> <code>{{datum_odevzdani}}</code> <code>{{datum_dnes}}</code>
     </div>
     <div class="tpl-select" id="tplTabRow"></div>
-    <div class="modal-field">
-      <label id="tplEditorLabel">Šablona</label>
-      <textarea class="gen-output" id="tplEditorArea" style="min-height:200px;"></textarea>
+    <div id="tplEditorBody">
+      <div class="modal-field">
+        <label>Název šablony</label>
+        <input type="text" id="tplEditorName" placeholder="např. E-mail na hotline" oninput="tplNameInput(this.value)">
+      </div>
+      <div class="tpl-usage" id="tplUsage"></div>
+      <div class="modal-field">
+        <label>Znění e-mailu</label>
+        <textarea class="gen-output" id="tplEditorArea" style="min-height:200px;" oninput="tplTextInput(this.value)"></textarea>
+      </div>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="resetCurrentTemplate()">Obnovit výchozí</button>
+      <button class="btn btn-danger" onclick="deleteCurrentTemplate()">Smazat šablonu</button>
+      <button class="btn btn-secondary" id="tplResetBtn" onclick="resetCurrentTemplate()">Obnovit výchozí znění</button>
       <button class="btn btn-secondary" onclick="closeModal('tplEditorModal')">Zavřít</button>
       <button class="btn btn-primary" onclick="saveCurrentTemplate()">Uložit</button>
     </div>
@@ -803,11 +834,13 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 
 <!-- Modal: Nastavení checklistu (editor struktury) -->
 <div class="modal-overlay" id="structModal">
-  <div class="modal modal-lg" style="width:760px;">
+  <div class="modal modal-lg" style="width:900px;">
     <h2>Nastavení checklistu</h2>
     <p style="color:var(--gray-text);font-size:13px;margin-bottom:16px;">
       Upravte si kostru checklistu podle aktuální praxe. Změny se ukládají okamžitě a platí pro všechny knihy —
       u rozpracovaných knih se nové kroky objeví jako nesplněné, smazané kroky zmizí (jejich odškrtnutí zůstane uložené, kdybyste krok vrátila).
+      Rozbalovátkem <b>✉ bez e-mailu</b> u kroku napojíte e-mailovou šablonu — v checklistu se pak u toho kroku objeví tlačítko
+      <b>Generovat e-mail</b>. Nové šablony si přidáte v <b>Šablonách e-mailů</b>.
     </p>
     <div id="structEditor"></div>
     <div class="modal-actions">
@@ -857,6 +890,7 @@ const SVG_CHEVRON = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"
 const SVG_NOTE = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
 const SVG_CHECK = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`;
 const SVG_MAIL = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>`;
+const SVG_GRIP = `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="5" r="1.7"/><circle cx="15" cy="5" r="1.7"/><circle cx="9" cy="12" r="1.7"/><circle cx="15" cy="12" r="1.7"/><circle cx="9" cy="19" r="1.7"/><circle cx="15" cy="19" r="1.7"/></svg>`;
 const SVG_PLUS = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
 const SVG_FILE = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>`;
 // Praporek u blízkého termínu (dřív ⏰) a „předáno ven" u štítku čeká se na (dřív ⏳).
@@ -1228,17 +1262,19 @@ S pozdravem
 {{redaktor}}`,
 };
 
-const TEMPLATE_LABELS = {
+const DEFAULT_TEMPLATE_LABELS = {
   a: 'Návrh smlouvy', b: 'Oslovení autora', c: 'Onboarding',
   d: 'Předání korektorce', e: 'Žádost o ISBN', f: 'Odeslání autorům',
   g: 'Oslovení sazeče', h: 'Kalkulace ke schválení', i: 'Složka pro knihu (Filip)',
   l: 'E-kniha (Lukáš)', m: 'Yammer', n: 'Evidence výtisku',
   o: 'Účetnictví (Filip)', q: 'Představení korektorce', r: 'Představení sazeči',
 };
+const TEMPLATE_LABELS_KEY = 'redakcni-template-labels-v1';
 
 // ===== State =====
 let state = loadState();
 let templates = loadTemplates();
+let templateLabels = loadTemplateLabels();
 let currentTab = 'active';
 let currentView = 'board';   // 'board' = kanban přehled, 'detail' = checklist knihy
 let vydActiveYear = null;    // rok rozepsaný ve sloupci Vydáno (null = aktuální rok)
@@ -1262,10 +1298,30 @@ function loadState() {
 }
 function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
 function loadTemplates() {
-  try { const r = localStorage.getItem(TEMPLATES_KEY); if (r) return { ...DEFAULT_TEMPLATES, ...JSON.parse(r) }; } catch(e) {}
+  // Uložené šablony platí tak, jak jsou. Kdyby se do nich doplňovaly výchozí,
+  // smazaná šablona by se po načtení stránky vrátila zpátky.
+  try { const r = localStorage.getItem(TEMPLATES_KEY); const p = r && JSON.parse(r); if (p && typeof p === 'object') return p; } catch(e) {}
   return { ...DEFAULT_TEMPLATES };
 }
 function saveTemplates() { localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates)); }
+function loadTemplateLabels() {
+  try { const r = localStorage.getItem(TEMPLATE_LABELS_KEY); const p = r && JSON.parse(r); if (p && typeof p === 'object') return p; } catch(e) {}
+  return { ...DEFAULT_TEMPLATE_LABELS };
+}
+function saveTemplateLabels() { localStorage.setItem(TEMPLATE_LABELS_KEY, JSON.stringify(templateLabels)); }
+// Názvy a texty šablon musí sedět na stejné klíče — pořadí záložek se řídí názvy.
+function normalizeTemplates() {
+  Object.keys(templates).forEach(k => { if (!templateLabels[k]) templateLabels[k] = 'Šablona'; });
+  Object.keys(templateLabels).forEach(k => { if (templates[k] === undefined) delete templateLabels[k]; });
+}
+function templateKeys() { return Object.keys(templateLabels); }
+function templateName(k) { return (templateLabels[k] || '').trim() || 'Bez názvu'; }
+// Kroky checklistu, které mají tuhle šablonu napojenou
+function stepsUsingTemplate(k) {
+  const out = [];
+  PHASES.forEach(ph => ph.steps.forEach(st => { if (st.template === k) out.push(st); }));
+  return out;
+}
 
 // Helpers
 function uuid() { return 'r-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,8); }
@@ -1601,7 +1657,8 @@ function boardCard(b, phaseIdx) {
   }
   const wait = currentWaitingStep(b);
   const waitHtml = wait ? `<div class="kb-wait">${SVG_HANDOFF}<span>čeká se na ${escapeHtml(wait.waitingOn)}</span><button class="kb-wait-x" onclick="event.stopPropagation();dismissWaiting('${b.id}','${wait.id}')" title="Už mám odpověď — skrýt štítek">✕</button></div>` : '';
-  return `<div class="kb-card ${isKomentar(b)?'priority':''}" onclick="openBook('${b.id}')">
+  return `<div class="kb-card ${isKomentar(b)?'priority':''}" data-book="${b.id}" onclick="boardCardClick('${b.id}')">
+    <button class="kb-grip" title="Přetažením změníte pořadí karet v této fázi" aria-label="Přetáhnout kartu" onpointerdown="boardDragStart(event)" onclick="event.stopPropagation()">${SVG_GRIP}</button>
     <div class="kb-card-title">${escapeHtml(b.title)}</div>
     <div class="kb-card-author">${escapeHtml(b.author)}</div>
     <div class="kb-dots">${dots}</div>
@@ -1655,10 +1712,11 @@ function renderBoard() {
   // Rozřazení do sloupců podle aktuální fáze
   const cols = PHASES.map(() => []);
   books.forEach(b => { cols[currentPhaseIndex(b)].push(b); });
+  cols.forEach((list, i) => sortBoardColumn(list, PHASES[i].id));
 
   let colsHtml = PHASES.map((ph, i) => {
     const items = cols[i].length ? cols[i].map(b => boardCard(b, i)).join('') : `<div class="kb-col-empty">—</div>`;
-    return `<div class="kb-col">
+    return `<div class="kb-col" data-phase="${escapeHtml(ph.id)}">
       <div class="kb-col-head"><span class="kb-col-num">${i+1}</span><span class="kb-col-title">${escapeHtml(ph.title)}</span><span class="kb-col-count">${cols[i].length}</span></div>
       ${items}
     </div>`;
@@ -1688,6 +1746,128 @@ function renderBoard() {
   </div>`;
 
   detail.innerHTML = `<div class="kb-stats">${stats}</div>${dlWrapHtml}<div class="kb-board">${colsHtml}</div>`;
+}
+
+// ===== Ruční pořadí karet v Přehledu =====
+// Pořadí se drží zvlášť pro každou fázi (state.boardOrder[idFáze] = [idKnihy, …]).
+// Kniha, která v uloženém pořadí není — nová, nebo se právě posunula z jiné fáze —
+// zůstává na konci sloupce ve svém přirozeném pořadí.
+function sortBoardColumn(list, phaseId) {
+  const order = (state.boardOrder || {})[phaseId];
+  if (!order || !order.length) return list;
+  const rank = new Map(order.map((id, i) => [id, i]));
+  const natural = new Map(list.map((b, i) => [b.id, i]));
+  const pos = b => rank.has(b.id) ? rank.get(b.id) : order.length + natural.get(b.id);
+  return list.sort((x, y) => pos(x) - pos(y));
+}
+
+let kbDrag = null;          // probíhající přetažení
+let kbClickBlocked = false; // po puštění karty se nesmí otevřít kniha
+let kbScrollSpeed = 0, kbScrollRAF = null;
+
+function boardCardClick(id) { if (kbClickBlocked) return; openBook(id); }
+
+function boardDragStart(e) {
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  const handle = e.currentTarget;
+  const card = handle.closest('.kb-card');
+  const col = card && card.closest('.kb-col');
+  if (!col || col.classList.contains('done')) return;
+  e.preventDefault(); e.stopPropagation();
+  const r = card.getBoundingClientRect();
+  kbDrag = {
+    card, col, handle, pointerId: e.pointerId,
+    dx: e.clientX - r.left, dy: e.clientY - r.top, w: r.width,
+    startX: e.clientX, startY: e.clientY, lastY: e.clientY,
+    active: false, ghost: null,
+    scroller: document.querySelector('.detail-wrap'),
+  };
+  try { handle.setPointerCapture(e.pointerId); } catch (err) {}
+  window.addEventListener('pointermove', boardDragMove);
+  window.addEventListener('pointerup', boardDragEnd);
+  window.addEventListener('pointercancel', boardDragEnd);
+}
+
+function boardDragMove(e) {
+  if (!kbDrag || e.pointerId !== kbDrag.pointerId) return;
+  // Drobný pohyb ještě není přetažení — teprve po pár pixelech, ať se nehýbe při klepnutí
+  if (!kbDrag.active) {
+    if (Math.abs(e.clientX - kbDrag.startX) < 4 && Math.abs(e.clientY - kbDrag.startY) < 4) return;
+    kbDrag.active = true;
+    const g = kbDrag.card.cloneNode(true);
+    g.classList.add('kb-ghost');
+    g.style.width = kbDrag.w + 'px';
+    document.body.appendChild(g);
+    kbDrag.ghost = g;
+    kbDrag.card.classList.add('kb-dragged');
+    document.body.classList.add('kb-dragging');
+  }
+  e.preventDefault();
+  kbDrag.lastY = e.clientY;
+  kbDrag.ghost.style.left = (e.clientX - kbDrag.dx) + 'px';
+  kbDrag.ghost.style.top  = (e.clientY - kbDrag.dy) + 'px';
+  kbUpdateAutoScroll(e.clientY);
+  kbReposition(e.clientY);
+}
+
+// Zařazení karty mezi sourozence ve stejném sloupci — do jiné fáze se nikdy nedostane
+function kbReposition(y) {
+  if (!kbDrag || !kbDrag.active) return;
+  const cards = Array.from(kbDrag.col.querySelectorAll('.kb-card')).filter(c => c !== kbDrag.card);
+  let target = null;
+  for (const c of cards) {
+    const r = c.getBoundingClientRect();
+    if (y < r.top + r.height / 2) { target = c; break; }
+  }
+  if (target) {
+    if (kbDrag.card.nextElementSibling !== target) kbDrag.col.insertBefore(kbDrag.card, target);
+  } else if (kbDrag.col.lastElementChild !== kbDrag.card) {
+    kbDrag.col.appendChild(kbDrag.card);
+  }
+}
+
+// Posun stránky, když se karta táhne k hornímu nebo dolnímu okraji
+function kbUpdateAutoScroll(y) {
+  const sc = kbDrag && kbDrag.scroller;
+  if (!sc) return;
+  const r = sc.getBoundingClientRect(), zone = 90;
+  if (y < r.top + zone) kbScrollSpeed = -Math.ceil((r.top + zone - y) / 5);
+  else if (y > r.bottom - zone) kbScrollSpeed = Math.ceil((y - (r.bottom - zone)) / 5);
+  else kbScrollSpeed = 0;
+  if (kbScrollSpeed && !kbScrollRAF) kbScrollRAF = requestAnimationFrame(kbScrollTick);
+}
+function kbScrollTick() {
+  kbScrollRAF = null;
+  if (!kbDrag || !kbDrag.active || !kbScrollSpeed) return;
+  const sc = kbDrag.scroller, before = sc.scrollTop;
+  sc.scrollTop = before + kbScrollSpeed;
+  if (sc.scrollTop !== before) kbReposition(kbDrag.lastY);
+  kbScrollRAF = requestAnimationFrame(kbScrollTick);
+}
+
+function boardDragEnd(e) {
+  if (!kbDrag) return;
+  if (e && e.pointerId !== undefined && e.pointerId !== kbDrag.pointerId) return;
+  window.removeEventListener('pointermove', boardDragMove);
+  window.removeEventListener('pointerup', boardDragEnd);
+  window.removeEventListener('pointercancel', boardDragEnd);
+  try { kbDrag.handle.releasePointerCapture(kbDrag.pointerId); } catch (err) {}
+  kbScrollSpeed = 0;
+  if (kbScrollRAF) { cancelAnimationFrame(kbScrollRAF); kbScrollRAF = null; }
+  const d = kbDrag;
+  kbDrag = null;
+  if (!d.active) return;
+  if (d.ghost) d.ghost.remove();
+  d.card.classList.remove('kb-dragged');
+  document.body.classList.remove('kb-dragging');
+  kbClickBlocked = true;
+  setTimeout(() => { kbClickBlocked = false; }, 80);
+  const phaseId = d.col.dataset.phase;
+  if (!phaseId) return;
+  if (!state.boardOrder) state.boardOrder = {};
+  state.boardOrder[phaseId] = Array.from(d.col.querySelectorAll('.kb-card'))
+    .map(c => c.dataset.book).filter(Boolean);
+  saveState();
 }
 
 function renderMain() {
@@ -1880,7 +2060,8 @@ function renderStep(book, st, archived) {
 
   const hasNote = !!s.note;
   const optBtn = (!archived && isOpt && !isActive) ? `<button class="opt-activate-btn" onclick="activateOptional('${st.id}')">+ aktivovat</button>` : '';
-  const tplLink = st.template ? `<button class="step-tpl-link" onclick="generateEmail('${st.template}')">${SVG_MAIL} Generovat e-mail</button>` : '';
+  const tplLink = (st.template && templates[st.template] !== undefined)
+    ? `<button class="step-tpl-link" onclick="generateEmail('${st.template}')">${SVG_MAIL} Generovat e-mail</button>` : '';
   const noteBtn = `<button class="step-note-btn ${hasNote?'has-note':''}" onclick="toggleStepNote('${st.id}')" title="Poznámka">${SVG_NOTE}</button>`;
 
   let repHtml = '';
@@ -2184,7 +2365,7 @@ function renderTemplate(tpl, book) {
 function generateEmail(key) {
   const b=getBook(); if(!b) return;
   const tpl=templates[key]; if(!tpl) return;
-  document.getElementById('genTitle').textContent=TEMPLATE_LABELS[key]||'E-mail';
+  document.getElementById('genTitle').textContent=templateName(key);
   document.getElementById('genOutput').value=renderTemplate(tpl,b);
   openModal('genModal');
 }
@@ -2192,19 +2373,84 @@ function copyGen() {
   const ta=document.getElementById('genOutput');
   navigator.clipboard.writeText(ta.value).then(showToast).catch(()=>{ ta.select(); document.execCommand('copy'); showToast(); });
 }
-function showToast() { const t=document.getElementById('copyToast'); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1800); }
+function showToast(msg) {
+  const t=document.getElementById('copyToast');
+  t.textContent = (typeof msg === 'string' && msg) ? msg : 'Zkopírováno ✓';
+  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1800);
+}
 
 // Template editor
-function openTemplatesEditor() { tplEditorKey='a'; renderTplEditorTabs(); loadTplEditorContent(); openModal('tplEditorModal'); }
+function openTemplatesEditor() {
+  normalizeTemplates();
+  if (!templates[tplEditorKey]) tplEditorKey = templateKeys()[0] || null;
+  renderTplEditorTabs(); loadTplEditorContent(); openModal('tplEditorModal');
+}
 function renderTplEditorTabs() {
-  document.getElementById('tplTabRow').innerHTML=Object.keys(TEMPLATE_LABELS).map(k =>
-    `<button class="tpl-tab ${k===tplEditorKey?'active':''}" onclick="selectTplTab('${k}')">${k.toUpperCase()} – ${TEMPLATE_LABELS[k]}</button>`
-  ).join('');
+  document.getElementById('tplTabRow').innerHTML =
+    templateKeys().map(k => `<button class="tpl-tab ${k===tplEditorKey?'active':''}" onclick="selectTplTab('${k}')">${escapeHtml(templateName(k))}</button>`).join('') +
+    `<button class="tpl-tab tpl-add" onclick="addTemplate()">+ Nová šablona</button>`;
 }
 function selectTplTab(k) { tplEditorKey=k; renderTplEditorTabs(); loadTplEditorContent(); }
-function loadTplEditorContent() { document.getElementById('tplEditorLabel').textContent=TEMPLATE_LABELS[tplEditorKey]||tplEditorKey; document.getElementById('tplEditorArea').value=templates[tplEditorKey]||''; }
-function saveCurrentTemplate() { templates[tplEditorKey]=document.getElementById('tplEditorArea').value; saveTemplates(); showToast(); }
-function resetCurrentTemplate() { if(!confirm('Obnovit výchozí šablonu?')) return; templates[tplEditorKey]=DEFAULT_TEMPLATES[tplEditorKey]; saveTemplates(); loadTplEditorContent(); }
+function loadTplEditorContent() {
+  const k = tplEditorKey;
+  const nameInp = document.getElementById('tplEditorName');
+  const area = document.getElementById('tplEditorArea');
+  const body = document.getElementById('tplEditorBody');
+  body.style.display = k ? '' : 'none';
+  if (!k) { document.getElementById('tplUsage').innerHTML = 'Zatím tu není žádná šablona. Novou přidáte tlačítkem <b>+ Nová šablona</b>.'; return; }
+  nameInp.value = templateLabels[k] || '';
+  area.value = templates[k] || '';
+  document.getElementById('tplResetBtn').style.display = DEFAULT_TEMPLATES[k] ? '' : 'none';
+  const used = stepsUsingTemplate(k);
+  document.getElementById('tplUsage').innerHTML = used.length
+    ? `Generuje se u ${used.length===1?'kroku':'kroků'}: ` + used.map(st => `<b>${escapeHtml(st.label)}</b>`).join(', ')
+    : 'Zatím není napojená na žádný krok. Napojíte ji v <b>Nastavení checklistu</b> — u zvoleného kroku vyberte tuhle šablonu v rozbalovátku.';
+}
+// Píše se rovnou do uložených dat, aby se text neztratil při přepnutí záložky ani zavření okna
+function tplTextInput(v) { if (!tplEditorKey) return; templates[tplEditorKey] = v; saveTemplates(); }
+function tplNameInput(v) {
+  if (!tplEditorKey) return;
+  templateLabels[tplEditorKey] = v; saveTemplateLabels(); renderTplEditorTabs();
+}
+function saveCurrentTemplate() {
+  if (!tplEditorKey) return;
+  templates[tplEditorKey] = document.getElementById('tplEditorArea').value;
+  templateLabels[tplEditorKey] = document.getElementById('tplEditorName').value;
+  saveTemplates(); saveTemplateLabels(); renderTplEditorTabs(); showToast('Uloženo ✓');
+}
+function addTemplate() {
+  let k; do { k = 'tpl-' + Math.random().toString(36).slice(2,8); } while (templates[k] !== undefined);
+  templates[k] = '';
+  templateLabels[k] = '';
+  saveTemplates(); saveTemplateLabels();
+  tplEditorKey = k;
+  renderTplEditorTabs(); loadTplEditorContent();
+  const inp = document.getElementById('tplEditorName');
+  inp.focus();
+}
+function deleteCurrentTemplate() {
+  const k = tplEditorKey; if (!k) return;
+  const used = stepsUsingTemplate(k);
+  const seznam = used.map(st => '• ' + st.label).join('\n');
+  const msg = used.length
+    ? 'Smazat šablonu „' + templateName(k) + '"?\n\nOdpojí se od těchto kroků checklistu:\n' + seznam
+    : 'Smazat šablonu „' + templateName(k) + '"?';
+  if (!confirm(msg)) return;
+  used.forEach(st => { delete st.template; });
+  if (used.length) { savePhases(); renderMainIfDetail(); }
+  delete templates[k]; delete templateLabels[k];
+  saveTemplates(); saveTemplateLabels();
+  tplEditorKey = templateKeys()[0] || null;
+  renderTplEditorTabs(); loadTplEditorContent();
+}
+function resetCurrentTemplate() {
+  if (!tplEditorKey || !DEFAULT_TEMPLATES[tplEditorKey]) return;
+  if (!confirm('Obnovit výchozí znění téhle šablony? Vaše úpravy textu se ztratí.')) return;
+  templates[tplEditorKey] = DEFAULT_TEMPLATES[tplEditorKey];
+  if (DEFAULT_TEMPLATE_LABELS[tplEditorKey]) templateLabels[tplEditorKey] = DEFAULT_TEMPLATE_LABELS[tplEditorKey];
+  saveTemplates(); saveTemplateLabels(); renderTplEditorTabs(); loadTplEditorContent();
+}
+function renderMainIfDetail() { if (currentView === 'detail') renderMain(); }
 
 // ===== Editor struktury checklistu =====
 function openStructEditor() { renderStructEditor(); openModal('structModal'); }
@@ -2214,7 +2460,8 @@ function structChanged() {
   state.books.forEach(migrateBook);
   saveState();
   renderStructEditor();
-  renderMain(); renderBookList();
+  renderBookList();
+  if (currentView === 'board') renderBoard(); else renderMain();
 }
 
 function renderStructEditor() {
@@ -2222,9 +2469,14 @@ function renderStructEditor() {
   el.innerHTML = PHASES.map((ph, pi) => {
     const rows = ph.steps.map((st, si) => {
       const flags =
-        (st.template ? `<span class="se-flag tpl" title="Krok má napojenou e-mailovou šablonu">✉ e-mail</span>` : '') +
         (st.repeatable ? `<span class="se-flag rep" title="Krok umožňuje přidávat opakování">opakovatelný</span>` : '') +
         (st.archiveStep ? `<span class="se-flag arch" title="Speciální krok s archivací knihy — nelze smazat">archivace</span>` : '');
+      const orphan = st.template && templates[st.template] === undefined
+        ? `<option value="${escapeHtml(st.template)}" selected>(smazaná šablona)</option>` : '';
+      const tplSel = `<select class="se-tpl ${st.template?'on':''}" onchange="seEditTemplate(${pi},${si},this.value)" title="Napojená šablona e-mailu — u kroku se pak v checklistu objeví tlačítko Generovat e-mail. Nové šablony přidáte v Šablonách e-mailů.">
+            <option value="">✉ bez e-mailu</option>
+            ${templateKeys().map(k => `<option value="${escapeHtml(k)}"${st.template===k?' selected':''}>${escapeHtml(templateName(k))}</option>`).join('')}${orphan}
+          </select>`;
       const subRows = (st.subSteps || []).map((ss, ssi) => `
         <div class="se-row sub">
           <input class="se-label" value="${escapeHtml(ss.label)}" onchange="seEditLabel(${pi},${si},${ssi},this.value)">
@@ -2238,6 +2490,7 @@ function renderStructEditor() {
           <div class="se-row">
             <input class="se-label" value="${escapeHtml(st.label)}" onchange="seEditLabel(${pi},${si},null,this.value)">
             ${flags}
+            ${tplSel}
             <span class="se-opt ${st.optional?'on':''}" onclick="seToggleOptional(${pi},${si},null)" title="Podmíněný krok se v checklistu objeví šedý a musí se nejdřív aktivovat">${st.optional?'podmíněný':'aktivní'}</span>
             <input class="se-wait" placeholder="čeká se na…" value="${escapeHtml(st.waitingOn||'')}" onchange="seEditWaitingOn(${pi},${si},this.value)" title="Na koho se čeká po odškrtnutí tohoto kroku. Štítek se objeví na kartě v Přehledu a zůstane, dokud neodškrtnete další krok s vyplněným čekáním.">
             <button class="se-ctl" onclick="seMove(${pi},${si},-1)" title="Posunout výš">↑</button>
@@ -2270,6 +2523,11 @@ function seEditLabel(pi, si, ssi, val) {
 function seEditWaitingOn(pi, si, val) {
   const v = val.trim();
   if (v) PHASES[pi].steps[si].waitingOn = v; else delete PHASES[pi].steps[si].waitingOn;
+  structChanged();
+}
+function seEditTemplate(pi, si, val) {
+  if (val) PHASES[pi].steps[si].template = val;
+  else delete PHASES[pi].steps[si].template;
   structChanged();
 }
 function seToggleOptional(pi, si, ssi) {
@@ -2321,10 +2579,14 @@ function seReset() {
 
 // Export / Import
 function exportData() {
-  // Záloha musí obsahovat vše, co si redaktorka sama upravila — knihy, strukturu
-  // checklistu (waitingOn, přejmenované/přidané kroky) i šablony e-mailů. Dřív se
-  // šablony do zálohy vůbec nedostaly a při obnově na jiném počítači by zmizely.
-  const blob=new Blob([JSON.stringify({ books: state.books, phases: PHASES, templates },null,2)],{type:'application/json'});
+  // Záloha musí obsahovat vše, co si redaktorka sama upravila — knihy, ruční pořadí
+  // karet v Přehledu, strukturu checklistu (waitingOn, přejmenované/přidané kroky)
+  // i šablony e-mailů včetně jejich názvů. Dřív se šablony do zálohy vůbec nedostaly
+  // a při obnově na jiném počítači by zmizely.
+  const blob=new Blob([JSON.stringify({
+    books: state.books, boardOrder: state.boardOrder || {},
+    phases: PHASES, templates, templateLabels,
+  },null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url; a.download=`redakcni-zaloha-${new Date().toISOString().slice(0,10)}.json`; a.click();
@@ -2340,9 +2602,11 @@ function importData(event) {
       const choice=prompt('1 = Přepsat vše\n2 = Sloučit (přidat nové)\n(Enter = zrušit)','2');
       if(!choice) return;
       if(choice==='1') {
-        state={ books: imp.books };
+        state={ books: imp.books, boardOrder: (imp.boardOrder && typeof imp.boardOrder==='object') ? imp.boardOrder : {} };
         if(Array.isArray(imp.phases) && imp.phases.length) { PHASES=imp.phases; savePhases(); }
-        if(imp.templates && typeof imp.templates==='object') { templates={ ...DEFAULT_TEMPLATES, ...imp.templates }; saveTemplates(); }
+        if(imp.templates && typeof imp.templates==='object') { templates={ ...imp.templates }; saveTemplates(); }
+        if(imp.templateLabels && typeof imp.templateLabels==='object') { templateLabels={ ...imp.templateLabels }; saveTemplateLabels(); }
+        normalizeTemplates(); saveTemplateLabels();
       }
       else if(choice==='2') { const ids=new Set(state.books.map(b=>b.id)); imp.books.forEach(b=>{ if(!ids.has(b.id)) state.books.push(b); }); }
       saveState(); initApp(); alert('Import dokončen.');
@@ -2398,7 +2662,7 @@ function dismissSidebarHint() {
 document.getElementById('sidebar').addEventListener('mouseenter', dismissSidebarHint);
 
 // Init
-function initApp() { state.books.forEach(migrateBook); openPhaseId=null; initCal(); currentView='board'; currentBookId=filteredBooks()[0]?.id||null; applySidebarPin(); maybeShowSidebarHint(); render(); }
+function initApp() { state.books.forEach(migrateBook); if (!state.boardOrder) state.boardOrder = {}; normalizeTemplates(); saveTemplateLabels(); openPhaseId=null; initCal(); currentView='board'; currentBookId=filteredBooks()[0]?.id||null; applySidebarPin(); maybeShowSidebarHint(); render(); }
 function render() {
   renderCalendar(); renderBookList(); updateViewToggle();
   if (currentView==='board') renderBoard();
