@@ -567,6 +567,20 @@ body.kb-dragging { user-select: none; cursor: grabbing; }
 .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 22px; flex-wrap: wrap; }
 .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .modal-fullrow { grid-column: 1 / -1; }
+
+/* Připomínka zálohy */
+.bkp-overlay { position: fixed; inset: 0; background: rgba(20,30,60,0.45); display: none; align-items: center; justify-content: center; z-index: 300; padding: 20px; }
+.bkp-overlay.open { display: flex; }
+.bkp-card { background: var(--white); border-radius: 22px; padding: 34px 30px 28px; width: 400px; max-width: 100%; box-shadow: var(--shadow-md); text-align: center; }
+.bkp-illu { margin: 0 auto 18px; width: 88px; height: 88px; }
+.bkp-kicker { font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: var(--raspberry); margin-bottom: 8px; }
+.bkp-msg { font-size: 16.5px; color: var(--black); line-height: 1.5; margin-bottom: 26px; padding: 0 6px; }
+.bkp-hero { width: 100%; background: var(--raspberry); color: #fff; padding: 13px 20px; border-radius: 999px; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: var(--transition); box-shadow: 0 6px 16px rgba(177,30,84,0.28); }
+.bkp-hero:hover { background: #9a1a48; }
+.bkp-minor { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 16px; }
+.bkp-link { font-size: 12.5px; font-weight: 500; color: var(--gray-text); }
+.bkp-link:hover { color: var(--black); text-decoration: underline; }
+.bkp-dot { color: var(--gray-border); font-size: 12px; }
 .tpl-vars { background: var(--page); padding: 10px 12px; border-radius: var(--radius-sm); font-size: 12px; color: var(--gray-text); margin-bottom: 16px; border-left: 3px solid var(--blue); }
 .tpl-vars code { background: rgba(64,114,173,0.10); color: var(--blue); padding: 1px 5px; border-radius: 3px; font-size: 11px; margin: 0 2px; }
 .tpl-vars-click { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
@@ -632,7 +646,7 @@ body.kb-dragging { user-select: none; cursor: grabbing; }
 
 @media print {
   body { background: var(--white); }
-  .sidebar, .main-topbar, .bh-actions, .step-end, .step-waiting-x, .phase-note-toggle, .add-rep-btn, .todo-add, .modal-overlay, .copy-toast, .author-row-del, .add-author-btn, .kb-grip { display: none !important; }
+  .sidebar, .main-topbar, .bh-actions, .step-end, .step-waiting-x, .phase-note-toggle, .add-rep-btn, .todo-add, .modal-overlay, .bkp-overlay, .copy-toast, .author-row-del, .add-author-btn, .kb-grip { display: none !important; }
   .app { display: block; }
   .main { display: block; }
   .detail-wrap, .detail { display: block; overflow: visible; height: auto; }
@@ -890,6 +904,32 @@ body.kb-dragging { user-select: none; cursor: grabbing; }
 
 <div class="copy-toast" id="copyToast">Zkopírováno ✓</div>
 
+<div class="bkp-overlay" id="zalohaPopup">
+  <div class="bkp-card">
+    <div class="bkp-illu">
+      <svg width="88" height="88" viewBox="0 0 88 88" fill="none">
+        <path d="M27 10h28a4 4 0 0 1 4 4v56l-18-12-18 12V14a4 4 0 0 1 4-4z" fill="var(--navy)" transform="rotate(-4 44 44)"/>
+        <path d="M14 22c2-3 5-3 6 0" stroke="var(--blue-light)" stroke-width="2.4" stroke-linecap="round"/>
+        <circle cx="72" cy="20" r="2.6" fill="var(--green-dark)"/>
+        <path d="M68 46c3-2 4 1 2 4" stroke="var(--blue-light)" stroke-width="2.2" stroke-linecap="round"/>
+        <circle cx="60" cy="62" r="21" fill="var(--raspberry)"/>
+        <path d="M60 68.5c-6.5-4.2-9.5-7.6-9.5-11.3 0-2.9 2.3-5.1 5.1-5.1 1.6 0 3.2.8 4.4 2.1 1.2-1.3 2.8-2.1 4.4-2.1 2.8 0 5.1 2.2 5.1 5.1 0 3.7-3 7.1-9.5 11.3z" fill="#fff"/>
+      </svg>
+    </div>
+    <div class="bkp-kicker">Než dnes skončíš</div>
+    <div class="bkp-msg">Nezapomeň si stáhnout zálohu, ať nepřijdeš o žádné informace.</div>
+    <button class="bkp-hero" onclick="zalohaBackupNow()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M6.5 10.5 12 16l5.5-5.5"/><path d="M4 19h16"/></svg>
+      Záloha
+    </button>
+    <div class="bkp-minor">
+      <button class="bkp-link" onclick="zalohaDismiss()">Teď ne</button>
+      <span class="bkp-dot">·</span>
+      <button class="bkp-link" onclick="zalohaSnooze()">Připomenout později</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const SVG_CHEVRON = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`;
 const SVG_NOTE = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
@@ -908,6 +948,8 @@ const TEMPLATES_KEY = 'redakcni-templates-v1';
 const UNLOCK_KEY    = 'redakcni-unlocked';
 const SIDEBAR_PIN_KEY  = 'redakcni-sidebar-pinned';
 const SIDEBAR_HINT_KEY = 'redakcni-sidebar-hint-seen';
+const ZALOHA_POPUP_KEY = 'redakcni-zaloha-next-v1';
+const ZALOHA_TRIGGER_DAYS = [1, 5]; // pondělí, pátek
 
 const EDICE_LABELS = {
   komentar: 'Komentář',
@@ -2656,6 +2698,42 @@ function importData(event) {
   reader.readAsText(file); event.target.value='';
 }
 
+// Připomínka zálohy — v pondělí a v pátek, dokud ji redaktorka nepotvrdí
+function zalohaTodayStr(d = new Date()) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function zalohaAddDays(dateStr, n) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return zalohaTodayStr(new Date(y, m-1, d+n));
+}
+function zalohaNextTriggerAfter(dateStr) {
+  let next = dateStr;
+  for (let i=0; i<7; i++) {
+    next = zalohaAddDays(next, 1);
+    const [y, m, d] = next.split('-').map(Number);
+    if (ZALOHA_TRIGGER_DAYS.includes(new Date(y, m-1, d).getDay())) return next;
+  }
+  return next;
+}
+function checkZalohaPopup() {
+  const today = zalohaTodayStr();
+  const nextEligible = localStorage.getItem(ZALOHA_POPUP_KEY);
+  const due = nextEligible ? (today >= nextEligible) : ZALOHA_TRIGGER_DAYS.includes(new Date().getDay());
+  if (due) document.getElementById('zalohaPopup').classList.add('open');
+}
+function zalohaDismiss() {
+  localStorage.setItem(ZALOHA_POPUP_KEY, zalohaNextTriggerAfter(zalohaTodayStr()));
+  document.getElementById('zalohaPopup').classList.remove('open');
+}
+function zalohaSnooze() {
+  localStorage.setItem(ZALOHA_POPUP_KEY, zalohaAddDays(zalohaTodayStr(), 1));
+  document.getElementById('zalohaPopup').classList.remove('open');
+}
+function zalohaBackupNow() {
+  exportData();
+  zalohaDismiss();
+}
+
 // Modal helpers
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
@@ -2703,7 +2781,7 @@ function dismissSidebarHint() {
 document.getElementById('sidebar').addEventListener('mouseenter', dismissSidebarHint);
 
 // Init
-function initApp() { state.books.forEach(migrateBook); if (!state.boardOrder) state.boardOrder = {}; normalizeTemplates(); saveTemplateLabels(); openPhaseId=null; initCal(); currentView='board'; currentBookId=filteredBooks()[0]?.id||null; applySidebarPin(); maybeShowSidebarHint(); render(); }
+function initApp() { state.books.forEach(migrateBook); if (!state.boardOrder) state.boardOrder = {}; normalizeTemplates(); saveTemplateLabels(); openPhaseId=null; initCal(); currentView='board'; currentBookId=filteredBooks()[0]?.id||null; applySidebarPin(); maybeShowSidebarHint(); render(); checkZalohaPopup(); }
 function render() {
   renderCalendar(); renderBookList(); updateViewToggle();
   if (currentView==='board') renderBoard();
