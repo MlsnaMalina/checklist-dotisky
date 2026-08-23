@@ -2045,6 +2045,7 @@ function renderMain() {
       </div>
     </div>`;
 
+  let firstIncompleteFound = false;
   PHASES.forEach((ph, idx) => {
     const pp = phaseProgress(book, ph);
     const ppct = pp.total===0 ? 0 : Math.round(pp.done/pp.total*100);
@@ -2052,7 +2053,11 @@ function renderMain() {
     const phFrom = prevWidths[phKey];
     prevWidths[phKey] = ppct;
     const justDone = phFrom !== undefined && phFrom < 100 && ppct >= 100;
-    const isOpen = openPhaseId===ph.id || (openPhaseId===null && idx===0);
+    // Výchozí rozbalená fáze (bez explicitní volby v openPhaseId) je první nedokončená,
+    // ne první podle pořadí — jinak by se po dohotovení fáze 1 pořád otvírala ona.
+    const isFirstIncomplete = !firstIncompleteFound && ppct < 100;
+    if (isFirstIncomplete) firstIncompleteFound = true;
+    const isOpen = openPhaseId===ph.id || (openPhaseId===null && isFirstIncomplete);
     const accent = cancelled ? 'var(--rose)' : (ppct>=100?'var(--green)':ppct>0?'var(--blue)':'var(--gray-border)');
     const hasNote = !!book.phaseNotes[ph.id];
     const phaseStatusCls = cancelled ? '' : (ppct>=100 ? 'phase-done' : ppct>0 ? 'phase-active' : 'phase-pending');
