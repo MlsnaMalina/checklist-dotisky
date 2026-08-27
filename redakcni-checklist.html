@@ -2815,11 +2815,6 @@ function renderPartsSection(book, archived) {
   const ringFrom = prevSubmitPct[ringKey];
   prevSubmitPct[ringKey] = submitPct;
 
-  const hasP2_2 = !!book.steps['p2_2'], hasP2_6 = !!book.steps['p2_6'];
-  const linkLines = [];
-  if (hasP2_2) linkLines.push(`<div>↳ naformátováno provázáno s krokem fáze Redakce: <b>Kontrola stylů v PublishOnu — ${fCount} / ${total}</b></div>`);
-  if (hasP2_6) linkLines.push(`<div>↳ redakčně + jazykově provázáno s krokem fáze Redakce: <b>Redakční kontrola + kontrola jazykové korektorky — ${rCount} / ${total}</b></div>`);
-
   const ro = archived;
   const importHtml = ro ? '' : `
     <div class="add-row-actions">
@@ -2896,7 +2891,6 @@ function renderPartsSection(book, archived) {
         </table>
         ${importHtml}
       </div>
-      ${linkLines.length ? `<div class="link-step">${linkLines.join('')}</div>` : ''}
     </div>`;
 }
 function paraImportPreviewHtml(book){
