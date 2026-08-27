@@ -262,6 +262,8 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .kb-chip.dl { background: rgba(177,30,84,.08); color: var(--raspberry); }
 .kb-chip.dl.hot { background: var(--raspberry); color: #fff; }
 .kb-chip.odev { background: var(--gray-bg); color: var(--gray-text); }
+.kb-chip.odev-parts { background: rgba(64,114,173,.10); color: var(--blue); }
+.kb-chip.odev-parts.complete { background: rgba(152,196,81,.16); color: #5a8a1a; }
 /* „Čeká se na" — vlastní řádek na kartě, ať se vejde celý text */
 .kb-wait { display: flex; align-items: flex-start; gap: 4px; background: rgba(64,114,173,.09); color: var(--blue); font-size: 11.5px; font-weight: 600; padding: 5px 6px 5px 9px; border-radius: var(--radius-sm); margin-bottom: 9px; line-height: 1.35; }
 .kb-wait > svg { flex-shrink: 0; margin-top: 1px; }
@@ -640,6 +642,168 @@ body.kb-dragging { user-select: none; cursor: grabbing; }
 .se-add-step { display: block; width: calc(100% - 24px); margin: 4px 12px 10px; padding: 7px; border: 1px dashed var(--gray-border); border-radius: var(--radius-sm); font-size: 12px; color: var(--gray-text); transition: var(--transition); text-align: center; }
 .se-add-step:hover { border-color: var(--blue); color: var(--blue); background: rgba(64,114,173,0.04); }
 
+/* ===== Rukopis po částech — tabulka paragrafů ===== */
+.parts-card { margin-bottom: 20px; }
+.nudge-banner { text-align: center; padding: 16px 20px; margin-bottom: 14px; background: rgba(152,196,81,0.08); border: 1px solid rgba(152,196,81,0.35); border-radius: var(--radius); }
+.nb-rule { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px; }
+.nb-rule::before, .nb-rule::after { content: ''; width: 44px; height: 1px; background: #b9d68a; }
+.nb-rule span { color: var(--green-dark); font-size: 12px; }
+.nudge-banner h3 { font-size: 16px; margin-bottom: 3px; }
+.nudge-banner p { font-size: 12px; color: var(--gray-text); }
+.summary-bar { background: var(--white); border: 1px solid var(--gray-border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px 22px; margin-bottom: 14px; }
+.summary-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+.summary-stats { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; flex: 1; }
+.stat { display: flex; align-items: baseline; gap: 7px; }
+.stat b { font-family: 'Playfair Display', serif; font-size: 21px; font-weight: 700; color: var(--navy); font-variant-numeric: tabular-nums; }
+.stat span { font-size: 11.5px; color: var(--gray-text); }
+.stat.accent b { color: var(--raspberry); }
+.stat.mech b { color: var(--blue); }
+.sep { width: 1px; height: 22px; background: var(--gray-border); }
+.author-breakdown { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--gray-border); grid-template-columns: repeat(5,1fr); gap: 14px 18px; }
+.author-breakdown.open { display: grid; }
+.ab-item .ab-name { font-size: 12px; font-weight: 600; margin-bottom: 3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor: pointer; border-radius: 4px; padding: 1px 3px; margin-left: -3px; }
+.ab-item .ab-name:hover { background: rgba(64,114,173,0.08); color: var(--blue); }
+.ab-item .ab-name.active-filter { background: var(--navy); color: #fff; }
+.ab-item .ab-name.none { color: var(--gray-dim); font-weight: 400; font-style: italic; cursor: default; }
+.ab-item .ab-name.none:hover { background: none; color: var(--gray-dim); }
+.ab-orphan { color: var(--amber); font-size: 11px; cursor: help; }
+.ab-bar { height: 5px; border-radius: 3px; background: var(--gray-bg); overflow: hidden; margin-bottom: 4px; }
+.ab-bar-fill { height: 100%; border-radius: 3px; transition: width 300ms ease; }
+.ab-meta { font-size: 11px; color: var(--gray-text); display: flex; justify-content: space-between; }
+.ab-meta b { color: var(--navy); font-variant-numeric: tabular-nums; }
+.ab-note { grid-column: 1/-1; font-size: 11.5px; color: var(--gray-text); margin-top: 2px; }
+.author-reminder-btn { display: block; margin-top: 3px; font-size: 10.5px; color: var(--blue); cursor: pointer; }
+.author-reminder-btn:hover { text-decoration: underline; }
+.reminder-panel { grid-column: 1/-1; margin-top: 4px; padding: 12px 14px; background: var(--gray-bg); border-radius: var(--radius-sm); font-size: 12.5px; }
+.reminder-panel .rp-head { font-weight: 600; margin-bottom: 6px; color: var(--navy); }
+.reminder-panel pre { white-space: pre-wrap; font-family: inherit; margin-bottom: 10px; line-height: 1.55; color: var(--black); }
+.reminder-actions { display: flex; gap: 8px; }
+.btn-mini { font-size: 11.5px; padding: 6px 12px; border-radius: var(--radius-sm); background: var(--navy); color: #fff; cursor: pointer; border: none; }
+.btn-mini.ghost { background: var(--white); color: var(--gray-text); border: 1px solid var(--gray-border); }
+.btn-mini:disabled { opacity: .4; cursor: default; }
+.minimap-wrap { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--gray-border); }
+.minimap-label { font-size: 10.5px; color: var(--gray-dim); margin-bottom: 8px; }
+.minimap { display: flex; flex-wrap: wrap; gap: 5px; }
+.mm-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--gray-border); border: none; padding: 0; cursor: pointer; flex-shrink: 0; transition: transform 120ms ease; }
+.mm-dot:hover { transform: scale(1.5); }
+.mm-dot.partial { background: var(--blue); }
+.mm-dot.done { background: var(--green); }
+.mm-dot.waiting { background: var(--white); border: 1.5px dashed var(--gray-dim); }
+tr.para-flash { animation: paraRowFlash 1.4s ease; }
+@keyframes paraRowFlash { 0%, 100% { background: transparent; } 20% { background: rgba(64,114,173,0.18); } }
+.controls-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 10px; }
+.filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.pf-chip { padding: 5px 13px; border-radius: 20px; font-size: 12px; font-weight: 500; color: var(--gray-text); border: 1px solid var(--gray-border); background: var(--white); cursor: pointer; transition: var(--transition); }
+.pf-chip:hover { border-color: var(--blue); }
+.pf-chip.active { background: var(--navy); border-color: var(--navy); color: #fff; }
+.search-box { font-size: 12.5px; border: 1px solid var(--gray-border); border-radius: 20px; padding: 6px 12px; background: var(--white); width: 190px; }
+.search-box:focus { outline: none; border-color: var(--blue); }
+.active-filter-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #fff; background: var(--navy); padding: 5px 8px 5px 12px; border-radius: 20px; margin-bottom: 10px; }
+.active-filter-chip span { cursor: pointer; opacity: .7; }
+.active-filter-chip span:hover { opacity: 1; }
+.legend { font-size: 11.5px; color: var(--gray-dim); margin-bottom: 10px; }
+.legend b.authorial-sample { font-style: italic; color: var(--gray-text); font-weight: 400; }
+.tbl-wrap { background: var(--white); border: 1px solid var(--gray-border); border-radius: var(--radius); box-shadow: var(--shadow); overflow-x: auto; }
+.tbl-wrap table { width: 100%; min-width: 900px; border-collapse: collapse; table-layout: fixed; }
+.tbl-wrap thead th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--gray-dim); font-weight: 600; padding: 10px 12px; background: var(--gray-bg); border-bottom: 1px solid var(--gray-border); }
+.tbl-wrap th.mid, .tbl-wrap td.mid { text-align: center; }
+.tbl-wrap th.num, .tbl-wrap td.num { text-align: right; }
+.tbl-wrap tbody tr { border-bottom: 1px solid var(--gray-border); position: relative; }
+.tbl-wrap tbody tr:last-child { border-bottom: none; }
+.tbl-wrap tbody tr:hover { background: rgba(64,114,173,0.03); }
+.tbl-wrap td { padding: 7px 12px; vertical-align: middle; }
+.tbl-wrap .row-accent { width: 4px; padding: 0; }
+tr.done .row-accent div, tr.partial .row-accent div, tr.pending .row-accent div { width: 4px; height: 100%; position: absolute; left: 0; top: 0; bottom: 0; }
+tr.done .row-accent div { background: var(--green); }
+tr.partial .row-accent div { background: var(--blue); }
+tr.pending .row-accent div { background: var(--gray-border); }
+.tbl-wrap tr.waiting { opacity: .6; }
+tr.waiting .row-accent div { position:absolute; left:0; top:0; bottom:0; width:4px; border-left: 2px dashed var(--gray-dim); }
+tr.note-row { background: var(--page); }
+tr.note-row:hover { background: var(--page); }
+.tbl-wrap .grip { color: var(--gray-dim); opacity: 0; cursor: grab; display: inline-flex; flex-shrink: 0; }
+.tbl-wrap tr:hover .grip { opacity: .4; }
+.para-cell { display: flex; flex-direction: column; gap: 4px; padding: 3px 0; }
+.para-meta { display: flex; align-items: center; gap: 5px; }
+.move-btns { display: flex; flex-direction: column; gap: 0; flex-shrink: 0; }
+.move-btn { width: 15px; height: 11px; display: flex; align-items: center; justify-content: center; color: var(--gray-dim); font-size: 8px; cursor: pointer; border-radius: 2px; line-height: 1; }
+.move-btn:hover { background: var(--gray-bg); color: var(--navy); }
+.cell-input, .cell-select { border: 1px solid transparent; background: transparent; padding: 4px 6px; border-radius: 4px; font-family: inherit; font-size: inherit; color: inherit; transition: var(--transition); }
+.cell-input:hover, .cell-select:hover { border-color: var(--gray-border); }
+.cell-input:focus, .cell-select:focus { outline: none; border-color: var(--blue); background: var(--white); }
+.num-input, .para-num-static { width: 58px; flex-shrink: 0; font-weight: 700; font-family: 'Playfair Display', serif; font-size: 14px; }
+.auth-toggle { flex-shrink: 0; width: 22px; height: 22px; border-radius: 4px; border: 1px solid var(--gray-border); color: var(--gray-dim); font-size: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: var(--white); transition: var(--transition); }
+.auth-toggle:hover { border-color: var(--blue); }
+.auth-toggle.on { background: rgba(64,114,173,0.10); border-color: var(--blue); color: var(--blue); }
+.para-name-input, .para-name-static { width: 100%; font-size: 13px; resize: none; overflow: hidden; display: block; line-height: 1.4; min-height: 28px; }
+.para-name-input.authorial, .para-name-static.authorial { font-style: italic; color: var(--gray-text); }
+.authors-cell { display: flex; flex-direction: column; gap: 4px; padding: 3px 0; }
+.author-chips { display: flex; flex-wrap: wrap; gap: 3px; }
+.author-chip { display: inline-flex; align-items: center; gap: 4px; background: var(--gray-bg); color: var(--black); font-size: 11px; padding: 3px 6px 3px 9px; border-radius: 10px; white-space: nowrap; }
+.chip-x { cursor: pointer; color: var(--gray-dim); font-size: 10px; line-height: 1; padding: 1px; }
+.chip-x:hover { color: var(--rose); }
+.author-select { font-size: 12px; width: 100%; color: var(--gray-dim); }
+.date-input { width: 108px; font-size: 12px; }
+.chars-input { width: 74px; text-align: right; font-size: 12.5px; }
+.chars-input::-webkit-outer-spin-button, .chars-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.chars-input { -moz-appearance: textfield; appearance: textfield; }
+.ns-hint { font-size: 10px; color: var(--gray-dim); display: block; text-align: right; margin-top: 1px; }
+.deadline-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--gray-text); cursor: pointer; background: var(--gray-bg); padding: 4px 8px; border-radius: 10px; border: none; }
+.deadline-badge svg { flex-shrink: 0; }
+.deadline-badge.soon { color: var(--amber); background: rgba(224,123,0,.12); }
+.deadline-badge.late { color: #fff; background: var(--raspberry); }
+.deadline-add { font-size: 11px; color: var(--gray-dim); cursor: pointer; text-decoration: underline dotted; background: none; border: none; padding: 4px 2px; }
+.deadline-add:hover { color: var(--blue); }
+.date-cell-wrap { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.arrive-row { display: flex; align-items: center; gap: 5px; }
+.arrive-row .date-input { width: 108px; }
+.today-btn { font-size: 10.5px; font-weight: 600; padding: 5px 9px; border-radius: 10px; background: rgba(152,196,81,0.18); color: var(--green-dark); border: none; cursor: pointer; white-space: nowrap; transition: var(--transition); }
+.today-btn:hover { background: rgba(152,196,81,0.32); }
+.waiting-pill { font-size: 11px; color: var(--gray-dim); font-style: italic; }
+.row-actions { display: flex; align-items: center; gap: 2px; opacity: 0; transition: opacity 120ms ease; }
+.tbl-wrap tr:hover .row-actions { opacity: 1; }
+.note-btn, .del-btn { width: 22px; height: 22px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--gray-dim); cursor: pointer; font-size: 12px; flex-shrink: 0; }
+.note-btn:hover { background: var(--gray-bg); color: var(--navy); }
+.note-btn.has-note { color: var(--amber); opacity: 1; }
+.del-btn:hover { background: rgba(192,96,106,0.12); color: var(--rose); }
+.note-row td { padding: 0 12px 12px 34px; }
+.note-edit { display: flex; align-items: flex-end; gap: 8px; }
+.note-row textarea { flex: 1; min-height: 46px; padding: 7px 10px; border: 1px solid var(--gray-border); border-radius: var(--radius-sm); font-family: inherit; font-size: 12.5px; resize: vertical; background: var(--white); }
+.note-row textarea:focus { outline: none; border-color: var(--blue); }
+.note-clear-btn { flex-shrink: 0; font-size: 11.5px; color: var(--rose); background: none; border: 1px solid var(--gray-border); padding: 7px 11px; border-radius: var(--radius-sm); cursor: pointer; white-space: nowrap; transition: var(--transition); }
+.note-clear-btn:hover { background: rgba(192,96,106,0.08); border-color: var(--rose); }
+.fz-stepper { display: inline-flex; align-items: flex-start; }
+.fz-node { display: flex; flex-direction: column; align-items: center; gap: 3px; width: 50px; flex-shrink: 0; cursor: pointer; }
+.fz-dot { width: 13px; height: 13px; border-radius: 50%; border: 1.6px solid var(--gray-border); background: var(--white); display: flex; align-items: center; justify-content: center; transition: var(--transition); }
+.fz-node:hover .fz-dot { border-color: var(--blue); }
+.fz-node.on .fz-dot { background: var(--green); border-color: var(--green); }
+.fz-node.on .fz-dot::after { content: '✓'; color: #fff; font-size: 8px; font-weight: 700; }
+.fz-node span { font-size: 8.5px; color: var(--gray-dim); white-space: nowrap; }
+.fz-node.on span { color: var(--green-dark); font-weight: 600; }
+.fz-line { width: 13px; height: 1.6px; background: var(--gray-border); margin-top: 5px; flex-shrink: 0; }
+.fz-line.on { background: var(--green); }
+.fz-node.mech.on .fz-dot { background: var(--blue); border-color: var(--blue); }
+.fz-node.mech.on span { color: var(--blue); }
+.fz-line.mech.on { background: var(--blue); }
+.add-row-actions { display: flex; border-top: 1px dashed var(--gray-border); }
+.add-row-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 11px 16px; color: var(--blue); font-size: 12.5px; font-weight: 500; cursor: pointer; user-select: none; text-align: center; }
+.add-row-btn:hover { background: rgba(64,114,173,0.04); }
+.add-row-actions .add-row-btn + .add-row-btn { border-left: 1px dashed var(--gray-border); }
+.import-panel { padding: 16px 18px; border-top: 1px solid var(--gray-border); background: var(--page); }
+.import-hint { font-size: 12px; color: var(--gray-text); margin-bottom: 10px; line-height: 1.5; }
+.import-panel textarea { width: 100%; min-height: 130px; padding: 10px 12px; border: 1px solid var(--gray-border); border-radius: var(--radius-sm); font-family: inherit; font-size: 12.5px; resize: vertical; background: var(--white); }
+.import-panel textarea:focus { outline: none; border-color: var(--blue); }
+.import-actions { display: flex; gap: 8px; margin-top: 10px; }
+.import-preview { margin-top: 16px; }
+.import-preview-head { font-size: 12.5px; font-weight: 600; color: var(--navy); margin-bottom: 8px; }
+.import-preview-list { max-height: 240px; overflow-y: auto; background: var(--white); border: 1px solid var(--gray-border); border-radius: var(--radius-sm); }
+.import-row { display: flex; align-items: center; gap: 10px; padding: 7px 12px; border-bottom: 1px solid var(--gray-bg); font-size: 12.5px; }
+.import-row:last-child { border-bottom: none; }
+.import-row .inum { font-weight: 700; font-family: 'Playfair Display', serif; width: 60px; flex-shrink: 0; }
+.import-row .iname { flex: 1; color: var(--gray-text); }
+.import-row .iname.empty { color: var(--gray-dim); font-style: italic; }
+.import-row .idup { color: var(--gray-dim); font-size: 10.5px; flex-shrink: 0; white-space: nowrap; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; }
 }
@@ -647,11 +811,12 @@ body.kb-dragging { user-select: none; cursor: grabbing; }
 @media print {
   body { background: var(--white); }
   .sidebar, .main-topbar, .bh-actions, .step-end, .step-waiting-x, .phase-note-toggle, .add-rep-btn, .todo-add, .modal-overlay, .bkp-overlay, .copy-toast, .author-row-del, .add-author-btn, .kb-grip { display: none !important; }
+  .grip, .move-btns, .auth-toggle, .chip-x, .row-actions, .add-row-actions, .import-panel, .controls-row, .active-filter-chip, .expand-hint { display: none !important; }
   .app { display: block; }
   .main { display: block; }
   .detail-wrap, .detail { display: block; overflow: visible; height: auto; }
   .detail { padding: 0; }
-  .book-header, .phase { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+  .book-header, .phase, .parts-card .summary-bar, .parts-card .tbl-wrap { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
   .phase-body { display: block !important; padding: 4px 22px 16px !important; }
   .phase-body-inner { overflow: visible !important; }
   .note-area { display: block !important; }
@@ -1351,6 +1516,18 @@ let justToggledStep = null;   // id kroku pro mikro-animaci odškrtnutí
 let curWaitId = null;         // id kroku, u kterého se právě čeká (nastavuje renderMain)
 const prevWidths = {};        // předchozí hodnoty progressu pro plynulé animace
 
+// ===== Rukopis po částech — přechodný UI stav tabulky paragrafů (neukládá se) =====
+let partsFilterMode = 'all';   // 'all' | 'incomplete' | 'unsubmitted'
+let partsSortMode = 'book';    // 'book' | 'author'
+let partsSearchQuery = '';
+let partsAuthorFilter = null;
+let partsBreakdownOpen = false;
+let partsOpenNoteId = null;
+let partsOpenReminder = null;
+let partsImportOpen = false;
+let partsImportPreview = null;
+let prevSubmitPct = {};        // per-book % odevzdáno pro plynulou animaci kola
+
 function initCal() { const n = new Date(); calYear = n.getFullYear(); calMonth = n.getMonth(); }
 
 function loadState() {
@@ -1429,6 +1606,8 @@ function migrateBook(b) {
   b.todos.forEach(t => { if (!t.id) t.id = uuid(); });
   if (b.cancelled === undefined) b.cancelled = false;
   if (b.rukopisOdevzdan === undefined) b.rukopisOdevzdan = false;
+  if (b.submittedInParts === undefined) b.submittedInParts = false;
+  if (!b.paragraphs) b.paragraphs = [];
 }
 
 // Progress
@@ -1552,7 +1731,7 @@ function isKomentar(b) { return b.edice==='komentar' || b.edice==='praktickyKome
 function filteredBooks() {
   let books = state.books.filter(b => currentTab==='active' ? !b.archivedAt : !!b.archivedAt);
   if (filterKomentare) books = books.filter(isKomentar);
-  if (filterOdevzdane) books = books.filter(b => !!b.rukopisOdevzdan);
+  if (filterOdevzdane) books = books.filter(b => !!b.rukopisOdevzdan || !!b.submittedInParts);
   if (searchQ) { const q = searchQ.toLowerCase(); books = books.filter(b => b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q)); }
   if (currentTab === 'active') {
     books = books.slice().sort((a, c) => {
@@ -1675,14 +1854,15 @@ function animateProgress() {
 function boardActiveBooks() {
   let books = state.books.filter(b => !b.archivedAt && !b.cancelled);
   if (filterKomentare) books = books.filter(isKomentar);
-  if (filterOdevzdane) books = books.filter(b => !!b.rukopisOdevzdan);
+  if (filterOdevzdane) books = books.filter(b => !!b.rukopisOdevzdan || !!b.submittedInParts);
   if (searchQ) { const q = searchQ.toLowerCase(); books = books.filter(b => b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q)); }
   return books;
 }
 // Index první nedokončené fáze (přeskakuje prázdné fáze); je-li vše hotové, poslední fáze
-// Dokud není odevzdán rukopis, kniha zůstává v 1. fázi bez ohledu na to, kolik kroků má hotových
+// Dokud není odevzdán rukopis (celý, nebo aspoň po částech), kniha zůstává v 1. fázi
+// bez ohledu na to, kolik kroků má hotových.
 function currentPhaseIndex(b) {
-  if (!b.rukopisOdevzdan) return 0;
+  if (!b.rukopisOdevzdan && !b.submittedInParts) return 0;
   for (let i = 0; i < PHASES.length; i++) {
     const pp = phaseProgress(b, PHASES[i]);
     if (pp.total === 0) continue;
@@ -1708,6 +1888,11 @@ function boardCard(b, phaseIdx) {
   let chip = '';
   if (b.rukopisOdevzdan) {
     chip = `<span class="kb-chip odev">odevzdáno</span>`;
+  } else if (b.submittedInParts) {
+    const total = (b.paragraphs||[]).length;
+    const got = (b.paragraphs||[]).filter(p=>p.date).length;
+    const complete = total>0 && got>=total;
+    chip = `<span class="kb-chip odev-parts ${complete?'complete':''}">${got}/${total} částí</span>`;
   } else if (b.odevzdaniRukopisu) {
     const d = daysUntil(b.odevzdaniRukopisu);
     if (d !== null) {
@@ -1738,7 +1923,7 @@ function renderBoard() {
   // Statistiky
   const upcoming = [];
   activeAll.forEach(b => {
-    if (b.rukopisOdevzdan || !b.odevzdaniRukopisu) return;
+    if (b.rukopisOdevzdan || b.submittedInParts || !b.odevzdaniRukopisu) return;
     const d = daysUntil(b.odevzdaniRukopisu);
     if (d === null || d < 0) return;
     upcoming.push({ d, title: b.title });
@@ -2025,6 +2210,9 @@ function renderMain() {
                 <div class="ms-toggle ${book.rukopisOdevzdan?'on':''} ${archived?'locked':''}" ${archived?'':'onclick="toggleRukopis()"'}>
                   <div class="ms-box"></div><span>Rukopis odevzdán</span>
                 </div>
+                <div class="ms-toggle ${book.submittedInParts?'on':''} ${archived?'locked':''}" ${archived?'':'onclick="toggleSubmittedInParts()"'} title="Rukopis chodí postupně, po jednotlivých paragrafech — otevře tabulku dole a posune knihu do Redakce stejně jako Rukopis odevzdán">
+                  <div class="ms-box"></div><span>Rukopis odevzdáván po částech</span>
+                </div>
               </div>
             </div>
           </div>
@@ -2044,6 +2232,8 @@ function renderMain() {
         <button class="btn btn-danger" onclick="deleteBook()">Smazat</button>
       </div>
     </div>`;
+
+  html += renderPartsSection(book, archived);
 
   let firstIncompleteFound = false;
   PHASES.forEach((ph, idx) => {
@@ -2093,6 +2283,7 @@ function renderMain() {
   detail.innerHTML = html;
   justToggledStep = null;
   animateProgress();
+  document.querySelectorAll('.para-name-input').forEach(paraAutoGrow);
   // attach todo Enter key
   const ti = document.getElementById('todoInput');
   if (ti) ti.addEventListener('keydown', e => { if (e.key==='Enter') addTodo(); });
@@ -2257,6 +2448,479 @@ function toggleRukopis() {
   const b=getBook(); if(!b||b.archivedAt) return;
   b.rukopisOdevzdan=!b.rukopisOdevzdan; saveState(); renderMain(); renderBookList();
 }
+
+// ===== Rukopis po částech — tabulka paragrafů =====
+// Přehled paragrafů, které se odevzdávají postupně (velké kolektivy). Zapnutí tohohle
+// přepínače posouvá knihu z „Domlouvání spolupráce" stejně jako Rukopis odevzdán
+// (viz currentPhaseIndex) — jen nezávisle na něm, ať ten druhý zůstane pravdivý,
+// i když je manuskript ve skutečnosti pořád ještě rozdělaný.
+function toggleSubmittedInParts() {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  b.submittedInParts=!b.submittedInParts; saveState(); renderMain(); renderBookList();
+}
+// Krok „Kontrola stylů v PublishOnu" a „Redakční kontrola + kontrola jazykové korektorky"
+// se odvozují přímo z tabulky — jen když ty kroky ve fázi Redakce existují (uživatelka
+// si mohla checklist v Nastavení přejmenovat nebo smazat), jinak se nic neděje.
+function syncPartsStepsFromParagraphs(b) {
+  if (!b.submittedInParts) return;
+  const ps = b.paragraphs || []; if (!ps.length) return;
+  const allFormatted = ps.every(p=>p.f);
+  const allChecked = ps.every(p=>p.r && p.j);
+  const sf = b.steps['p2_2'];
+  if (sf && sf.done !== allFormatted) { sf.done = allFormatted; sf.completedAt = allFormatted ? todayISO() : null; }
+  const sc = b.steps['p2_6'];
+  if (sc && sc.done !== allChecked) { sc.done = allChecked; sc.completedAt = allChecked ? todayISO() : null; }
+}
+function paraFind(b, id) { return (b.paragraphs||[]).find(p=>p.id===id); }
+function paraNs(chars) { return chars ? (chars/1800).toFixed(1).replace('.',',') + ' NS' : '—'; }
+function paraAutoGrow(el) { el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }
+
+function paraAddParagraph() {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  const id = uuid();
+  b.paragraphs.push({ id, num:'', name:'', authorial:false, authors:[], date:'', deadline:'', f:false, r:false, j:false, a:false, chars:null, note:'' });
+  saveState(); renderMain();
+  setTimeout(()=>{ const el=document.querySelector('[data-para-focus="'+id+'"]'); if(el) el.focus(); }, 0);
+}
+function paraDeleteParagraph(id) {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  if(!confirm('Smazat tento paragraf z tabulky?')) return;
+  b.paragraphs = b.paragraphs.filter(p=>p.id!==id);
+  syncPartsStepsFromParagraphs(b);
+  saveState(); renderMain(); renderBookList();
+}
+function paraMoveRow(id, dir) {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  const i = b.paragraphs.findIndex(p=>p.id===id);
+  const j = i+dir;
+  if(j<0 || j>=b.paragraphs.length) return;
+  [b.paragraphs[i], b.paragraphs[j]] = [b.paragraphs[j], b.paragraphs[i]];
+  saveState(); renderMain();
+}
+function paraToggleFaze(id, key) {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  const p=paraFind(b,id); if(!p) return;
+  p[key] = !p[key];
+  syncPartsStepsFromParagraphs(b);
+  saveState(); renderMain(); renderBookList();
+}
+function paraToggleAuthorial(id) {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  const p=paraFind(b,id); if(!p) return;
+  p.authorial = !p.authorial; saveState(); renderMain();
+}
+function paraUpdateField(id, field, val) {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  const p=paraFind(b,id); if(!p) return;
+  p[field] = field==='chars' ? (val===''? null : Number(val)) : val;
+  if (field==='date') syncPartsStepsFromParagraphs(b);
+  saveState(); renderMain(); if (field==='date') renderBookList();
+}
+function paraSetDeadline(id) {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  const p=paraFind(b,id); if(!p) return;
+  const cur = p.deadline ? fmtDateInput(p.deadline) : '';
+  const v = prompt('Termín odevzdání (RRRR-MM-DD), prázdné pole termín zruší:', cur);
+  if(v===null) return;
+  const t = v.trim();
+  p.deadline = t ? new Date(t).toISOString() : '';
+  saveState(); renderMain();
+}
+function paraAddAuthor(id, name) {
+  if(!name) return;
+  const b=getBook(); if(!b||b.archivedAt) return;
+  const p=paraFind(b,id); if(!p) return;
+  if(!p.authors.includes(name)) p.authors.push(name);
+  saveState(); renderMain();
+}
+function paraRemoveAuthor(id, name) {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  const p=paraFind(b,id); if(!p) return;
+  p.authors = p.authors.filter(a=>a!==name);
+  saveState(); renderMain();
+}
+function paraToggleNote(id) { partsOpenNoteId = partsOpenNoteId===id ? null : id; renderMain(); }
+function paraClearNote(id) {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  const p=paraFind(b,id); if(!p) return;
+  p.note = ''; partsOpenNoteId = null; saveState(); renderMain();
+}
+
+function paraMissingFor(b, author) { return (b.paragraphs||[]).filter(p=>p.authors.includes(author) && !p.date); }
+function paraReminderText(b, author) {
+  const missing = paraMissingFor(b, author);
+  const items = missing.map(p => '- ' + (p.num||'(bez čísla)') + (p.name ? (' ' + (p.authorial ? '['+p.name+']' : p.name)) : '')).join('\n');
+  return 'Dobrý den,\n\nchtěla jsem se zeptat, jak to vypadá s odevzdáním následujících paragrafů:\n\n' + items + '\n\nBudu ráda za orientační termín. Děkuji a přeji hezký den.';
+}
+function paraToggleReminder(author) { partsOpenReminder = partsOpenReminder===author ? null : author; renderMain(); }
+function paraCopyReminder(author) {
+  const b=getBook(); if(!b) return;
+  const t = paraReminderText(b, author);
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t).then(()=>showToast('Zkopírováno do schránky')).catch(()=>showToast('Nepodařilo se zkopírovat — označte text ručně'));
+  } else { showToast('Označte text a zkopírujte ručně'); }
+}
+
+function paraSetFilterMode(v){ partsFilterMode = v; renderMain(); }
+function paraSetSort(v){ partsSortMode = v; renderMain(); }
+function paraSetSearch(v){ partsSearchQuery = v.trim().toLowerCase(); renderMain(); }
+function paraFilterByAuthor(name){ partsAuthorFilter = partsAuthorFilter===name ? null : name; renderMain(); }
+function paraJumpTo(id){
+  const el = document.querySelector(`tr[data-para-row="${id}"]`);
+  if(!el) return;
+  el.scrollIntoView({behavior:'smooth', block:'center'});
+  el.classList.add('para-flash');
+  setTimeout(()=>el.classList.remove('para-flash'), 1400);
+}
+
+// Rozpozná „§ N" na začátku řádku — číslo může mít až dvě písmena přílepku z novely (§ 14a, § 14ab),
+// vždy nalepená přímo na číslici. Nadpis pozná podle jediného pravidla: pokud navazující text
+// nekončí tečkou (ani středníkem), je to nadpis; jakmile končí tečkou, je to už zákonné znění
+// paragrafu samotného, ne název — a řádek zůstane bez názvu.
+function parseStatuteText(text){
+  const lines = text.replace(/\r\n/g,'\n').replace(/ /g,' ').split('\n');
+  const results = [];
+  let i = 0;
+  while(i < lines.length){
+    const line = lines[i].trim();
+    const m = line.match(/^§\s*(\d+[a-z]{0,2})\b\s*(.*)$/i);
+    if(m){
+      const num = '§ ' + m[1];
+      const sameLine = m[2].trim().replace(/^[-–—:.]\s*/, '');
+      let heading = '';
+      if(sameLine){
+        if(!/[.;]$/.test(sameLine)) heading = sameLine;
+      } else {
+        let j = i+1;
+        while(j < lines.length && lines[j].trim()==='') j++;
+        const next = (lines[j]||'').trim();
+        if(next && !/[.;]$/.test(next)){
+          heading = next;
+          i = j;
+        }
+      }
+      results.push({num, name:heading});
+    }
+    i++;
+  }
+  return results;
+}
+function paraToggleImport(){
+  partsImportOpen = !partsImportOpen;
+  if(!partsImportOpen) partsImportPreview = null;
+  renderMain();
+  if (partsImportOpen) { const ta=document.getElementById('paraImportText'); if(ta) ta.focus(); }
+}
+function paraParseImportText(){
+  const b=getBook(); if(!b) return;
+  const ta = document.getElementById('paraImportText'); if(!ta) return;
+  const parsed = parseStatuteText(ta.value);
+  partsImportPreview = parsed;
+  renderMain();
+}
+function paraCommitImport(){
+  const b=getBook(); if(!b||b.archivedAt) return;
+  if(!partsImportPreview || !partsImportPreview.length) return;
+  const existingNums = new Set(b.paragraphs.map(p=>p.num.trim()));
+  let added = 0, skipped = 0;
+  partsImportPreview.forEach(item=>{
+    if(existingNums.has(item.num.trim())){ skipped++; return; }
+    b.paragraphs.push({ id:uuid(), num:item.num, name:item.name||'', authorial:false, authors:[], date:'', deadline:'', f:false, r:false, j:false, a:false, chars:null, note:'' });
+    existingNums.add(item.num.trim());
+    added++;
+  });
+  partsImportOpen = false; partsImportPreview = null;
+  saveState(); renderMain();
+  showToast(`Přidáno ${added} paragrafů` + (skipped?`, ${skipped} už v tabulce bylo`:'') + '.');
+}
+
+function paraFzHtml(p, ro){
+  if(!p.date) return `<span class="waiting-pill">čeká se</span>`;
+  const c = (key,label,mech) => `<div class="fz-node ${mech?'mech':''} ${p[key]?'on':''}" ${ro?'':`onclick="paraToggleFaze('${p.id}','${key}')"`}><span class="fz-dot"></span><span>${label}</span></div>`;
+  return `<div class="fz-stepper">
+    ${c('f','naformátováno',true)}
+    <div class="fz-line mech ${p.f?'on':''}"></div>
+    ${c('r','redakčně')}
+    <div class="fz-line ${p.r?'on':''}"></div>
+    ${c('j','jazykově')}
+    <div class="fz-line ${p.j?'on':''}"></div>
+    ${c('a','autorsky')}
+  </div>`;
+}
+function paraDateCellHtml(p, ro){
+  if(p.date){
+    return `<input type="date" class="cell-input date-input" value="${fmtDateInput(p.date)}" ${ro?'readonly disabled':''} onchange="paraUpdateField('${p.id}','date',this.value?new Date(this.value).toISOString():'')" title="Datum odevzdání">`;
+  }
+  const deadlineHtml = p.deadline
+    ? `<button class="deadline-badge ${todoDueClass(p.deadline)}" ${ro?'disabled':`onclick="paraSetDeadline('${p.id}')"`} title="Termín odevzdání — klik pro úpravu nebo zrušení">${SVG_FLAG} ${fmtDate(p.deadline)}</button>`
+    : (ro ? '' : `<button class="deadline-add" onclick="paraSetDeadline('${p.id}')">+ termín</button>`);
+  if (ro) return deadlineHtml || '—';
+  return `<div class="date-cell-wrap">
+    ${deadlineHtml}
+    <div class="arrive-row">
+      <input type="date" class="cell-input date-input" value="" onchange="paraUpdateField('${p.id}','date',this.value?new Date(this.value).toISOString():'')" title="Vyberte datum, kdy část dorazila">
+      <button class="today-btn" onclick="paraUpdateField('${p.id}','date','${todayISO()}')" title="Označit jako odevzdané dnes">dnes</button>
+    </div>
+  </div>`;
+}
+function paraRowsHtml(book, archived){
+  const ro = archived;
+  let list = book.paragraphs.map((p,i)=>({p,i}));
+  if(partsSortMode==='author'){
+    list = list.slice().sort((x,y)=>{
+      const an = x.p.authors[0] || 'zzzz', bn = y.p.authors[0] || 'zzzz';
+      const c = an.localeCompare(bn, 'cs');
+      return c!==0 ? c : x.i-y.i;
+    });
+  }
+  if(partsFilterMode==='incomplete') list = list.filter(x=>!(x.p.f && x.p.r && x.p.j && x.p.a));
+  if(partsFilterMode==='unsubmitted') list = list.filter(x=>!x.p.date);
+  if(partsAuthorFilter) list = list.filter(x=>x.p.authors.includes(partsAuthorFilter));
+  if(partsSearchQuery) list = list.filter(x => (x.p.num||'').toLowerCase().includes(partsSearchQuery) || (x.p.name||'').toLowerCase().includes(partsSearchQuery));
+  const canMove = !ro && partsSortMode==='book' && partsFilterMode==='all' && !partsAuthorFilter && !partsSearchQuery;
+  const authors = (book.authors||[]).filter(Boolean);
+
+  if(!list.length) return `<tr><td colspan="7" style="text-align:center;color:var(--gray-dim);padding:26px;">Žádné paragrafy k zobrazení.</td></tr>`;
+
+  return list.map(({p})=>{
+    const done = p.f && p.r && p.j && p.a;
+    const stateClass = !p.date ? 'waiting' : done ? 'done' : (p.f||p.r||p.j||p.a) ? 'partial' : 'pending';
+    const moveBtns = canMove ? `<div class="move-btns">
+        <span class="move-btn" onclick="paraMoveRow('${p.id}',-1)" title="Posunout výš">▲</span>
+        <span class="move-btn" onclick="paraMoveRow('${p.id}',1)" title="Posunout níž">▼</span>
+      </div>` : '';
+    const noteRow = partsOpenNoteId===p.id ? `<tr class="note-row"><td class="row-accent"></td><td colspan="6">
+        <div class="note-edit">
+          <textarea ${ro?'readonly':''} placeholder="Poznámka k paragrafu…" onchange="paraUpdateField('${p.id}','note',this.value)">${escapeHtml(p.note)}</textarea>
+          ${ro?'':`<button class="note-clear-btn" onclick="paraClearNote('${p.id}')" title="Smazat poznámku">Smazat poznámku</button>`}
+        </div>
+      </td></tr>` : '';
+    const nameField = ro
+      ? `<div class="para-name-static ${p.authorial?'authorial':''}">${p.name?escapeHtml(p.name):'<span style="color:var(--gray-dim);">—</span>'}</div>`
+      : `<textarea class="cell-input para-name-input ${p.authorial?'authorial':''}" rows="1" placeholder="Název paragrafu…" onchange="paraUpdateField('${p.id}','name',this.value)" oninput="paraAutoGrow(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">${escapeHtml(p.name)}</textarea>`;
+    const authorsField = ro
+      ? `<div class="author-chips">${p.authors.map(a=>`<span class="author-chip">${escapeHtml(a)}</span>`).join('')}</div>`
+      : `<div class="authors-cell">
+          <div class="author-chips">
+            ${p.authors.map(a=>`<span class="author-chip">${escapeHtml(a)}<span class="chip-x" onclick="paraRemoveAuthor('${p.id}','${escapeHtml(a)}')" title="Odebrat">✕</span></span>`).join('')}
+          </div>
+          <select class="cell-input author-select" onchange="paraAddAuthor('${p.id}',this.value); this.value='';">
+            <option value="">+ přidat autora</option>
+            ${authors.filter(a=>!p.authors.includes(a)).map(a=>`<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('')}
+          </select>
+        </div>`;
+
+    return `<tr class="${stateClass}" data-para-row="${p.id}">
+      <td class="row-accent"><div></div></td>
+      <td>
+        <div class="para-cell">
+          <div class="para-meta">
+            ${ro?'':`<span class="grip">⠿</span>`}
+            ${moveBtns}
+            ${ro
+              ? `<span class="para-num-static">${escapeHtml(p.num)}</span>`
+              : `<input class="cell-input num-input" data-para-focus="${p.id}" value="${escapeHtml(p.num)}" placeholder="§" onchange="paraUpdateField('${p.id}','num',this.value)">`}
+            ${ro?'':`<button class="auth-toggle ${p.authorial?'on':''}" title="Autorský název (bez zákonného znění) — v sazbě jde do hranatých závorek" onclick="paraToggleAuthorial('${p.id}')">[ ]</button>`}
+          </div>
+          ${nameField}
+        </div>
+      </td>
+      <td class="mid">${paraFzHtml(p, ro)}</td>
+      <td>${authorsField}</td>
+      <td>${paraDateCellHtml(p, ro)}</td>
+      <td class="num">
+        ${ro
+          ? `<span class="ns-hint" style="display:inline;">${p.chars??'—'}</span>`
+          : `<input class="cell-input chars-input" type="number" min="0" value="${p.chars??''}" placeholder="—" onchange="paraUpdateField('${p.id}','chars',this.value)">`}
+        <span class="ns-hint">${paraNs(p.chars)}</span>
+      </td>
+      <td>
+        ${ro ? '' : `<div class="row-actions">
+          <span class="note-btn ${p.note?'has-note':''}" title="Poznámka" onclick="paraToggleNote('${p.id}')">✎</span>
+          <span class="del-btn" title="Smazat paragraf" onclick="paraDeleteParagraph('${p.id}')">✕</span>
+        </div>`}
+      </td>
+    </tr>${noteRow}`;
+  }).join('');
+}
+function paraAuthorBreakdownHtml(book){
+  const AUTHORS = (book.authors||[]).filter(Boolean);
+  const allNames = new Set(AUTHORS);
+  book.paragraphs.forEach(p => p.authors.forEach(a => allNames.add(a)));
+  const groups = {}; allNames.forEach(a=>groups[a]=[]); groups['']=[];
+  book.paragraphs.forEach(p => {
+    if(!p.authors.length){ groups[''].push(p); return; }
+    p.authors.forEach(a => { groups[a].push(p); });
+  });
+  const named = [...allNames].filter(a=>groups[a].length).sort((x,y)=>paraMissingFor(book,y).length - paraMissingFor(book,x).length);
+  const order = named.concat(groups[''].length ? [''] : []);
+  let html = '';
+  order.forEach(a=>{
+    const g = groups[a];
+    if(!g.length) return;
+    const done = g.filter(p=>p.f&&p.r&&p.j&&p.a).length;
+    const chars = g.reduce((s,p)=>s+(p.chars||0),0);
+    const pct = g.length ? Math.round(done/g.length*100) : 0;
+    const missing = a ? paraMissingFor(book,a).length : 0;
+    const orphan = a && !AUTHORS.includes(a);
+    html += `<div class="ab-item">
+      <div class="ab-name${a?'':' none'}${a && partsAuthorFilter===a?' active-filter':''}" ${a?`onclick="paraFilterByAuthor('${escapeHtml(a)}')" title="Zobrazit jen tohoto autora"`:''}>${a?escapeHtml(a):'Bez autora'}${orphan?' <span class="ab-orphan" title="Tohle jméno už není v seznamu autorů knihy — možná přejmenováno nebo opravený překlep. Otevřete dané paragrafy a přiřaďte správné jméno.">⚠</span>':''}</div>
+      <div class="ab-bar"><div class="ab-bar-fill" style="width:${pct}%;background:${pct>=100?'var(--green)':'var(--blue)'};"></div></div>
+      <div class="ab-meta"><span>${done} z ${g.length} ${g.length===1?'§':'§§'}</span><b>${paraNs(chars)}</b></div>
+      ${a && missing>0 ? `<span class="author-reminder-btn" onclick="paraToggleReminder('${escapeHtml(a)}')">Upomenout (${missing})</span>` : ''}
+    </div>`;
+  });
+  if(groups[''].length>0) html += `<div class="ab-note">Odevzdáno za kolektiv, bez přiřazení jednotlivým autorům — rozpis honoráře doplníte později, až bude k dispozici.</div>`;
+  if(book.paragraphs.some(p=>p.authors.length>1)) html += `<div class="ab-note">Paragraf s víc autory se počítá celý do součtu u každého z nich — rozdělení honoráře mezi ně si dořešíte ručně.</div>`;
+  if(partsOpenReminder){
+    html += `<div class="reminder-panel">
+      <div class="rp-head">Upomínka — ${escapeHtml(partsOpenReminder)}</div>
+      <pre>${escapeHtml(paraReminderText(book, partsOpenReminder))}</pre>
+      <div class="reminder-actions">
+        <button class="btn-mini" onclick="paraCopyReminder('${escapeHtml(partsOpenReminder)}')">Zkopírovat text</button>
+        <button class="btn-mini ghost" onclick="paraToggleReminder('${escapeHtml(partsOpenReminder)}')">Zavřít</button>
+      </div>
+    </div>`;
+  }
+  return html;
+}
+function paraMinimapHtml(book){
+  return book.paragraphs.map(p=>{
+    const done = p.f && p.r && p.j && p.a;
+    const cls = !p.date ? 'waiting' : done ? 'done' : (p.f||p.r||p.j||p.a) ? 'partial' : '';
+    const label = escapeHtml(p.num||'?') + (p.name ? ' — '+escapeHtml(p.name) : '') + (!p.date ? ' (čeká se)' : '');
+    return `<button class="mm-dot ${cls}" onclick="paraJumpTo('${p.id}')" title="${label}"></button>`;
+  }).join('');
+}
+function paraNudgeHtml(book){
+  const ps = book.paragraphs || [];
+  const allSubmitted = ps.length>0 && ps.every(p=>p.date);
+  if(!allSubmitted || book.rukopisOdevzdan) return '';
+  return `<div class="nudge-banner">
+    <div class="nb-rule"><span>❦</span></div>
+    <h3>Všechny paragrafy jsou odevzdané</h3>
+    <p>Až budete připravena, přepněte ručně „Rukopis odevzdán" v hlavičce — appka to sama nepřepne.</p>
+  </div>`;
+}
+function renderPartsSection(book, archived) {
+  if (!book.submittedInParts) return '';
+  const total = book.paragraphs.length;
+  const submitted = book.paragraphs.filter(p=>p.date).length;
+  const fCount = book.paragraphs.filter(p=>p.f).length;
+  const rCount = book.paragraphs.filter(p=>p.r).length;
+  const jCount = book.paragraphs.filter(p=>p.j).length;
+  const doneCount = book.paragraphs.filter(p=>p.f&&p.r&&p.j&&p.a).length;
+  const submitPct = total ? Math.round(submitted/total*100) : 0;
+  const ringKey = 'parts:' + book.id;
+  const ringFrom = prevSubmitPct[ringKey];
+  prevSubmitPct[ringKey] = submitPct;
+
+  const hasP2_2 = !!book.steps['p2_2'], hasP2_6 = !!book.steps['p2_6'];
+  const linkLines = [];
+  if (hasP2_2) linkLines.push(`<div>↳ naformátováno provázáno s krokem fáze Redakce: <b>Kontrola stylů v PublishOnu — ${fCount} / ${total}</b></div>`);
+  if (hasP2_6) linkLines.push(`<div>↳ redakčně + jazykově provázáno s krokem fáze Redakce: <b>Redakční kontrola + kontrola jazykové korektorky — ${rCount} / ${total}</b></div>`);
+
+  const ro = archived;
+  const importHtml = ro ? '' : `
+    <div class="add-row-actions">
+      <div class="add-row-btn" onclick="paraAddParagraph()">+ Přidat paragraf</div>
+      <div class="add-row-btn" onclick="paraToggleImport()">+ Vložit víc najednou ze znění zákona</div>
+    </div>
+    ${partsImportOpen ? `<div class="import-panel">
+      <p class="import-hint">Vložte text zákona — appka najde všechna „§ N" (i s přílepkem novely jako „14a" nebo „14ab"). Když text hned pod paragrafem nekončí tečkou, vezme ho jako nadpis; jakmile končí tečkou, je to už znění paragrafu a název zůstane prázdný. Nic se nezapíše, dokud výsledek dole nepotvrdíte.</p>
+      <textarea id="paraImportText" placeholder="§ 1&#10;Základní ustanovení&#10;(1) Tento zákon upravuje…&#10;&#10;§ 2&#10;…"></textarea>
+      <div class="import-actions">
+        <button class="btn-mini" onclick="paraParseImportText()">Zpracovat text</button>
+        <button class="btn-mini ghost" onclick="paraToggleImport()">Zrušit</button>
+      </div>
+      ${partsImportPreview ? paraImportPreviewHtml(book) : ''}
+    </div>` : ''}
+  `;
+
+  return `
+    <div class="parts-card">
+      ${paraNudgeHtml(book)}
+      <div class="summary-bar">
+        <div class="summary-top">
+          <div class="summary-stats">
+            <div class="stat"><b>${total}</b><span>paragrafů celkem</span></div>
+            <div class="sep"></div>
+            <div class="stat"><b>${submitted}</b><span>odevzdáno</span></div>
+            <div class="stat mech"><b>${fCount}</b><span>naformátováno</span></div>
+            <div class="stat"><b>${rCount}</b><span>redakčně</span></div>
+            <div class="stat"><b>${jCount}</b><span>jazykově</span></div>
+            <div class="stat accent"><b>${doneCount}</b><span>zcela hotové</span></div>
+            <div class="expand-hint" onclick="partsBreakdownOpen=!partsBreakdownOpen;renderMain();">Rozpis podle autora (nepovinné) ${partsBreakdownOpen?'▴':'▾'}</div>
+          </div>
+          ${total ? `<div class="bh-progress">
+            <div class="circ-progress">${circSvg(submitPct, false, ringFrom)}<div class="circ-label"><span class="circ-pct">${submitPct}%</span><span class="circ-sub">odevzdáno</span></div></div>
+            <div class="bh-done-count">${submitted} / ${total}</div>
+          </div>` : ''}
+        </div>
+        <div class="author-breakdown ${partsBreakdownOpen?'open':''}">${paraAuthorBreakdownHtml(book)}</div>
+        ${total ? `<div class="minimap-wrap">
+          <div class="minimap-label">Paragrafy v pořadí knihy — klikněte pro skok</div>
+          <div class="minimap">${paraMinimapHtml(book)}</div>
+        </div>` : ''}
+      </div>
+
+      <div class="controls-row">
+        <div class="filter-chips">
+          <span class="pf-chip ${partsFilterMode==='all'?'active':''}" onclick="paraSetFilterMode('all')">Vše</span>
+          <span class="pf-chip ${partsFilterMode==='incomplete'?'active':''}" onclick="paraSetFilterMode('incomplete')">Jen nekompletní</span>
+          <span class="pf-chip ${partsFilterMode==='unsubmitted'?'active':''}" onclick="paraSetFilterMode('unsubmitted')">Neodevzdáno</span>
+          <input type="text" class="search-box" placeholder="Hledat § nebo název…" oninput="paraSetSearch(this.value)">
+        </div>
+        <select class="sort-select" onchange="paraSetSort(this.value)">
+          <option value="book" ${partsSortMode==='book'?'selected':''}>Řadit: pořadí v knize</option>
+          <option value="author" ${partsSortMode==='author'?'selected':''}>Řadit: podle autora</option>
+        </select>
+      </div>
+      <div class="legend">Název v <b class="authorial-sample">[hranatých závorkách kurzívou]</b> = autorský název (paragraf nemá vlastní zákonné znění nadpisu) — přepíná se tlačítkem <b>[ ]</b> vedle názvu. Název bez závorek = převzato ze zákona.</div>
+      ${partsAuthorFilter ? `<div class="active-filter-chip">Jen: ${escapeHtml(partsAuthorFilter)} <span onclick="paraFilterByAuthor('${escapeHtml(partsAuthorFilter)}')" title="Zrušit filtr">✕</span></div>` : ''}
+
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:4px;padding:0;"></th>
+              <th style="width:31%;">Paragraf</th>
+              <th class="mid" style="width:250px;">Fáze</th>
+              <th style="width:140px;">Autor</th>
+              <th style="width:140px;">Odevzdáno</th>
+              <th class="num" style="width:95px;">Znaky</th>
+              <th style="width:52px;"></th>
+            </tr>
+          </thead>
+          <tbody>${paraRowsHtml(book, archived)}</tbody>
+        </table>
+        ${importHtml}
+      </div>
+      ${linkLines.length ? `<div class="link-step">${linkLines.join('')}</div>` : ''}
+    </div>`;
+}
+function paraImportPreviewHtml(book){
+  const parsed = partsImportPreview;
+  if(!parsed.length) return `<div class="import-preview"><div class="import-preview-head">Nenašla jsem žádné „§" — zkontrolujte prosím vložený text.</div></div>`;
+  const existingNums = new Set(book.paragraphs.map(p=>p.num.trim()));
+  const rows = parsed.map(item=>{
+    const dup = existingNums.has(item.num.trim());
+    return `<div class="import-row">
+      <span class="inum">${escapeHtml(item.num)}</span>
+      <span class="iname ${item.name?'':'empty'}">${item.name?escapeHtml(item.name):'(bez nadpisu — zákon ho nemá, autorský název doplníte později)'}</span>
+      ${dup?'<span class="idup">už v tabulce</span>':''}
+    </div>`;
+  }).join('');
+  const newCount = parsed.filter(item=>!existingNums.has(item.num.trim())).length;
+  return `<div class="import-preview">
+    <div class="import-preview-head">Nalezeno ${parsed.length} paragrafů, ${newCount} nových</div>
+    <div class="import-preview-list">${rows}</div>
+    <div class="import-actions">
+      <button class="btn-mini" onclick="paraCommitImport()" ${newCount?'':'disabled'}>Vložit ${newCount} nových paragrafů</button>
+      <button class="btn-mini ghost" onclick="paraToggleImport()">Zrušit</button>
+    </div>
+  </div>`;
+}
 function updatePhaseNote(phId,val) { const b=getBook(); if(!b||b.archivedAt) return; b.phaseNotes[phId]=val; saveState(); }
 function toggleStepNote(stepId) {
   const el=document.getElementById('snote-'+stepId);
@@ -2346,7 +3010,7 @@ function createBook() {
     sazec:document.getElementById('nb_sazec').value.trim(),
     odevzdaniRukopisu:ov?new Date(ov).toISOString():'',
     notes:'', createdAt:todayISO(), archivedAt:null, rokVydani:null,
-    cancelled:false, cancelReason:'', rukopisOdevzdan:false,
+    cancelled:false, cancelReason:'', rukopisOdevzdan:false, submittedInParts:false, paragraphs:[],
     activeOptional:[], additionals:{}, phaseNotes:{}, todos:[], waitingDismissed:[], steps:emptySteps(),
   };
   state.books.unshift(book); saveState();
