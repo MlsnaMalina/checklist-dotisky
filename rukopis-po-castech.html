@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rukopis po částech — Redakční checklist</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M7 3h10a1 1 0 0 1 1 1v17l-6-4.3L6 21V4a1 1 0 0 1 1-1z' fill='%231b2d52'/><path d='M9 8.4 L11 10.4 L15.3 6.2' fill='none' stroke='%23fff' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f4f6f8; --surface:#ffffff; --ink:#1a1a1a;
+  --navy:#1b2d52; --navy-ink:#101c38;
+  --blue:#4072ad; --blue-soft:rgba(64,114,173,.10);
+  --raspberry:#b11e54; --raspberry-soft:rgba(177,30,84,.08);
+  --green:#98c451; --green-dark:#5a8a1a; --green-soft:rgba(152,196,81,.16);
+  --amber:#e07b00; --amber-soft:rgba(224,123,0,.12);
+  --line:#e2e6ea; --muted:#5b5f66; --faint:#8f949c;
+  --shadow:0 1px 2px rgba(27,45,82,.06), 0 8px 24px rgba(27,45,82,.05);
+  --sidebar-w:230px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#12182a; --surface:#1a2338; --ink:#eef1f6;
+    --navy:#c7d3ec; --navy-ink:#eef1f6;
+    --blue:#7fa8db; --blue-soft:rgba(127,168,219,.14);
+    --raspberry:#f0688f; --raspberry-soft:rgba(240,104,143,.12);
+    --green:#a8d16a; --green-dark:#bfe089; --green-soft:rgba(168,209,106,.16);
+    --amber:#f0a545; --amber-soft:rgba(240,165,69,.14);
+    --line:#2b3654; --muted:#a9b3cc; --faint:#7c88a8;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#12182a; --surface:#1a2338; --ink:#eef1f6;
+  --navy:#c7d3ec; --navy-ink:#eef1f6;
+  --blue:#7fa8db; --blue-soft:rgba(127,168,219,.14);
+  --raspberry:#f0688f; --raspberry-soft:rgba(240,104,143,.12);
+  --green:#a8d16a; --green-dark:#bfe089; --green-soft:rgba(168,209,106,.16);
+  --amber:#f0a545; --amber-soft:rgba(240,165,69,.14);
+  --line:#2b3654; --muted:#a9b3cc; --faint:#7c88a8;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+}
+*,*::before,*::after{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:'DM Sans',system-ui,-apple-system,sans-serif;
+  font-size:15.5px; line-height:1.65; -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:'Playfair Display',Georgia,serif; font-weight:600; color:var(--navy-ink); text-wrap:balance; line-height:1.22;}
+code,.mono{font-family:'DM Mono','SF Mono',Consolas,monospace;}
+a{color:var(--blue);}
+::selection{background:var(--raspberry-soft); color:var(--ink);}
+:focus-visible{outline:2px solid var(--blue); outline-offset:2px;}
+
+.shell{display:flex; min-height:100vh;}
+
+/* ===== boční navigace — v duchu navy sidebaru appky ===== */
+.side{
+  width:var(--sidebar-w); flex-shrink:0; background:var(--navy-ink); color:rgba(255,255,255,.82);
+  padding:30px 22px; position:sticky; top:0; height:100vh; overflow-y:auto;
+}
+.side-brand{font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.42); margin-bottom:6px;}
+.side-title{font-family:'Playfair Display',serif; font-size:19px; font-weight:600; color:#fff; line-height:1.3; margin-bottom:28px;}
+.side nav{display:flex; flex-direction:column; gap:2px;}
+.side nav a{
+  display:block; padding:8px 10px; border-radius:6px; font-size:13px; color:rgba(255,255,255,.62);
+  text-decoration:none; transition:background 150ms ease, color 150ms ease;
+}
+.side nav a:hover{background:rgba(255,255,255,.07); color:#fff;}
+.side nav a.tag-impact{color:rgba(240,165,69,.85);}
+.side-foot{margin-top:32px; padding-top:20px; border-top:1px solid rgba(255,255,255,.1); font-size:11.5px; color:rgba(255,255,255,.35); line-height:1.6;}
+
+.main{flex:1; min-width:0; padding:64px 56px 120px; display:flex; justify-content:center;}
+.col{width:100%; max-width:700px;}
+
+/* ===== hlavička ===== */
+.eyebrow{font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--raspberry); font-weight:700; margin-bottom:14px;}
+h1{font-size:38px; margin:0 0 16px;}
+.lede{font-size:17px; color:var(--muted); max-width:58ch; margin:0 0 28px;}
+.at-a-glance{
+  display:flex; gap:0; flex-wrap:wrap; background:var(--surface); border:1px solid var(--line);
+  border-radius:12px; box-shadow:var(--shadow); overflow:hidden; margin-bottom:64px;
+}
+.glance-item{flex:1; min-width:130px; padding:18px 20px; border-right:1px solid var(--line);}
+.glance-item:last-child{border-right:none;}
+.glance-item b{display:block; font-family:'Playfair Display',serif; font-size:26px; font-weight:700; color:var(--navy); font-variant-numeric:tabular-nums; line-height:1;}
+.glance-item span{font-size:12px; color:var(--muted); display:block; margin-top:5px;}
+
+/* ===== sekce ===== */
+section{margin-bottom:60px; scroll-margin-top:32px;}
+section > h2{font-size:24px; margin:0 0 6px; display:flex; align-items:baseline; gap:10px;}
+.section-note{font-size:13.5px; color:var(--faint); margin:0 0 22px; max-width:60ch;}
+h3{font-size:16px; margin:26px 0 10px;}
+p{margin:0 0 16px; max-width:64ch;}
+ul,ol{margin:0 0 16px; padding-left:22px;}
+li{margin-bottom:7px; max-width:60ch;}
+li::marker{color:var(--faint);}
+strong{color:var(--navy-ink); font-weight:600;}
+.dim{color:var(--muted);}
+
+/* ===== "živé" ukázky komponent z appky ===== */
+.exhibit{
+  background:var(--surface); border:1px solid var(--line); border-radius:10px;
+  padding:18px 20px; margin:16px 0 20px; box-shadow:var(--shadow);
+}
+.exhibit-label{font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint); margin-bottom:12px; font-weight:600;}
+
+.ms-toggle{display:inline-flex; align-items:center; gap:8px; padding:9px 14px; border:1px solid var(--line); border-radius:7px; font-size:12.5px; color:var(--faint); margin:0 8px 8px 0;}
+.ms-toggle .box{width:16px; height:16px; border:2px solid var(--line); border-radius:4px; flex-shrink:0;}
+.ms-toggle.on{border-color:rgba(177,30,84,.35); color:#B83066; font-weight:500; background:var(--raspberry-soft);}
+.ms-toggle.on .box{background:#B83066; border-color:#B83066; display:flex; align-items:center; justify-content:center;}
+.ms-toggle.on .box::after{content:'✓'; color:#fff; font-size:10px; font-weight:700;}
+
+.row-anatomy{display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:10px 0;}
+.ra-part{display:flex; flex-direction:column; align-items:flex-start; gap:4px;}
+.ra-part .val{font-size:13px;}
+.ra-part .tag{font-size:9.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--faint);}
+.ra-num{font-family:'Playfair Display',serif; font-weight:700; font-size:16px; color:var(--ink);}
+.ra-name-stat{font-size:13px;}
+.ra-name-auth{font-size:13px; font-style:italic; color:var(--muted);}
+.ra-name-auth::before{content:'[';} .ra-name-auth::after{content:']';}
+
+.anat-pair{padding:9px 0;}
+.anat-pair + .anat-pair{border-top:1px dashed var(--line); margin-top:2px;}
+.anat-row{display:flex; align-items:baseline; gap:12px; margin-bottom:5px;}
+.anat-note{font-size:12px; color:var(--faint); margin:0; max-width:52ch;}
+
+.fz-stepper{display:inline-flex; align-items:flex-start;}
+.fz-node{display:flex; flex-direction:column; align-items:center; gap:3px; width:56px; flex-shrink:0;}
+.fz-dot{width:14px; height:14px; border-radius:50%; border:1.6px solid var(--line); background:var(--surface); display:flex; align-items:center; justify-content:center;}
+.fz-node.on .fz-dot{background:var(--green); border-color:var(--green);}
+.fz-node.on .fz-dot::after{content:'✓'; color:#fff; font-size:9px; font-weight:700;}
+.fz-node span{font-size:9px; color:var(--faint); white-space:nowrap;}
+.fz-node.on span{color:var(--green-dark); font-weight:600;}
+.fz-line{width:14px; height:1.6px; background:var(--line); margin-top:6px; flex-shrink:0;}
+.fz-line.on{background:var(--green);}
+.fz-node.mech.on .fz-dot{background:var(--blue); border-color:var(--blue);}
+.fz-node.mech.on span{color:var(--blue);}
+.fz-line.mech.on{background:var(--blue);}
+
+/* hlavičkové štítky knihy — pro ukázku, kam patří tlačítko Paragrafy */
+.head-chip{display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:500; letter-spacing:.02em; margin:0 6px 6px 0;}
+.head-chip.edice{background:var(--blue-soft); color:var(--blue);}
+.head-chip.parts{background:var(--blue-soft); color:var(--blue); font-weight:600;}
+.head-chip.parts svg{flex-shrink:0;}
+.head-title-demo{font-family:'Playfair Display',serif; font-weight:600; font-size:18px; color:var(--navy-ink); margin-top:8px; line-height:1.3;}
+
+/* pop-up okno — zmenšený rámec appky s tmavým pozadím kolem */
+.modal-frame{background:var(--navy-ink); border-radius:10px; padding:26px 18px; display:flex; justify-content:center;}
+.modal-frame-window{background:var(--surface); border-radius:10px; box-shadow:0 24px 60px rgba(0,0,0,.4); width:100%; max-width:440px; overflow:hidden;}
+.modal-frame-head{display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--line);}
+.modal-frame-head span:first-child{font-family:'Playfair Display',serif; font-weight:600; font-size:15px; color:var(--navy-ink);}
+.modal-frame-x{width:24px; height:24px; border-radius:5px; display:flex; align-items:center; justify-content:center; color:var(--faint); font-size:12px;}
+.modal-frame-body{padding:16px 18px;}
+.modal-frame-stats{font-size:11.5px; color:var(--muted); margin-bottom:12px; padding-bottom:12px; border-bottom:1px dashed var(--line);}
+.modal-frame-stats strong{color:var(--navy-ink);}
+.modal-frame-row{display:flex; align-items:center; gap:12px; padding:7px 0; font-size:12.5px; border-bottom:1px solid var(--line);}
+.modal-frame-row .ra-num{font-size:13px; flex-shrink:0;}
+.modal-frame-row .mf-name{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:0 8px; color:var(--ink);}
+.modal-frame-row .mf-name.auth{font-style:italic; color:var(--muted);}
+.modal-frame-row .mf-name.auth::before{content:'[';} .modal-frame-row .mf-name.auth::after{content:']';}
+.mini-fz-dots{display:flex; gap:3px; margin-left:auto; flex-shrink:0;}
+.mini-fz-dots i{width:8px; height:8px; border-radius:50%; background:var(--line); display:block; font-style:normal;}
+.mini-fz-dots i.on{background:var(--green);}
+.modal-frame-row.waiting{color:var(--faint); font-style:italic;}
+.modal-frame-more{text-align:center; font-size:11.5px; color:var(--faint); font-style:italic; padding-top:10px;}
+
+.author-chip{display:inline-flex; align-items:center; gap:5px; background:var(--paper); border:1px solid var(--line); color:var(--ink); font-size:11.5px; padding:4px 9px; border-radius:10px;}
+.deadline-badge{display:inline-flex; align-items:center; gap:5px; font-size:11px; padding:5px 9px; border-radius:10px; font-weight:500;}
+.deadline-badge.neutral{background:var(--paper); color:var(--muted);}
+.deadline-badge.soon{background:var(--amber-soft); color:var(--amber);}
+.deadline-badge.late{background:var(--raspberry); color:#fff;}
+
+.mini-ring{position:relative; width:52px; height:52px; flex-shrink:0;}
+.mini-ring svg{transform:rotate(-90deg);}
+.mini-ring-label{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; font-variant-numeric:tabular-nums;}
+
+.mm-row{display:flex; gap:5px; flex-wrap:wrap; align-items:center;}
+.mm-dot{width:11px; height:11px; border-radius:50%; background:var(--line); flex-shrink:0;}
+.mm-dot.blue{background:var(--blue);} .mm-dot.green{background:var(--green);}
+.mm-dot.waiting{background:var(--surface); border:1.5px dashed var(--faint);}
+
+.kb-chip-demo{display:inline-flex; align-items:center; gap:4px; font-size:10.5px; font-weight:600; padding:3px 9px; border-radius:10px;}
+.kb-chip-demo.blue{background:var(--blue-soft); color:var(--blue);}
+.kb-chip-demo.green{background:var(--green-soft); color:var(--green-dark);}
+.kb-chip-demo.flat{background:var(--paper); color:var(--muted);}
+.kb-card-mini{display:inline-block; background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--raspberry); border-radius:8px; padding:12px 14px; box-shadow:var(--shadow); min-width:220px;}
+.kb-card-mini .t{font-family:'Playfair Display',serif; font-weight:600; font-size:13.5px; margin-bottom:2px;}
+.kb-card-mini .a{font-size:11px; color:var(--muted); font-style:italic; margin-bottom:10px;}
+.kb-card-mini .f{display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--faint);}
+
+/* ===== rozpis podle autora ===== */
+.ab-demo{display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
+.ab-name{font-size:12px; font-weight:600; color:var(--ink); margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.ab-orphan{color:var(--amber); font-size:11px;}
+.ab-bar{height:5px; border-radius:3px; background:var(--line); overflow:hidden; margin-bottom:5px;}
+.ab-bar-fill{height:100%; border-radius:3px;}
+.ab-meta{font-size:11px; color:var(--muted); display:flex; justify-content:space-between; gap:6px;}
+.ab-meta b{color:var(--navy-ink); font-variant-numeric:tabular-nums;}
+.author-reminder-btn{display:inline-block; margin-top:6px; font-size:10.5px; color:var(--blue); font-weight:600;}
+
+/* ===== náhled importu ze znění zákona ===== */
+.import-demo{background:var(--paper); border:1px solid var(--line); border-radius:8px; overflow:hidden;}
+.id-head{padding:10px 14px; font-size:12px; font-weight:600; color:var(--navy-ink); background:var(--surface); border-bottom:1px solid var(--line);}
+.id-warn{color:var(--amber); font-weight:700;}
+.id-row{display:flex; align-items:center; gap:12px; padding:9px 14px; font-size:12.5px; border-bottom:1px solid var(--line); background:var(--surface);}
+.id-row:last-child{border-bottom:none;}
+.id-row.suspicious{background:var(--amber-soft);}
+.id-num{font-family:'Playfair Display',serif; font-weight:700; width:54px; flex-shrink:0;}
+.id-name{flex:1; color:var(--muted);}
+.id-name.auth{font-style:italic;}
+.id-name.empty{color:var(--faint); font-style:italic;}
+.id-flag{color:var(--amber); font-size:10.5px; font-weight:700; flex-shrink:0; white-space:nowrap;}
+
+/* ===== ovládací prvky — tabulka control -> co dělá ===== */
+.ctl-table{width:100%; border-collapse:collapse; margin:10px 0 4px; font-size:13.5px;}
+.ctl-table th{text-align:left; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--faint); font-weight:600; padding:0 14px 10px 0; border-bottom:1px solid var(--line);}
+.ctl-table td{padding:12px 14px 12px 0; border-bottom:1px solid var(--line); vertical-align:top;}
+.ctl-table tr:last-child td{border-bottom:none;}
+.ctl-table .k{font-weight:600; color:var(--navy-ink); white-space:nowrap;}
+
+/* ===== dopady na zbytek appky ===== */
+.impact-list{list-style:none; margin:0 0 16px; padding:0; display:flex; flex-direction:column; gap:14px;}
+.impact-item{display:flex; gap:14px; padding:16px 18px; background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--blue); border-radius:8px; box-shadow:var(--shadow);}
+.impact-item .where{flex-shrink:0; width:150px; font-size:11.5px; font-weight:700; color:var(--navy-ink); letter-spacing:.01em;}
+.impact-item p{margin:0; font-size:13.5px;}
+
+.divider{border:none; border-top:1px solid var(--line); margin:56px 0;}
+.foot-note{font-size:12.5px; color:var(--faint);}
+
+@media (max-width: 880px){
+  .shell{flex-direction:column;}
+  .side{position:relative; width:100%; height:auto; top:auto;}
+  .main{padding:40px 24px 100px;}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div class="side-brand">Redakční checklist</div>
+    <div class="side-title">Rukopis po částech</div>
+    <nav>
+      <a href="#zapnuti">Jak se to zapíná</a>
+      <a href="#radek">Anatomie jednoho paragrafu</a>
+      <a href="#prehled-nastroje">Souhrn a přehled</a>
+      <a href="#ovladani">Filtrování a hromadné vkládání</a>
+      <a href="#dopady" class="tag-impact">Co to mění jinde ↗</a>
+    </nav>
+    <div class="side-foot">Reference k funkci přidané do knihy, když se rukopis odevzdává postupně, paragraf po paragrafu, ne najednou.</div>
+  </aside>
+
+  <main class="main">
+    <div class="col">
+      <div class="eyebrow">Nová funkce · Redakční checklist</div>
+      <h1>Rukopis po částech</h1>
+      <p class="lede">Pro velké kolektivní komentáře, kde autoři neodevzdávají rukopis najednou, ale po částech, nebo paragraf po paragrafu. Tenhle dokument shrnuje, co funkce umí a co se v Redakčním checklistu mění.</p>
+
+      <div class="at-a-glance">
+        <div class="glance-item"><b>1 řádek</b><span>= jeden paragraf, ne blok</span></div>
+        <div class="glance-item"><b>4</b><span>kroky fáze na paragraf</span></div>
+        <div class="glance-item"><b>3</b><span>filtry + vyhledávání</span></div>
+        <div class="glance-item"><b>2</b><span>kroky checklistu se hlídají samy</span></div>
+      </div>
+
+      <section id="zapnuti">
+        <h2>Jak se to zapíná</h2>
+        <p class="section-note">V hlavičce knihy, vedle stávajícího přepínače.</p>
+        <div class="exhibit">
+          <div class="exhibit-label">Hlavička knihy</div>
+          <div class="ms-toggle"><div class="box"></div>Rukopis odevzdán</div>
+          <div class="ms-toggle on"><div class="box"></div>Rukopis odevzdáván po částech</div>
+        </div>
+        <p>Zaškrtnutí <strong>Rukopis odevzdáván po částech</strong> vytvoří nové tlačítko nad názvem knihy „Paragrafy 0/0" a zároveň celou kartu knihy v Přehledu přesune z kroku <em>Domlouvání spolupráce</em> do kroku <em>Redakce</em> (stejně, jako to dnes dělá tlačítko „Rukopis odevzdán").</p>
+
+        <div class="exhibit">
+          <div class="exhibit-label">Tlačítko nad názvem knihy</div>
+          <span class="head-chip edice">Právní monografie</span>
+          <span class="head-chip parts"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 7 2 2 3-3"/><path d="M11 6h10"/><path d="m3 17 2 2 3-3"/><path d="M11 18h10"/></svg>Paragrafy: 8/14</span>
+          <div class="head-title-demo">Zákon o obchodních korporacích. Velký komentář</div>
+        </div>
+        <p>Číslo v tlačítku se počítá průběžně — kolik paragrafů už má datum odevzdání z celkového počtu. Klik na tlačítko otevře pop-up okno se sledováním:</p>
+
+        <div class="exhibit">
+          <div class="exhibit-label">Pop-up okno</div>
+          <div class="modal-frame">
+            <div class="modal-frame-window">
+              <div class="modal-frame-head"><span>Paragrafy</span><span class="modal-frame-x">✕</span></div>
+              <div class="modal-frame-body">
+                <div class="modal-frame-stats">14 paragrafů · <strong>8 odevzdáno</strong> · <strong>86 %</strong></div>
+                <div class="modal-frame-row"><span class="ra-num">§ 1</span><span class="mf-name">Předmět úpravy</span><span class="mini-fz-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
+                <div class="modal-frame-row"><span class="ra-num">§ 8</span><span class="mf-name auth">Založení společnosti</span><span class="mini-fz-dots"><i class="on"></i><i></i><i></i><i></i></span></div>
+                <div class="modal-frame-row waiting"><span class="ra-num">§ 172</span><span class="mf-name">čeká se</span></div>
+                <div class="modal-frame-more">… a dalších 11 paragrafů</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="dim">Checklist s fázemi a kroky zůstává hlavní obsah stránky — tabulka paragrafů, i u knih s desítkami řádků, ho nezatlačí dolů. Okno se zavírá křížkem, klávesou Escape nebo klikem mimo něj.</p>
+      </section>
+
+      <section id="radek">
+        <h2>Anatomie jednoho paragrafu</h2>
+        <p class="section-note">Základní jednotka je vždy jeden zákonný paragraf — ne rozsah, ne kapitola.</p>
+
+        <h3>Číslo a název</h3>
+        <div class="exhibit">
+          <div class="exhibit-label">Dva paragrafy, dvě situace</div>
+          <div class="anat-pair">
+            <div class="anat-row"><span class="ra-num">§ 14a</span><span class="ra-name-stat">Vklad</span></div>
+            <p class="anat-note">Zákonné znění paragraf pojmenovává samo — použije se ono, autor nic nedoplňuje.</p>
+          </div>
+          <div class="anat-pair">
+            <div class="anat-row"><span class="ra-num">§ 89</span><span class="ra-name-auth">Předmět vkladu</span></div>
+            <p class="anat-note">Zákonný název chybí — autor mu dal vlastní, proto je kurzívou v hranatých závorkách.</p>
+          </div>
+        </div>
+        <p>Číslo paragrafu unese i přílepek (<code>§ 14a</code>, <code>§ 14ab</code>). Název jde přepnout tlačítkem mezi <strong>zákonným</strong> (obyčejné písmo) a <strong>autorským</strong> (ten se zobrazuje kurzivou v hranatých závorkách).</p>
+
+        <h3>Fáze — čtyři kroky</h3>
+        <div class="exhibit">
+          <div class="exhibit-label">Cestička paragrafu</div>
+          <div class="fz-stepper">
+            <div class="fz-node mech on"><div class="fz-dot"></div><span>naformátováno</span></div>
+            <div class="fz-line mech on"></div>
+            <div class="fz-node on"><div class="fz-dot"></div><span>redakčně</span></div>
+            <div class="fz-line on"></div>
+            <div class="fz-node"><div class="fz-dot"></div><span>jazykově</span></div>
+            <div class="fz-line"></div>
+            <div class="fz-node"><div class="fz-dot"></div><span>autorsky</span></div>
+          </div>
+        </div>
+        <p><strong>Naformátováno</strong> je mechanická kontrola — proto svítí modře, ne zeleně jako ty tři další. Kliknutím se každý bod zaškrtává nezávisle na ostatních.</p>
+
+        <h3>Autor, datum, znaky, poznámka</h3>
+        <div class="exhibit">
+          <div class="exhibit-label">Zbytek řádku</div>
+          <div class="row-anatomy">
+            <div class="ra-part"><span class="author-chip">Nováková</span> <span class="author-chip">Svoboda</span><span class="tag" style="margin-top:6px;">víc autorů na paragraf, nebo žádný</span></div>
+            <div class="ra-part"><span class="deadline-badge late">⚑ 20. 8.</span><span class="tag">termín, po kterém je pozdě</span></div>
+            <div class="ra-part"><span class="ra-name-stat">18,4 NS</span><span class="tag">normostrany z počtu znaků</span></div>
+          </div>
+        </div>
+        <ul>
+          <li><strong>Autor je nepovinný</strong> a smí jich být víc.</li>
+          <li>Dokud paragraf nemá datum odevzdání, řádek je „čeká se" — datum se zapisuje buď výběrem v kalendáři, nebo tlačítkem <strong>dnes</strong>.</li>
+          <li>Termín (nepovinný) se zobrazuje jen u nedodaných paragrafů: šedě když je času dost, oranžově do 14 dnů, růžově po termínu.</li>
+          <li>Znaky se přepočítávají na normostrany (1 NS = 1800 znaků). Poznámka jde smazat přímo z otevřeného pole, ne jen skrýt.</li>
+        </ul>
+      </section>
+
+      <section id="prehled-nastroje">
+        <h2>Souhrn a přehled</h2>
+        <p class="section-note">Tři způsoby, jak nad tabulkou vidět celek, aniž by se muselo scrollovat řádek po řádku.</p>
+
+        <h3>Kolo odevzdanosti</h3>
+        <div class="exhibit">
+          <div class="exhibit-label">V hlavičce, vedle souhrnu</div>
+          <div style="display:flex; align-items:center; gap:14px;">
+            <div class="mini-ring">
+              <svg viewBox="0 0 68 68" width="52" height="52">
+                <circle cx="34" cy="34" r="28" fill="none" stroke="var(--line)" stroke-width="5"/>
+                <circle cx="34" cy="34" r="28" fill="none" stroke="#e0a300" stroke-width="5" stroke-dasharray="123 176" stroke-linecap="round" transform="rotate(-90 34 34)"/>
+              </svg>
+              <div class="mini-ring-label">86 %</div>
+            </div>
+            <p style="margin:0;">Stejná komponenta jako celkový progress knihy — jen tady měří výhradně <strong>odevzdanost</strong>, ne rozpracovanost. Barva napovídá, jestli je řeč o polovině (modrá), nebo se honí poslední kusy (zlatá, od 70 %).</p>
+          </div>
+        </div>
+
+        <h3>Mapa paragrafů</h3>
+        <div class="exhibit">
+          <div class="exhibit-label">Kolečko na paragraf, v pořadí knihy</div>
+          <div class="mm-row">
+            <div class="mm-dot green"></div><div class="mm-dot green"></div><div class="mm-dot blue"></div><div class="mm-dot blue"></div><div class="mm-dot blue"></div><div class="mm-dot waiting"></div><div class="mm-dot waiting"></div><div class="mm-dot green"></div><div class="mm-dot blue"></div>
+          </div>
+        </div>
+        <p>Klik na kolečko skočí na ten řádek v tabulce a na chvíli ho podbarví — u knihy s desítkami paragrafů ukáže shluky mezer, aniž by se muselo pročítat celou tabulku.</p>
+
+        <h3>Rozpis podle autora</h3>
+        <div class="exhibit">
+          <div class="exhibit-label">Sbalitelný panel, seřazeno podle toho, kdo má nejvíc nedodaného</div>
+          <div class="ab-demo">
+            <div class="ab-item">
+              <div class="ab-name">Dvořáková</div>
+              <div class="ab-bar"><div class="ab-bar-fill" style="width:33%;background:var(--blue);"></div></div>
+              <div class="ab-meta"><span>3 z 9 §§</span><b>14,0 NS</b></div>
+              <span class="author-reminder-btn">Upomenout (6)</span>
+            </div>
+            <div class="ab-item">
+              <div class="ab-name">Svoboda</div>
+              <div class="ab-bar"><div class="ab-bar-fill" style="width:75%;background:var(--blue);"></div></div>
+              <div class="ab-meta"><span>6 z 8 §§</span><b>9,5 NS</b></div>
+              <span class="author-reminder-btn">Upomenout (2)</span>
+            </div>
+            <div class="ab-item">
+              <div class="ab-name">Král</div>
+              <div class="ab-bar"><div class="ab-bar-fill" style="width:100%;background:var(--green);"></div></div>
+              <div class="ab-meta"><span>8 z 8 §§</span><b>22,0 NS</b></div>
+            </div>
+          </div>
+        </div>
+        <p>Součet normostran za každého autora, seřazený tak, že <strong>kdo má nejvíc nedodaného, je nahoře</strong> — přímá odpověď na „koho ještě upomenout". Klik na jméno tabulku rovnou přefiltruje jen na tohoto autora; tlačítko <strong>Upomenout</strong> vygeneruje text e-mailu se seznamem chybějících paragrafů ke zkopírování — jakmile má autor odevzdáno vše, tlačítko zmizí.</p>
+        <p class="dim">Paragraf s víc autory se počítá celý do součtu u každého z nich — rozdělení honoráře mezi ně je na vás. A když někomu v hlavičce knihy opravíte překlep ve jméně, jeho dřív přiřazené paragrafy ze součtu nezmizí — jen dostanou žlutý praporek ⚠, dokud je ručně nepřevedete na opravené jméno.</p>
+      </section>
+
+      <section id="ovladani">
+        <h2>Filtrování, řazení a hromadné vkládání</h2>
+        <table class="ctl-table">
+          <thead><tr><th>Ovládací prvek</th><th>Co dělá</th></tr></thead>
+          <tbody>
+            <tr><td class="k">Vše / Jen nekompletní / Neodevzdáno</td><td>tři filtry tabulky — poslední ukáže jen to, co ještě vůbec nedorazilo</td></tr>
+            <tr><td class="k">Hledat § nebo název</td><td>živé vyhledávání v čísle i v textu názvu</td></tr>
+            <tr><td class="k">Řadit: pořadí v knize / podle autora</td><td>přepíná pohled bez změny uloženého pořadí</td></tr>
+            <tr><td class="k">▲ ▼</td><td>ruční přesun řádku o pozici — funguje jen v základním pořadí, bez filtru</td></tr>
+            <tr><td class="k">Vložit víc najednou ze znění zákona</td><td>vloží se text zákona, appka najde všechna „§ N" a nabídne náhled k potvrzení</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Import ze znění zákona</h3>
+        <p>U knihy se stovkami paragrafů je ruční přepisování čísel a názvů zbytečné riziko překlepu. Appka umí z vloženého textu zákona — třeba zkopírovaného z ASPI — sama vytáhnout paragrafy: najde všechna <code>§ N</code>, i s přílepkem novely, a tam, kde to jde, doplní i název.</p>
+        <p>Nadpis pozná podle interpunkce: text hned za paragrafem, který <strong>nekončí tečkou, středníkem ani dvojtečkou</strong>, je nadpis; jinak je to už znění paragrafu a název zůstane prázdný k doplnění. Krátké odkazové štítky, které mívají zdrojové weby hned za číslem paragrafu — typicky <code>DZ</code> nebo <code>+ Více</code>, odkaz na důvodovou zprávu — appka mezi paragrafem a nadpisem sama přeskočí, takže se nezapíšou jako název.</p>
+
+        <div class="exhibit">
+          <div class="exhibit-label">Náhled před vložením</div>
+          <div class="import-demo">
+            <div class="id-head">Nalezeno 4 paragrafy, 4 nové · <span class="id-warn">⚠ 1 k ruční kontrole</span></div>
+            <div class="id-row"><span class="id-num">§ 100</span><span class="id-name">Valná hromada</span></div>
+            <div class="id-row"><span class="id-num">§ 101</span><span class="id-name auth">Působnost valné hromady</span></div>
+            <div class="id-row"><span class="id-num">§ 102</span><span class="id-name empty">(bez nadpisu — doplníte později)</span></div>
+            <div class="id-row suspicious"><span class="id-num">§ 104</span><span class="id-name">DZ Rozhodování mimo valnou hromadu</span><span class="id-flag">⚠ zkontrolovat</span></div>
+          </div>
+        </div>
+        <p>Nic se do tabulky nezapíše, dokud náhled nepotvrdíte. Duplicitní paragrafy (co v tabulce už jsou) se automaticky přeskočí — a nadpisy, které i po přeskočení odkazu pořád vypadají podezřele (jako <code>§ 104</code> v ukázce), appka rovnou vlajkuje k ruční kontrole. U stovek paragrafů tak stačí projít jen těch pár označených, ne celý seznam.</p>
+      </section>
+
+      <hr class="divider">
+
+      <section id="dopady">
+        <h2>Co to mění jinde v checklistu</h2>
+        <p class="section-note">Tohle je ta část, která přesahuje samotnou tabulku.</p>
+
+        <ul class="impact-list">
+          <li class="impact-item">
+            <div class="where">Fáze knihy</div>
+            <p>Zapnutí přepínače posouvá knihu z <em>Domlouvání spolupráce</em> do <em>Redakce</em> — nezávisle na „Rukopis odevzdán", stejným mechanismem.</p>
+          </li>
+          <li class="impact-item">
+            <div class="where">Karta v Přehledu</div>
+            <p style="margin-bottom:10px;">Místo štítku „odevzdáno" se v patě karty objeví zlomek — modrý, dokud části chybí, zelený, jakmile jsou všechny v ruce:</p>
+            <div style="display:flex; gap:8px;">
+              <span class="kb-chip-demo blue">12/14 částí</span>
+              <span class="kb-chip-demo green">14/14 částí</span>
+              <span class="kb-chip-demo flat">odevzdáno</span>
+            </div>
+          </li>
+          <li class="impact-item">
+            <div class="where">Dva kroky fáze Redakce</div>
+            <p><strong>Kontrola stylů v PublishOnu</strong> se odškrtne sama, jakmile jsou naformátované všechny paragrafy; <strong>Redakční kontrola + kontrola jazykové korektorky</strong> se odškrtne, jakmile jsou všechny redakčně i jazykově zkontrolované. Funguje to, jen dokud si tyhle kroky v Nastavení checklistu nepřejmenujete nebo nesmažete — appka to v tom případě potichu přeskočí, ne že by na tom spadla.</p>
+          </li>
+          <li class="impact-item">
+            <div class="where">Boční filtry a nadcházející termín</div>
+            <p>Filtr „Odevzdané" v Přehledu i postranním panelu teď počítá i knihy odevzdávané po částech. Velký countdown „X dní do odevzdání" nahoře v Přehledu naopak knihu přestane počítat, jakmile se rozjede po částech — čeká se totiž už na jednotlivé paragrafy, ne na jedno velké datum.</p>
+          </li>
+          <li class="impact-item">
+            <div class="where">Záloha (export/import)</div>
+            <p>Celá tabulka jede ve stejné záloze jako zbytek knihy — není potřeba nic navíc exportovat ani obnovovat zvlášť.</p>
+          </li>
+          <li class="impact-item">
+            <div class="where">Starší knihy</div>
+            <p>Knihy založené před touhle funkcí dostanou při načtení bezpečně prázdnou tabulku — appka se na nich nezasekne, funkci si u nich prostě jen nezapnete, dokud nebudete chtít.</p>
+          </li>
+        </ul>
+      </section>
+
+      <p class="foot-note">Shrnuje stav funkce tak, jak byla nasazena do ostrého provozu. Pokud se appka od téhle chvíle ještě posune, tenhle přehled to nemusí zachytit.</p>
+    </div>
+  </main>
+</div>
+</body>
+</html>
