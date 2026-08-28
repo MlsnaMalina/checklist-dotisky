@@ -811,6 +811,9 @@ tr.note-row:hover { background: var(--page); }
 .import-row .iname { flex: 1; color: var(--gray-text); }
 .import-row .iname.empty { color: var(--gray-dim); font-style: italic; }
 .import-row .idup { color: var(--gray-dim); font-size: 10.5px; flex-shrink: 0; white-space: nowrap; }
+.import-row.suspicious { background: rgba(200,140,20,0.08); }
+.import-row .isus { color: #a8720f; font-size: 10.5px; font-weight: 600; flex-shrink: 0; white-space: nowrap; }
+.isus-count { color: #a8720f; font-weight: 700; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; }
@@ -2611,8 +2614,32 @@ function paraJumpTo(id){
 
 // Rozpozná „§ N" na začátku řádku — číslo může mít až dvě písmena přílepku z novely (§ 14a, § 14ab),
 // vždy nalepená přímo na číslici. Nadpis pozná podle jediného pravidla: pokud navazující text
-// nekončí tečkou (ani středníkem), je to nadpis; jakmile končí tečkou, je to už zákonné znění
-// paragrafu samotného, ne název — a řádek zůstane bez názvu.
+// nekončí tečkou, středníkem ani dvojtečkou (ta bývá na konci úvodní věty před výčtem a), b), c)…),
+// je to nadpis; jakmile končí, je to už zákonné znění paragrafu samotného, ne název — a řádek
+// zůstane bez názvu.
+// Zdrojové weby (např. ASPI) mívají hned za číslem paragrafu krátké odkazové štítky
+// (odkaz na důvodovou zprávu, rozbalení komentářů apod.), které se při kopírování vlepí
+// jako obyčejný text. Poznáme je podle tvaru: buď „+" a k němu přilepené slovo, nebo
+// osamocená krátká zkratka jen z velkých písmen (bez malých písmen jako má běžný nadpis).
+function isLinkNoiseLine(s){
+  const t = (s||'').trim();
+  if(!t) return true;
+  const stripped = t
+    .replace(/\+\s*\S+/g, ' ')
+    .replace(/\b[A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]{2,6}\b/g, ' ')
+    .replace(/\s+/g, '');
+  return stripped === '';
+}
+// Nadpis, který zůstal neprázdný, ale pořád vypadá jako zbytek odkazového štítku
+// (např. „DZ Předmět úpravy" — štítek slitý s opravdovým nadpisem na jednom řádku) —
+// appka ho nezahazuje, jen ho v náhledu importu vlajkuje k ruční kontrole.
+function looksSuspiciousHeading(name){
+  if(!name) return false;
+  if(/\+\s*\S/.test(name)) return true;
+  if(/^[A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ0-9]{1,6}$/.test(name)) return true;
+  if(/^[A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]{2,6}\s+\S/.test(name)) return true;
+  return false;
+}
 function parseStatuteText(text){
   const lines = text.replace(/\r\n/g,'\n').replace(/ /g,' ').split('\n');
   const results = [];
@@ -2622,15 +2649,16 @@ function parseStatuteText(text){
     const m = line.match(/^§\s*(\d+[a-z]{0,2})\b\s*(.*)$/i);
     if(m){
       const num = '§ ' + m[1];
-      const sameLine = m[2].trim().replace(/^[-–—:.]\s*/, '');
+      let sameLine = m[2].trim().replace(/^[-–—:.]\s*/, '');
+      if(isLinkNoiseLine(sameLine)) sameLine = '';
       let heading = '';
       if(sameLine){
-        if(!/[.;]$/.test(sameLine)) heading = sameLine;
+        if(!/[.;:]$/.test(sameLine)) heading = sameLine;
       } else {
         let j = i+1;
-        while(j < lines.length && lines[j].trim()==='') j++;
+        while(j < lines.length && isLinkNoiseLine(lines[j])) j++;
         const next = (lines[j]||'').trim();
-        if(next && !/[.;]$/.test(next)){
+        if(next && !/[.;:]$/.test(next)){
           heading = next;
           i = j;
         }
@@ -2858,7 +2886,7 @@ function renderPartsSection(book, archived) {
       <div class="add-row-btn" onclick="paraToggleImport()">+ Vložit víc najednou ze znění zákona</div>
     </div>
     ${partsImportOpen ? `<div class="import-panel">
-      <p class="import-hint">Vložte text zákona — appka najde všechna „§ N" (i s přílepkem novely jako „14a" nebo „14ab"). Když text hned pod paragrafem nekončí tečkou, vezme ho jako nadpis; jakmile končí tečkou, je to už znění paragrafu a název zůstane prázdný. Nic se nezapíše, dokud výsledek dole nepotvrdíte.</p>
+      <p class="import-hint">Vložte text zákona — appka najde všechna „§ N" (i s přílepkem novely jako „14a" nebo „14ab"). Když text hned pod paragrafem nekončí tečkou, středníkem ani dvojtečkou, vezme ho jako nadpis; jinak je to už znění paragrafu a název zůstane prázdný. Krátké odkazové štítky ze zdrojového webu (typicky „DZ" nebo „+ Více") appka mezi paragrafem a nadpisem přeskočí sama. Nic se nezapíše, dokud výsledek dole nepotvrdíte.</p>
       <textarea id="paraImportText" placeholder="§ 1&#10;Základní ustanovení&#10;(1) Tento zákon upravuje…&#10;&#10;§ 2&#10;…"></textarea>
       <div class="import-actions">
         <button class="btn-mini" onclick="paraParseImportText()">Zpracovat text</button>
@@ -2933,17 +2961,21 @@ function paraImportPreviewHtml(book){
   const parsed = partsImportPreview;
   if(!parsed.length) return `<div class="import-preview"><div class="import-preview-head">Nenašla jsem žádné „§" — zkontrolujte prosím vložený text.</div></div>`;
   const existingNums = new Set(book.paragraphs.map(p=>p.num.trim()));
+  let suspiciousCount = 0;
   const rows = parsed.map(item=>{
     const dup = existingNums.has(item.num.trim());
-    return `<div class="import-row">
+    const suspicious = looksSuspiciousHeading(item.name);
+    if(suspicious) suspiciousCount++;
+    return `<div class="import-row ${suspicious?'suspicious':''}">
       <span class="inum">${escapeHtml(item.num)}</span>
       <span class="iname ${item.name?'':'empty'}">${item.name?escapeHtml(item.name):'(bez nadpisu — zákon ho nemá, autorský název doplníte později)'}</span>
+      ${suspicious?'<span class="isus" title="Vypadá to jako zbytek odkazového štítku (např. „DZ" nebo „+ Více") — zkontrolujte prosím ručně">⚠ zkontrolovat</span>':''}
       ${dup?'<span class="idup">už v tabulce</span>':''}
     </div>`;
   }).join('');
   const newCount = parsed.filter(item=>!existingNums.has(item.num.trim())).length;
   return `<div class="import-preview">
-    <div class="import-preview-head">Nalezeno ${parsed.length} paragrafů, ${newCount} nových</div>
+    <div class="import-preview-head">Nalezeno ${parsed.length} paragrafů, ${newCount} nových${suspiciousCount?` · <span class="isus-count">⚠ ${suspiciousCount} k ruční kontrole</span>`:''}</div>
     <div class="import-preview-list">${rows}</div>
     <div class="import-actions">
       <button class="btn-mini" onclick="paraCommitImport()" ${newCount?'':'disabled'}>Vložit ${newCount} nových paragrafů</button>
