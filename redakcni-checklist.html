@@ -517,7 +517,7 @@ body.kb-dragging { user-select: none; cursor: grabbing; }
 .add-rep-btn:hover { background: rgba(64,114,173,0.15); }
 
 /* Seznam autorů — modál nové knihy i editace na kartě knihy */
-.authors-list { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+.authors-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); gap: 6px; margin-top: 4px; }
 .author-row { display: flex; align-items: center; gap: 6px; }
 .author-row input { flex: 1; padding: 7px 10px; border: 1px solid #e2e2e2; border-radius: var(--radius-sm); background: var(--white); font-size: 13px; transition: var(--transition); }
 .author-row input:focus { outline: none; border-color: #B83066; }
