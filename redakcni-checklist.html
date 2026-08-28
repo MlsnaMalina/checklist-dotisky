@@ -319,6 +319,7 @@ body.kb-dragging { user-select: none; cursor: grabbing; }
 }
 .bh-field input:focus, .bh-field select:focus, .bh-field textarea:focus { outline: none; border-color: #B83066; }
 .bh-field input[readonly] { background: var(--gray-bg); color: var(--gray-text); cursor: default; }
+.bh-field select[disabled] { background: var(--gray-bg); color: var(--gray-text); cursor: default; }
 .bh-notes { grid-column: 1 / -1; }
 .bh-authors { grid-column: 1 / -1; }
 .bh-notes textarea { resize: vertical; min-height: 60px; width: 100%; }
@@ -2193,7 +2194,15 @@ function renderMain() {
               ${ro?'':'<button type="button" class="add-author-btn" onclick="addAuthorRow()">+ Další autor/ka</button>'}
             </div>
             <div class="bh-field"><label>Redaktorka</label><input type="text" value="${escapeHtml(book.editor||'')}" ${ro} onchange="updateBook('editor',this.value)"></div>
-            <div class="bh-field"><label>Ediční řada</label><input type="text" value="${escapeHtml(ediceLabel(book))}" readonly style="background:var(--gray-bg);color:var(--gray-text);"></div>
+            <div class="bh-field"><label>Ediční řada</label>
+              <select ${archived?'disabled':''} onchange="updateBook('edice',this.value);renderMain()">
+                <option value="komentar" ${book.edice==='komentar'?'selected':''}>Komentář</option>
+                <option value="praktickyKomentar" ${book.edice==='praktickyKomentar'?'selected':''}>Praktický komentář</option>
+                <option value="monografie" ${book.edice==='monografie'?'selected':''}>Právní monografie</option>
+                <option value="edice" ${book.edice==='edice'?'selected':''}>Jiná ediční řada</option>
+              </select>
+            </div>
+            ${book.edice==='edice' ? `<div class="bh-field"><label>Název ediční řady</label><input type="text" value="${escapeHtml(book.ediceCustom||'')}" ${ro} onchange="updateBook('ediceCustom',this.value);renderMain()" placeholder="Název…"></div>` : ''}
             <div class="bh-field"><label>ISBN brož.</label><input type="text" value="${escapeHtml(book.isbnBroz||'')}" ${ro} onchange="updateBook('isbnBroz',this.value)" placeholder="978-80-…"></div>
             <div class="bh-field"><label>ISBN váz.</label><input type="text" value="${escapeHtml(book.isbnVaz||'')}" ${ro} onchange="updateBook('isbnVaz',this.value)" placeholder="978-80-…"></div>
             <div class="bh-field"><label>ISBN PDF</label><input type="text" value="${escapeHtml(book.isbnPdf||'')}" ${ro} onchange="updateBook('isbnPdf',this.value)" placeholder="978-80-…"></div>
