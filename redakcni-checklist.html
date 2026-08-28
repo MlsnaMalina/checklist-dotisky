@@ -306,6 +306,8 @@ body.kb-dragging { user-select: none; cursor: grabbing; }
 .chip-nav { background: rgba(152,196,81,0.15); color: #5a8a1a; }
 .chip-odevzdani { background: rgba(177,30,84,0.08); color: var(--raspberry); }
 .chip-cancelled { background: rgba(192,96,106,0.12); color: var(--rose); }
+.chip-parts { background: rgba(64,114,173,0.10); color: var(--blue); border: none; font: inherit; letter-spacing: inherit; cursor: pointer; transition: var(--transition); }
+.chip-parts:hover { background: rgba(64,114,173,0.2); }
 .bh-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .bh-info { flex: 1; min-width: 0; }
 .bh-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 600; color: var(--black); margin-bottom: 2px; line-height: 1.25; }
@@ -561,7 +563,12 @@ body.kb-dragging { user-select: none; cursor: grabbing; }
 .modal-overlay.open { display: flex; }
 .modal { background: var(--white); border-radius: var(--radius); padding: 28px; width: 540px; max-width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-md); }
 .modal-lg { width: 680px; }
+.modal-xl { width: 1300px; }
 .modal h2 { font-size: 22px; margin-bottom: 20px; }
+.modal-head-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.modal-head-row h2 { margin-bottom: 0; }
+.modal-close-x { flex-shrink: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; color: var(--gray-dim); font-size: 17px; transition: var(--transition); }
+.modal-close-x:hover { background: rgba(177,30,84,0.08); color: var(--raspberry); }
 .modal-field { margin-bottom: 14px; }
 .modal-field label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--gray-text); margin-bottom: 5px; }
 .modal-field input, .modal-field select { width: 100%; padding: 9px 11px; border: 1px solid #e2e2e2; border-radius: var(--radius-sm); font-size: 14px; background: var(--white); transition: var(--transition); }
@@ -1068,6 +1075,17 @@ tr.note-row:hover { background: var(--page); }
   </div>
 </div>
 
+<!-- Modal: Paragrafy (rukopis odevzdávaný po částech) -->
+<div class="modal-overlay" id="partsModal">
+  <div class="modal modal-xl">
+    <div class="modal-head-row">
+      <h2>Paragrafy</h2>
+      <button type="button" class="modal-close-x" onclick="closeModal('partsModal')" title="Zavřít">✕</button>
+    </div>
+    <div id="partsModalBody"></div>
+  </div>
+</div>
+
 <div class="copy-toast" id="copyToast">Zkopírováno ✓</div>
 
 <div class="bkp-overlay" id="zalohaPopup">
@@ -1107,6 +1125,7 @@ const SVG_FILE = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" st
 // Praporek u blízkého termínu (dřív ⏰) a „předáno ven" u štítku čeká se na (dřív ⏳).
 const SVG_FLAG = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V4"/><path d="M6 4h11l-2.3 3.6L17 11H6"/></svg>`;
 const SVG_HANDOFF = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/><path d="M12 3v11"/><path d="M8.4 6.6L12 3l3.6 3.6"/></svg>`;
+const SVG_PARTS = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 7 2 2 3-3"/><path d="M11 6h10"/><path d="m3 17 2 2 3-3"/><path d="M11 18h10"/></svg>`;
 
 const APP_PASSWORD  = 'dotisky2025';
 const STORAGE_KEY   = 'redakcni-checklist-v1';
@@ -2156,6 +2175,11 @@ function renderMain() {
   if (book.nav) chips += `<span class="chip chip-nav">NAV: ${escapeHtml(book.nav)}</span>`;
   if (book.odevzdaniRukopisu) chips += `<span class="chip chip-odevzdani">Odevzdání: ${fmtDate(book.odevzdaniRukopisu)}</span>`;
   if (cancelled) chips += `<span class="chip chip-cancelled">Zrušeno</span>`;
+  if (book.submittedInParts) {
+    const partsTotal = book.paragraphs.length;
+    const partsDone = book.paragraphs.filter(p=>p.date).length;
+    chips += `<button type="button" class="chip chip-parts" onclick="openPartsModal()" title="Otevřít sledování paragrafů">${SVG_PARTS}Paragrafy: ${partsDone}/${partsTotal}</button>`;
+  }
 
   // ToDo list — nesplněné nahoře, odškrtnuté dole
   const todos = (book.todos || []).slice().sort((a,b) => (a.done?1:0) - (b.done?1:0));
@@ -2219,7 +2243,7 @@ function renderMain() {
                 <div class="ms-toggle ${book.rukopisOdevzdan?'on':''} ${archived?'locked':''}" ${archived?'':'onclick="toggleRukopis()"'}>
                   <div class="ms-box"></div><span>Rukopis odevzdán</span>
                 </div>
-                <div class="ms-toggle ${book.submittedInParts?'on':''} ${archived?'locked':''}" ${archived?'':'onclick="toggleSubmittedInParts()"'} title="Rukopis chodí postupně, po jednotlivých paragrafech — otevře tabulku dole a posune knihu do Redakce stejně jako Rukopis odevzdán">
+                <div class="ms-toggle ${book.submittedInParts?'on':''} ${archived?'locked':''}" ${archived?'':'onclick="toggleSubmittedInParts()"'} title="Rukopis chodí postupně, po jednotlivých paragrafech — v hlavičce přibude tlačítko „Paragrafy" se sledováním a kniha se posune do Redakce stejně jako Rukopis odevzdán">
                   <div class="ms-box"></div><span>Rukopis odevzdáván po částech</span>
                 </div>
               </div>
@@ -2242,7 +2266,8 @@ function renderMain() {
       </div>
     </div>`;
 
-  html += renderPartsSection(book, archived);
+  // Paragrafy po částech se nevkládají do hlavního toku (viz #partsModal níž) —
+  // u knih s desítkami paragrafů by jinak checklist fází zatlačily hluboko pod scroll.
 
   let firstIncompleteFound = false;
   PHASES.forEach((ph, idx) => {
@@ -2290,6 +2315,7 @@ function renderMain() {
   });
 
   detail.innerHTML = html;
+  document.getElementById('partsModalBody').innerHTML = renderPartsSection(book, archived);
   justToggledStep = null;
   animateProgress();
   document.querySelectorAll('.para-name-input').forEach(paraAutoGrow);
@@ -2467,6 +2493,7 @@ function toggleSubmittedInParts() {
   const b=getBook(); if(!b||b.archivedAt) return;
   b.submittedInParts=!b.submittedInParts; saveState(); renderMain(); renderBookList();
 }
+function openPartsModal() { openModal('partsModal'); }
 // Krok „Kontrola stylů v PublishOnu" a „Redakční kontrola + kontrola jazykové korektorky"
 // se odvozují přímo z tabulky — jen když ty kroky ve fázi Redakce existují (uživatelka
 // si mohla checklist v Nastavení přejmenovat nebo smazat), jinak se nic neděje.
