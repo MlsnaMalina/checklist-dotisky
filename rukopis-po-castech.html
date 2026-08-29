@@ -202,6 +202,27 @@ strong{color:var(--navy-ink); font-weight:600;}
 .ab-meta b{color:var(--navy-ink); font-variant-numeric:tabular-nums;}
 .author-reminder-btn{display:inline-block; margin-top:6px; font-size:10.5px; color:var(--blue); font-weight:600;}
 
+/* ===== vnořené skupiny — ukázkový strom ===== */
+.gt-toolbar{display:flex; align-items:center; gap:16px; font-size:11px; color:var(--muted); margin-bottom:10px; padding-bottom:10px; border-bottom:1px dashed var(--line);}
+.gt-toolbar b{color:var(--navy-ink); font-variant-numeric:tabular-nums;}
+.gt-row{display:flex; align-items:center; gap:8px; padding:6px 0;}
+.gt-indent{display:flex; align-self:stretch; flex-shrink:0;}
+.gt-guide{width:16px; flex-shrink:0; position:relative;}
+.gt-guide::before{content:''; position:absolute; left:7px; top:-7px; bottom:-7px; width:1px; background:var(--line);}
+.gt-twisty{width:14px; flex-shrink:0; text-align:center; color:var(--faint); font-size:10px;}
+.gt-rank{font-family:'Playfair Display',serif; font-weight:700; font-size:12px; color:var(--muted); width:64px; flex-shrink:0;}
+.gt-row.lv1{background:var(--blue-soft); margin:0 -20px; padding:8px 20px; border-radius:6px;}
+.gt-row.lv1 .gt-rank{color:var(--navy); font-size:13.5px;}
+.gt-row.lv1 .gt-name{font-family:'Playfair Display',serif; font-weight:700; color:var(--navy-ink); font-size:13.5px;}
+.gt-row.lv2 .gt-name{font-family:'Playfair Display',serif; font-weight:700; color:var(--navy-ink); font-size:12.5px;}
+.gt-name{flex:1;}
+.gt-agg{display:flex; align-items:center; gap:7px; flex-shrink:0;}
+.gt-bar{width:56px; height:5px; border-radius:3px; background:var(--line); overflow:hidden;}
+.gt-bar-fill{height:100%; border-radius:3px;}
+.gt-count{font-size:10.5px; color:var(--muted); font-variant-numeric:tabular-nums; width:36px; text-align:right;}
+.gt-assign{font-size:10px; font-weight:600; color:var(--blue); border:1px solid rgba(64,114,173,.3); background:var(--blue-soft); padding:3px 9px; border-radius:20px; flex-shrink:0; white-space:nowrap;}
+.gt-hint{padding:1px 0 9px; font-size:11px; color:var(--faint); font-style:italic;}
+
 /* ===== náhled importu ze znění zákona ===== */
 .import-demo{background:var(--paper); border:1px solid var(--line); border-radius:8px; overflow:hidden;}
 .id-head{padding:10px 14px; font-size:12px; font-weight:600; color:var(--navy-ink); background:var(--surface); border-bottom:1px solid var(--line);}
@@ -214,6 +235,9 @@ strong{color:var(--navy-ink); font-weight:600;}
 .id-name.auth{font-style:italic;}
 .id-name.empty{color:var(--faint); font-style:italic;}
 .id-flag{color:var(--amber); font-size:10.5px; font-weight:700; flex-shrink:0; white-space:nowrap;}
+.id-row.group{background:var(--blue-soft); font-weight:600;}
+.id-row.group .id-num{color:var(--navy);}
+.id-row.group .id-name{font-family:'Playfair Display',serif; color:var(--navy-ink); font-style:normal;}
 
 /* ===== ovládací prvky — tabulka control -> co dělá ===== */
 .ctl-table{width:100%; border-collapse:collapse; margin:10px 0 4px; font-size:13.5px;}
@@ -246,6 +270,7 @@ strong{color:var(--navy-ink); font-weight:600;}
     <nav>
       <a href="#zapnuti">Jak se to zapíná</a>
       <a href="#radek">Anatomie jednoho paragrafu</a>
+      <a href="#skupiny">Vnořené skupiny</a>
       <a href="#prehled-nastroje">Souhrn a přehled</a>
       <a href="#ovladani">Filtrování a hromadné vkládání</a>
       <a href="#dopady" class="tag-impact">Co to mění jinde ↗</a>
@@ -352,6 +377,72 @@ strong{color:var(--navy-ink); font-weight:600;}
         </ul>
       </section>
 
+      <section id="skupiny">
+        <h2>Vnořené skupiny paragrafů</h2>
+        <p class="section-note">Nové — pro komentáře, kde dává smysl paragrafy sdružit podle Části, Hlavy, Dílu nebo Oddílu zákona. Často to navíc odpovídá i tomu, jak si autoři reálně dělí práci — každý má na starost jeden ucelený úsek, ne roztroušené paragrafy.</p>
+
+        <div class="exhibit">
+          <div class="exhibit-label">Ukázka — sbalitelný strom</div>
+          <div class="gt-toolbar"><b>34</b>&nbsp;paragrafů&nbsp;·&nbsp;<b>26</b>&nbsp;odevzdáno&nbsp;·&nbsp;<b>76&nbsp;%</b></div>
+
+          <div class="gt-row lv1">
+            <span class="gt-twisty">▾</span>
+            <span class="gt-rank">Část I</span>
+            <span class="gt-name">Obecná ustanovení</span>
+            <span class="gt-agg"><div class="gt-bar"><div class="gt-bar-fill" style="width:71%;background:var(--blue);"></div></div><span class="gt-count">17/24</span></span>
+          </div>
+
+          <div class="gt-row lv2">
+            <span class="gt-indent"><span class="gt-guide"></span></span>
+            <span class="gt-twisty">▾</span>
+            <span class="gt-rank">Hlava I</span>
+            <span class="gt-name">Základní ustanovení</span>
+            <span class="gt-agg"><div class="gt-bar"><div class="gt-bar-fill" style="width:100%;background:var(--green);"></div></div><span class="gt-count">8/8</span></span>
+          </div>
+          <div class="gt-row">
+            <span class="gt-indent"><span class="gt-guide"></span><span class="gt-guide"></span></span>
+            <span class="ra-num" style="font-size:13px;">§ 1</span><span class="gt-name">Předmět úpravy</span>
+          </div>
+          <div class="gt-row">
+            <span class="gt-indent"><span class="gt-guide"></span><span class="gt-guide"></span></span>
+            <span class="ra-num" style="font-size:13px;">§ 2</span><span class="gt-name">Působnost zákona</span>
+          </div>
+
+          <div class="gt-row lv2">
+            <span class="gt-indent"><span class="gt-guide"></span></span>
+            <span class="gt-twisty">▾</span>
+            <span class="gt-rank">Hlava II</span>
+            <span class="gt-name">Vznik a zánik</span>
+            <span class="gt-agg"><div class="gt-bar"><div class="gt-bar-fill" style="width:56%;background:var(--blue);"></div></div><span class="gt-count">9/16</span></span>
+            <span class="gt-assign">👤 Přiřadit autora</span>
+          </div>
+          <div class="gt-row">
+            <span class="gt-indent"><span class="gt-guide"></span><span class="gt-guide"></span></span>
+            <span class="gt-twisty">▸</span>
+            <span class="gt-rank" style="width:56px;">Díl 2</span>
+            <span class="gt-name">Zánik</span>
+            <span class="gt-agg"><div class="gt-bar"><div class="gt-bar-fill" style="width:22%;background:var(--blue);"></div></div><span class="gt-count">2/9</span></span>
+          </div>
+          <div class="gt-hint" style="padding-left:36px;">↳ sbaleno — 7 § skrytých, 5 zbývá odevzdat</div>
+
+          <div class="gt-row lv1">
+            <span class="gt-twisty">▸</span>
+            <span class="gt-rank">Část II</span>
+            <span class="gt-name">Kapitálové společnosti</span>
+            <span class="gt-agg"><div class="gt-bar"><div class="gt-bar-fill" style="width:9%;background:var(--blue);"></div></div><span class="gt-count">1/10</span></span>
+          </div>
+          <div class="gt-hint">↳ sbaleno — obsahuje 2 hlavy, 9 § skrytých</div>
+        </div>
+        <p>Odsazení a vodicí linka ukazují, co je čeho součástí — čím výš patro (Část, pak Hlava, Díl, Oddíl…), tím výraznější písmo. Klik na šipku skupinu sbalí; číslo u ní (<code>17/24</code>) ukazuje odevzdanost <strong>i po sbalení</strong>, takže se nic neztratí z dohledu — jen sbalená skupina k tomu ještě řekne, kolik toho vevnitř ještě zbývá.</p>
+
+        <h3>Přidání — ručně, nebo automaticky ze zákona</h3>
+        <p>Tlačítko <strong>+ Přidat skupinu</strong> vloží prázdný řádek vedle „+ Přidat paragraf" — napíšete označení (např. „Hlava II"), název a šipkami <code>←</code> <code>→</code> upravíte, o kolik pater je zanořená. Import ze znění zákona (viz níže) umí Část/Hlavu/Díl/Oddíl rozpoznat sám, ve správném pořadí za sebou, takže u knihy s desítkami takových nadpisů nehrozí ruční přepis.</p>
+
+        <h3>Autor na celou skupinu</h3>
+        <p>Tlačítko <strong>👤 Přiřadit autora</strong> u skupiny (viditelné výše u Hlavy II) doplní vybraného autora rovnou všem paragrafům uvnitř — i těm ve vnořených dílech. Je to jednorázová hromadná akce, ne trvalé pravidlo: u jednotlivých paragrafů pak jde autora dál ručně přidávat nebo odebírat, aniž by se to k němu „vracelo" při příští změně na skupině.</p>
+        <p class="dim">Skupina i s celým svým obsahem se dá přesunout tlačítky ▲▼ stejně jako paragraf — paragrafy uvnitř ji následují jako jeden blok.</p>
+      </section>
+
       <section id="prehled-nastroje">
         <h2>Souhrn a přehled</h2>
         <p class="section-note">Tři způsoby, jak nad tabulkou vidět celek, aniž by se muselo scrollovat řádek po řádku.</p>
@@ -414,27 +505,29 @@ strong{color:var(--navy-ink); font-weight:600;}
           <tbody>
             <tr><td class="k">Vše / Jen nekompletní / Neodevzdáno</td><td>tři filtry tabulky — poslední ukáže jen to, co ještě vůbec nedorazilo</td></tr>
             <tr><td class="k">Hledat § nebo název</td><td>živé vyhledávání v čísle i v textu názvu</td></tr>
-            <tr><td class="k">Řadit: pořadí v knize / podle autora</td><td>přepíná pohled bez změny uloženého pořadí</td></tr>
-            <tr><td class="k">▲ ▼</td><td>ruční přesun řádku o pozici — funguje jen v základním pořadí, bez filtru</td></tr>
-            <tr><td class="k">Vložit víc najednou ze znění zákona</td><td>vloží se text zákona, appka najde všechna „§ N" a nabídne náhled k potvrzení</td></tr>
+            <tr><td class="k">Řadit: pořadí v knize / podle autora</td><td>přepíná pohled bez změny uloženého pořadí — řazení podle autora skupiny dočasně rozpustí do plochého seznamu</td></tr>
+            <tr><td class="k">▲ ▼</td><td>ruční přesun řádku o pozici — funguje jen v základním pořadí, bez filtru; u skupiny se přesune celý její obsah</td></tr>
+            <tr><td class="k">+ Přidat skupinu</td><td>vloží prázdnou Část/Hlavu/Díl…, šipkami <code>←</code> <code>→</code> upravíte patro</td></tr>
+            <tr><td class="k">Vložit víc najednou ze znění zákona</td><td>vloží se text zákona, appka najde všechna „§ N" i strukturní nadpisy a nabídne náhled k potvrzení</td></tr>
           </tbody>
         </table>
 
         <h3>Import ze znění zákona</h3>
-        <p>U knihy se stovkami paragrafů je ruční přepisování čísel a názvů zbytečné riziko překlepu. Appka umí z vloženého textu zákona — třeba zkopírovaného z ASPI — sama vytáhnout paragrafy: najde všechna <code>§ N</code>, i s přílepkem novely, a tam, kde to jde, doplní i název.</p>
+        <p>U knihy se stovkami paragrafů je ruční přepisování čísel a názvů zbytečné riziko překlepu. Appka umí z vloženého textu zákona — třeba zkopírovaného z ASPI — sama vytáhnout paragrafy: najde všechna <code>§ N</code>, i s přílepkem novely, a tam, kde to jde, doplní i název. Stejným průchodem pozná i nadpisy <strong>Části, Hlavy, Dílu a Oddílu</strong> a rovnou je zařadí do správného patra (viz <a href="#skupiny">Vnořené skupiny ↑</a>) — nemusí se přidávat zvlášť.</p>
         <p>Nadpis pozná podle interpunkce: text hned za paragrafem, který <strong>nekončí tečkou, středníkem ani dvojtečkou</strong>, je nadpis; jinak je to už znění paragrafu a název zůstane prázdný k doplnění. Krátké odkazové štítky, které mívají zdrojové weby hned za číslem paragrafu — typicky <code>DZ</code> nebo <code>+ Více</code>, odkaz na důvodovou zprávu — appka mezi paragrafem a nadpisem sama přeskočí, takže se nezapíšou jako název.</p>
 
         <div class="exhibit">
           <div class="exhibit-label">Náhled před vložením</div>
           <div class="import-demo">
-            <div class="id-head">Nalezeno 4 paragrafy, 4 nové · <span class="id-warn">⚠ 1 k ruční kontrole</span></div>
+            <div class="id-head">Nalezeno 4 paragrafy a 1 skupina, 5 nových · <span class="id-warn">⚠ 1 k ruční kontrole</span></div>
+            <div class="id-row group"><span class="id-num">HLAVA III</span><span class="id-name">Zvláštní ustanovení</span></div>
             <div class="id-row"><span class="id-num">§ 100</span><span class="id-name">Valná hromada</span></div>
             <div class="id-row"><span class="id-num">§ 101</span><span class="id-name auth">Působnost valné hromady</span></div>
             <div class="id-row"><span class="id-num">§ 102</span><span class="id-name empty">(bez nadpisu — doplníte později)</span></div>
             <div class="id-row suspicious"><span class="id-num">§ 104</span><span class="id-name">DZ Rozhodování mimo valnou hromadu</span><span class="id-flag">⚠ zkontrolovat</span></div>
           </div>
         </div>
-        <p>Nic se do tabulky nezapíše, dokud náhled nepotvrdíte. Duplicitní paragrafy (co v tabulce už jsou) se automaticky přeskočí — a nadpisy, které i po přeskočení odkazu pořád vypadají podezřele (jako <code>§ 104</code> v ukázce), appka rovnou vlajkuje k ruční kontrole. U stovek paragrafů tak stačí projít jen těch pár označených, ne celý seznam.</p>
+        <p>Nic se do tabulky nezapíše, dokud náhled nepotvrdíte. Duplicitní paragrafy i skupiny (co v tabulce už jsou) se automaticky přeskočí — a nadpisy, které i po přeskočení odkazu pořád vypadají podezřele (jako <code>§ 104</code> v ukázce), appka rovnou vlajkuje k ruční kontrole. U stovek paragrafů tak stačí projít jen těch pár označených, ne celý seznam.</p>
       </section>
 
       <hr class="divider">
