@@ -814,6 +814,31 @@ tr.note-row:hover { background: var(--page); }
 .import-row.suspicious { background: rgba(200,140,20,0.08); }
 .import-row .isus { color: #a8720f; font-size: 10.5px; font-weight: 600; flex-shrink: 0; white-space: nowrap; }
 .isus-count { color: #a8720f; font-weight: 700; }
+.import-row.group { background: rgba(64,114,173,0.06); font-weight: 600; }
+.import-row.group .inum { color: var(--navy); }
+.import-row.group.lv1 .iname { font-family: 'Playfair Display', serif; color: var(--navy); }
+
+/* ===== Vnořené skupiny (Část/Hlava/Díl/Oddíl) ===== */
+tr.grp-row.lv1 { background: rgba(64,114,173,0.05); }
+.grp-line { display: flex; align-items: center; gap: 7px; }
+.grp-indent { display: flex; align-self: stretch; flex-shrink: 0; }
+.grp-guide { width: 16px; flex-shrink: 0; position: relative; }
+.grp-guide::before { content: ''; position: absolute; left: 7px; top: -8px; bottom: -8px; width: 1px; background: var(--gray-border); }
+.grp-twisty { width: 16px; flex-shrink: 0; text-align: center; color: var(--gray-dim); font-size: 10px; cursor: pointer; user-select: none; }
+.grp-twisty:hover { color: var(--navy); }
+.grp-num-static, .grp-num-input { font-family: 'Playfair Display', serif; font-weight: 700; flex-shrink: 0; width: 84px; font-size: 13px; }
+.grp-name-static, .grp-name-input { flex: 1; min-width: 60px; font-size: 12.5px; }
+tr.grp-row.lv1 .grp-name-static, tr.grp-row.lv1 .grp-name-input { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 13.5px; color: var(--navy); }
+tr.grp-row.lv2 .grp-name-static, tr.grp-row.lv2 .grp-name-input { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 12.5px; color: var(--navy); }
+tr.grp-row.lv3 .grp-name-static, tr.grp-row.lv3 .grp-name-input, tr.grp-row.lv4 .grp-name-static, tr.grp-row.lv4 .grp-name-input { font-weight: 600; color: var(--gray-text); }
+.grp-agg { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.grp-bar { width: 64px; height: 5px; border-radius: 3px; background: var(--gray-bg); overflow: hidden; }
+.grp-bar-fill { display: block; height: 100%; border-radius: 3px; transition: width 300ms ease; }
+.grp-count { font-size: 11px; color: var(--gray-text); font-variant-numeric: tabular-nums; width: 42px; text-align: right; flex-shrink: 0; }
+.grp-assign-select { font-size: 11px; color: var(--blue); flex-shrink: 0; max-width: 148px; border: 1px solid rgba(64,114,173,.25); border-radius: 20px; background: rgba(64,114,173,.06); padding: 4px 8px; }
+.grp-level-btn { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; color: var(--gray-dim); font-size: 11px; cursor: pointer; border-radius: 4px; flex-shrink: 0; }
+.grp-level-btn:hover { background: var(--gray-bg); color: var(--navy); }
+tr.grp-collapsed-note td { padding: 0 12px 9px 34px; font-size: 11px; color: var(--gray-dim); font-style: italic; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; }
@@ -822,7 +847,7 @@ tr.note-row:hover { background: var(--page); }
 @media print {
   body { background: var(--white); }
   .sidebar, .main-topbar, .bh-actions, .step-end, .step-waiting-x, .phase-note-toggle, .add-rep-btn, .todo-add, .modal-overlay, .bkp-overlay, .copy-toast, .author-row-del, .add-author-btn, .kb-grip { display: none !important; }
-  .grip, .move-btns, .auth-toggle, .chip-x, .row-actions, .add-row-actions, .import-panel, .controls-row, .active-filter-chip, .expand-hint { display: none !important; }
+  .grip, .move-btns, .auth-toggle, .chip-x, .row-actions, .add-row-actions, .import-panel, .controls-row, .active-filter-chip, .expand-hint, .grp-assign-select, .grp-level-btn { display: none !important; }
   .app { display: block; }
   .main { display: block; }
   .detail-wrap, .detail { display: block; overflow: visible; height: auto; }
@@ -1912,8 +1937,9 @@ function boardCard(b, phaseIdx) {
   if (b.rukopisOdevzdan) {
     chip = `<span class="kb-chip odev">odevzdáno</span>`;
   } else if (b.submittedInParts) {
-    const total = (b.paragraphs||[]).length;
-    const got = (b.paragraphs||[]).filter(p=>p.date).length;
+    const leaves = paraLeaves(b);
+    const total = leaves.length;
+    const got = leaves.filter(p=>p.date).length;
     const complete = total>0 && got>=total;
     chip = `<span class="kb-chip odev-parts ${complete?'complete':''}">${got}/${total} částí</span>`;
   } else if (b.odevzdaniRukopisu) {
@@ -2179,8 +2205,9 @@ function renderMain() {
   if (book.odevzdaniRukopisu) chips += `<span class="chip chip-odevzdani">Odevzdání: ${fmtDate(book.odevzdaniRukopisu)}</span>`;
   if (cancelled) chips += `<span class="chip chip-cancelled">Zrušeno</span>`;
   if (book.submittedInParts) {
-    const partsTotal = book.paragraphs.length;
-    const partsDone = book.paragraphs.filter(p=>p.date).length;
+    const partsLeaves = paraLeaves(book);
+    const partsTotal = partsLeaves.length;
+    const partsDone = partsLeaves.filter(p=>p.date).length;
     chips += `<button type="button" class="chip chip-parts" onclick="openPartsModal()" title="Otevřít sledování paragrafů">${SVG_PARTS}Paragrafy: ${partsDone}/${partsTotal}</button>`;
   }
 
@@ -2502,7 +2529,7 @@ function openPartsModal() { openModal('partsModal'); }
 // si mohla checklist v Nastavení přejmenovat nebo smazat), jinak se nic neděje.
 function syncPartsStepsFromParagraphs(b) {
   if (!b.submittedInParts) return;
-  const ps = b.paragraphs || []; if (!ps.length) return;
+  const ps = paraLeaves(b); if (!ps.length) return;
   const allFormatted = ps.every(p=>p.f);
   const allChecked = ps.every(p=>p.r && p.j);
   const sf = b.steps['p2_2'];
@@ -2511,8 +2538,62 @@ function syncPartsStepsFromParagraphs(b) {
   if (sc && sc.done !== allChecked) { sc.done = allChecked; sc.completedAt = allChecked ? todayISO() : null; }
 }
 function paraFind(b, id) { return (b.paragraphs||[]).find(p=>p.id===id); }
+function paraLeaves(b) { return (b.paragraphs||[]).filter(p=>p.kind!=='g'); }
 function paraNs(chars) { return chars ? (chars/1800).toFixed(1).replace('.',',') + ' NS' : '—'; }
 function paraAutoGrow(el) { el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }
+
+// ===== Vnořené skupiny (Část/Hlava/Díl/Oddíl) =====
+// Skupiny žijí přímo v poli book.paragraphs vedle paragrafů — řádek se pozná
+// podle kind:'g' (paragraf kind nemá vůbec, kvůli zpětné kompatibilitě se
+// staršími knihami). Zanoření je čistě dané číslem "level" a pořadím v poli,
+// stejně jako nadpisy H1/H2/H3 v textovém editoru — bez samostatných odkazů
+// na rodiče. Rodič řádku je nejbližší předchozí skupina s nižším levelem.
+function paraIsGroup(r) { return r && r.kind === 'g'; }
+// Najde konec podstromu skupiny na indexu i — první další řádek na stejné
+// nebo mělčí úrovni (nebo konec pole).
+// Skutečná zanořená hloubka každého řádku — stejná logika jako u vykreslení
+// (zásobník úrovní), jen bez ohledu na to, jestli je nějaká skupina sbalená.
+// Paragraf nemá vlastní "level", ale hloubku má taky (podle poslední otevřené
+// skupiny před ním) — proto ji počítáme zvlášť, ne z rows[i].level.
+function paraComputeDepths(rows) {
+  const depths = new Array(rows.length);
+  const stack = [];
+  for (let k = 0; k < rows.length; k++) {
+    const r = rows[k];
+    if (paraIsGroup(r)) {
+      while (stack.length && stack[stack.length-1] >= r.level) stack.pop();
+      depths[k] = stack.length;
+      stack.push(r.level);
+    } else {
+      depths[k] = stack.length;
+    }
+  }
+  return depths;
+}
+// Konec "jednotky" na indexu i — u paragrafu vždy i+1 (nemá potomky), u skupiny
+// první další řádek ve stejné nebo mělčí hloubce (konec jejího podstromu).
+function paraUnitEnd(rows, depths, i) {
+  if (!paraIsGroup(rows[i])) return i + 1;
+  const d = depths[i];
+  let j = i + 1;
+  while (j < rows.length && depths[j] > d) j++;
+  return j;
+}
+function paraGroupBlockEnd(rows, i) {
+  return paraUnitEnd(rows, paraComputeDepths(rows), i);
+}
+function paraGroupAgg(rows, i) {
+  const end = paraGroupBlockEnd(rows, i);
+  let total = 0, submitted = 0, done = 0;
+  for (let k = i + 1; k < end; k++) {
+    const r = rows[k];
+    if (paraIsGroup(r)) continue;
+    total++;
+    if (r.date) submitted++;
+    if (r.f && r.r && r.j && r.a) done++;
+  }
+  return { total, submitted, done };
+}
 
 function paraAddParagraph() {
   const b=getBook(); if(!b||b.archivedAt) return;
@@ -2528,13 +2609,85 @@ function paraDeleteParagraph(id) {
   syncPartsStepsFromParagraphs(b);
   saveState(); renderMain(); renderBookList();
 }
+// Přesune řádek o pozici mezi svými sourozenci — u paragrafu je to vždycky
+// jen on sám, u skupiny celý její podstrom najednou (paragrafy uvnitř ji
+// následují). Sourozenec se hledá podle skutečné hloubky, ne podle "level" —
+// díky tomu funguje správně i sousední sourozenec, který je sám skupina
+// s vlastními potomky (jinak by se prohodil jen s jejím posledním řádkem).
 function paraMoveRow(id, dir) {
   const b=getBook(); if(!b||b.archivedAt) return;
-  const i = b.paragraphs.findIndex(p=>p.id===id);
-  const j = i+dir;
-  if(j<0 || j>=b.paragraphs.length) return;
-  [b.paragraphs[i], b.paragraphs[j]] = [b.paragraphs[j], b.paragraphs[i]];
+  const rows = b.paragraphs;
+  const i = rows.findIndex(p=>p.id===id);
+  if (i<0) return;
+  const depths = paraComputeDepths(rows);
+  const d = depths[i];
+  const myEnd = paraUnitEnd(rows, depths, i);
+  if (dir < 0) {
+    let k = i-1;
+    while (k>=0 && depths[k] > d) k--;
+    if (k<0 || depths[k] !== d) return; // není předchozí sourozenec
+    const before = rows.slice(0, k);
+    const mine = rows.slice(i, myEnd);
+    const prevUnit = rows.slice(k, i);
+    const after = rows.slice(myEnd);
+    b.paragraphs = before.concat(mine, prevUnit, after);
+  } else {
+    if (myEnd >= rows.length || depths[myEnd] !== d) return; // není další sourozenec
+    const nextEnd = paraUnitEnd(rows, depths, myEnd);
+    const before = rows.slice(0, i);
+    const mine = rows.slice(i, myEnd);
+    const nextUnit = rows.slice(myEnd, nextEnd);
+    const after = rows.slice(nextEnd);
+    b.paragraphs = before.concat(nextUnit, mine, after);
+  }
   saveState(); renderMain();
+}
+function paraAddGroup() {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  const id = uuid();
+  b.paragraphs.push({ id, kind:'g', level:1, num:'', name:'', collapsed:false });
+  saveState(); renderMain();
+  setTimeout(()=>{ const el=document.querySelector('[data-para-focus="'+id+'"]'); if(el) el.focus(); }, 0);
+}
+function paraDeleteGroup(id) {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  if(!confirm('Smazat tuto skupinu? Paragrafy uvnitř zůstanou zachovány, jen se z ní vyřadí.')) return;
+  b.paragraphs = b.paragraphs.filter(p=>p.id!==id);
+  saveState(); renderMain(); renderBookList();
+}
+function paraToggleGroupCollapse(id) {
+  const b=getBook(); if(!b) return;
+  const r=paraFind(b,id); if(!r) return;
+  r.collapsed = !r.collapsed;
+  saveState(); renderMain();
+}
+function paraGroupLevelChange(id, delta) {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  const r=paraFind(b,id); if(!r) return;
+  r.level = Math.max(1, Math.min(5, r.level + delta));
+  saveState(); renderMain();
+}
+function paraUpdateGroupField(id, field, val) {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  const r=paraFind(b,id); if(!r) return;
+  r[field] = val;
+  saveState(); renderMain();
+}
+function paraAssignAuthorToGroup(id, name) {
+  if(!name) return;
+  const b=getBook(); if(!b||b.archivedAt) return;
+  const rows = b.paragraphs;
+  const i = rows.findIndex(r=>r.id===id);
+  if (i<0) return;
+  const end = paraGroupBlockEnd(rows, i);
+  let added = 0;
+  for (let k=i+1; k<end; k++) {
+    const r = rows[k];
+    if (paraIsGroup(r)) continue;
+    if (!r.authors.includes(name)) { r.authors.push(name); added++; }
+  }
+  saveState(); renderMain();
+  showToast(added ? `${name} doplněn(a) k ${added} paragrafům` : `${name} už měl(a) všechny paragrafy v této skupině`);
 }
 function paraToggleFaze(id, key) {
   const b=getBook(); if(!b||b.archivedAt) return;
@@ -2585,7 +2738,7 @@ function paraClearNote(id) {
   p.note = ''; partsOpenNoteId = null; saveState(); renderMain();
 }
 
-function paraMissingFor(b, author) { return (b.paragraphs||[]).filter(p=>p.authors.includes(author) && !p.date); }
+function paraMissingFor(b, author) { return paraLeaves(b).filter(p=>p.authors.includes(author) && !p.date); }
 function paraReminderText(b, author) {
   const missing = paraMissingFor(b, author);
   const items = missing.map(p => '- ' + (p.num||'(bez čísla)') + (p.name ? (' ' + (p.authorial ? '['+p.name+']' : p.name)) : '')).join('\n');
@@ -2640,8 +2793,33 @@ function looksSuspiciousHeading(name){
   if(/^[A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]{2,6}\s+\S/.test(name)) return true;
   return false;
 }
+// Najde nadpis navazující na paragraf nebo strukturní jednotku — buď zbytek
+// stejného řádku (sameLine), nebo nejbližší další neprázdný, neodkazový
+// řádek. Vrací i posunutý index i, pokud byl nadpis načten z dalšího řádku.
+function extractHeading(lines, i, sameLine){
+  if(sameLine){
+    return { heading: /[.;:]$/.test(sameLine) ? '' : sameLine, i };
+  }
+  let j = i+1;
+  while(j < lines.length && isLinkNoiseLine(lines[j])) j++;
+  const next = (lines[j]||'').trim();
+  if(next && !/[.;:]$/.test(next)) return { heading: next, i: j };
+  return { heading: '', i };
+}
+// Strukturní jednotky nadřazené paragrafu — vždy nastupují v tomto pevném
+// pořadí (Část > Hlava > Díl > Oddíl > Pododdíl), nikdy obráceně, takže
+// zanoření lze poznat čistě podle toho, na kterou úroveň slovo patří.
+// Na rozdíl od "§" se rozpoznávají jen velkými písmeny — jde o mnohem
+// běžnější slova, malými by se snadno chytilo souvislé prózy.
+const STRUCT_RANKS = [
+  { level:1, re:/^ČÁST\s+\S+/ },
+  { level:2, re:/^HLAVA\s+\S+/ },
+  { level:3, re:/^DÍL\s+\S+/ },
+  { level:4, re:/^ODDÍL\s+\S+/ },
+  { level:5, re:/^PODODDÍL\s+\S+/ },
+];
 function parseStatuteText(text){
-  const lines = text.replace(/\r\n/g,'\n').replace(/ /g,' ').split('\n');
+  const lines = text.replace(/\r\n/g,'\n').replace(/\u00A0/g,' ').split('\n');
   const results = [];
   let i = 0;
   while(i < lines.length){
@@ -2651,19 +2829,20 @@ function parseStatuteText(text){
       const num = '§ ' + m[1];
       let sameLine = m[2].trim().replace(/^[-–—:.]\s*/, '');
       if(isLinkNoiseLine(sameLine)) sameLine = '';
-      let heading = '';
-      if(sameLine){
-        if(!/[.;:]$/.test(sameLine)) heading = sameLine;
-      } else {
-        let j = i+1;
-        while(j < lines.length && isLinkNoiseLine(lines[j])) j++;
-        const next = (lines[j]||'').trim();
-        if(next && !/[.;:]$/.test(next)){
-          heading = next;
-          i = j;
-        }
-      }
-      results.push({num, name:heading});
+      const found = extractHeading(lines, i, sameLine);
+      results.push({kind:'p', num, name:found.heading});
+      i = found.i + 1;
+      continue;
+    }
+    let rank = null;
+    for(const r of STRUCT_RANKS){ if(r.re.test(line)){ rank = r; break; } }
+    if(rank){
+      const num = line.match(rank.re)[0].trim();
+      const sameLine = line.slice(num.length).trim().replace(/^[-–—:.]\s*/, '');
+      const found = extractHeading(lines, i, sameLine);
+      results.push({kind:'g', level:rank.level, num, name:found.heading});
+      i = found.i + 1;
+      continue;
     }
     i++;
   }
@@ -2686,16 +2865,24 @@ function paraCommitImport(){
   const b=getBook(); if(!b||b.archivedAt) return;
   if(!partsImportPreview || !partsImportPreview.length) return;
   const existingNums = new Set(b.paragraphs.map(p=>p.num.trim()));
-  let added = 0, skipped = 0;
+  let addedP = 0, addedG = 0, skipped = 0;
   partsImportPreview.forEach(item=>{
     if(existingNums.has(item.num.trim())){ skipped++; return; }
-    b.paragraphs.push({ id:uuid(), num:item.num, name:item.name||'', authorial:false, authors:[], date:'', deadline:'', f:false, r:false, j:false, a:false, chars:null, note:'' });
+    if(item.kind==='g'){
+      b.paragraphs.push({ id:uuid(), kind:'g', level:item.level, num:item.num, name:item.name||'', collapsed:false });
+      addedG++;
+    } else {
+      b.paragraphs.push({ id:uuid(), num:item.num, name:item.name||'', authorial:false, authors:[], date:'', deadline:'', f:false, r:false, j:false, a:false, chars:null, note:'' });
+      addedP++;
+    }
     existingNums.add(item.num.trim());
-    added++;
   });
   partsImportOpen = false; partsImportPreview = null;
   saveState(); renderMain();
-  showToast(`Přidáno ${added} paragrafů` + (skipped?`, ${skipped} už v tabulce bylo`:'') + '.');
+  const parts = [];
+  if(addedP) parts.push(`${addedP} paragrafů`);
+  if(addedG) parts.push(`${addedG} skupin`);
+  showToast(`Přidáno: ${parts.join(', ') || '0'}` + (skipped?` · ${skipped} už v tabulce bylo`:'') + '.');
 }
 
 function paraFzHtml(p, ro){
@@ -2727,92 +2914,170 @@ function paraDateCellHtml(p, ro){
     </div>
   </div>`;
 }
+function paraLeafRowHtml(p, ro, authors, depth, canMove){
+  const done = p.f && p.r && p.j && p.a;
+  const stateClass = !p.date ? 'waiting' : done ? 'done' : (p.f||p.r||p.j||p.a) ? 'partial' : 'pending';
+  const guides = depth>0 ? `<span class="grp-indent">${'<span class="grp-guide"></span>'.repeat(depth)}</span>` : '';
+  const moveBtns = canMove ? `<div class="move-btns">
+      <span class="move-btn" onclick="paraMoveRow('${p.id}',-1)" title="Posunout výš">▲</span>
+      <span class="move-btn" onclick="paraMoveRow('${p.id}',1)" title="Posunout níž">▼</span>
+    </div>` : '';
+  const noteRow = partsOpenNoteId===p.id ? `<tr class="note-row"><td class="row-accent"></td><td colspan="6">
+      <div class="note-edit">
+        <textarea ${ro?'readonly':''} placeholder="Poznámka k paragrafu…" onchange="paraUpdateField('${p.id}','note',this.value)">${escapeHtml(p.note)}</textarea>
+        ${ro?'':`<button class="note-clear-btn" onclick="paraClearNote('${p.id}')" title="Smazat poznámku">Smazat poznámku</button>`}
+      </div>
+    </td></tr>` : '';
+  const nameField = ro
+    ? `<div class="para-name-static ${p.authorial?'authorial':''}">${p.name?escapeHtml(p.name):'<span style="color:var(--gray-dim);">—</span>'}</div>`
+    : `<textarea class="cell-input para-name-input ${p.authorial?'authorial':''}" rows="1" placeholder="Název paragrafu…" onchange="paraUpdateField('${p.id}','name',this.value)" oninput="paraAutoGrow(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">${escapeHtml(p.name)}</textarea>`;
+  const authorsField = ro
+    ? `<div class="author-chips">${p.authors.map(a=>`<span class="author-chip">${escapeHtml(a)}</span>`).join('')}</div>`
+    : `<div class="authors-cell">
+        <div class="author-chips">
+          ${p.authors.map(a=>`<span class="author-chip">${escapeHtml(a)}<span class="chip-x" onclick="paraRemoveAuthor('${p.id}','${escapeHtml(a)}')" title="Odebrat">✕</span></span>`).join('')}
+        </div>
+        <select class="cell-input author-select" onchange="paraAddAuthor('${p.id}',this.value); this.value='';">
+          <option value="">+ přidat autora</option>
+          ${authors.filter(a=>!p.authors.includes(a)).map(a=>`<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('')}
+        </select>
+      </div>`;
+
+  return `<tr class="${stateClass}" data-para-row="${p.id}">
+    <td class="row-accent"><div></div></td>
+    <td>
+      <div class="para-cell">
+        <div class="para-meta">
+          ${guides}
+          ${ro?'':`<span class="grip">⠿</span>`}
+          ${moveBtns}
+          ${ro
+            ? `<span class="para-num-static">${escapeHtml(p.num)}</span>`
+            : `<input class="cell-input num-input" data-para-focus="${p.id}" value="${escapeHtml(p.num)}" placeholder="§" onchange="paraUpdateField('${p.id}','num',this.value)">`}
+          ${ro?'':`<button class="auth-toggle ${p.authorial?'on':''}" title="Autorský název (bez zákonného znění) — v sazbě jde do hranatých závorek" onclick="paraToggleAuthorial('${p.id}')">[ ]</button>`}
+        </div>
+        ${nameField}
+      </div>
+    </td>
+    <td class="mid">${paraFzHtml(p, ro)}</td>
+    <td>${authorsField}</td>
+    <td>${paraDateCellHtml(p, ro)}</td>
+    <td class="num">
+      ${ro
+        ? `<span class="ns-hint" style="display:inline;">${p.chars??'—'}</span>`
+        : `<input class="cell-input chars-input" type="number" min="0" value="${p.chars??''}" placeholder="—" onchange="paraUpdateField('${p.id}','chars',this.value)">`}
+      <span class="ns-hint">${paraNs(p.chars)}</span>
+    </td>
+    <td>
+      ${ro ? '' : `<div class="row-actions">
+        <span class="note-btn ${p.note?'has-note':''}" title="Poznámka" onclick="paraToggleNote('${p.id}')">✎</span>
+        <span class="del-btn" title="Smazat paragraf" onclick="paraDeleteParagraph('${p.id}')">✕</span>
+      </div>`}
+    </td>
+  </tr>${noteRow}`;
+}
+function paraGroupRowHtml(book, row, i, depth, ro){
+  const agg = paraGroupAgg(book.paragraphs, i);
+  const pct = agg.total ? Math.round(agg.submitted/agg.total*100) : 0;
+  const guides = '<span class="grp-guide"></span>'.repeat(depth);
+  const authors = (book.authors||[]).filter(Boolean);
+  const numField = ro
+    ? `<span class="grp-num-static">${escapeHtml(row.num)}</span>`
+    : `<input class="cell-input grp-num-input" data-para-focus="${row.id}" value="${escapeHtml(row.num)}" placeholder="Část I" onchange="paraUpdateGroupField('${row.id}','num',this.value)">`;
+  const nameField = ro
+    ? `<span class="grp-name-static">${escapeHtml(row.name)}</span>`
+    : `<input class="cell-input grp-name-input" value="${escapeHtml(row.name)}" placeholder="Název skupiny…" onchange="paraUpdateGroupField('${row.id}','name',this.value)">`;
+  const assignField = ro ? '' : `<select class="cell-input grp-assign-select" title="Doplní autora všem paragrafům v této skupině" onchange="if(this.value)paraAssignAuthorToGroup('${row.id}',this.value); this.value='';">
+      <option value="">👤 Přiřadit autora</option>
+      ${authors.map(a=>`<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('')}
+    </select>`;
+  const levelBtns = ro ? '' : `<span class="grp-level-btn" onclick="paraGroupLevelChange('${row.id}',-1)" title="O úroveň výš">←</span><span class="grp-level-btn" onclick="paraGroupLevelChange('${row.id}',1)" title="O úroveň níž">→</span>`;
+  const moveBtns = ro ? '' : `<div class="move-btns">
+      <span class="move-btn" onclick="paraMoveRow('${row.id}',-1)" title="Posunout výš i s obsahem">▲</span>
+      <span class="move-btn" onclick="paraMoveRow('${row.id}',1)" title="Posunout níž i s obsahem">▼</span>
+    </div>`;
+  const barColor = pct>=100 ? 'var(--green)' : 'var(--blue)';
+  const collapsedHint = (row.collapsed && agg.total>0) ? `<tr class="grp-collapsed-note"><td class="row-accent"></td><td colspan="6">↳ sbaleno — ${agg.total} § skrytých${agg.total>agg.submitted?`, ${agg.total-agg.submitted} zbývá odevzdat`:''}</td></tr>` : '';
+
+  return `<tr class="grp-row lv${Math.min(depth+1,4)}" data-para-row="${row.id}">
+    <td class="row-accent"></td>
+    <td colspan="6">
+      <div class="grp-line">
+        <span class="grp-indent">${guides}</span>
+        ${ro?'':`<span class="grip">⠿</span>`}
+        ${moveBtns}
+        <span class="grp-twisty" onclick="paraToggleGroupCollapse('${row.id}')" title="${row.collapsed?'Rozbalit':'Sbalit'}">${row.collapsed?'▸':'▾'}</span>
+        ${numField}
+        ${nameField}
+        <span class="grp-agg">
+          <span class="grp-bar"><span class="grp-bar-fill" style="width:${pct}%;background:${barColor};"></span></span>
+          <span class="grp-count">${agg.submitted}/${agg.total}</span>
+        </span>
+        ${assignField}
+        ${levelBtns}
+        ${ro?'':`<span class="del-btn" title="Smazat skupinu (paragrafy zůstanou zachovány)" onclick="paraDeleteGroup('${row.id}')">✕</span>`}
+      </div>
+    </td>
+  </tr>${collapsedHint}`;
+}
 function paraRowsHtml(book, archived){
   const ro = archived;
-  let list = book.paragraphs.map((p,i)=>({p,i}));
-  if(partsSortMode==='author'){
-    list = list.slice().sort((x,y)=>{
-      const an = x.p.authors[0] || 'zzzz', bn = y.p.authors[0] || 'zzzz';
-      const c = an.localeCompare(bn, 'cs');
-      return c!==0 ? c : x.i-y.i;
-    });
-  }
-  if(partsFilterMode==='incomplete') list = list.filter(x=>!(x.p.f && x.p.r && x.p.j && x.p.a));
-  if(partsFilterMode==='unsubmitted') list = list.filter(x=>!x.p.date);
-  if(partsAuthorFilter) list = list.filter(x=>x.p.authors.includes(partsAuthorFilter));
-  if(partsSearchQuery) list = list.filter(x => (x.p.num||'').toLowerCase().includes(partsSearchQuery) || (x.p.name||'').toLowerCase().includes(partsSearchQuery));
-  const canMove = !ro && partsSortMode==='book' && partsFilterMode==='all' && !partsAuthorFilter && !partsSearchQuery;
   const authors = (book.authors||[]).filter(Boolean);
+  const flatMode = partsSortMode==='author' || partsFilterMode!=='all' || !!partsAuthorFilter || !!partsSearchQuery;
 
-  if(!list.length) return `<tr><td colspan="7" style="text-align:center;color:var(--gray-dim);padding:26px;">Žádné paragrafy k zobrazení.</td></tr>`;
+  if (flatMode) {
+    let list = paraLeaves(book).map((p,i)=>({p,i}));
+    if(partsSortMode==='author'){
+      list = list.slice().sort((x,y)=>{
+        const an = x.p.authors[0] || 'zzzz', bn = y.p.authors[0] || 'zzzz';
+        const c = an.localeCompare(bn, 'cs');
+        return c!==0 ? c : x.i-y.i;
+      });
+    }
+    if(partsFilterMode==='incomplete') list = list.filter(x=>!(x.p.f && x.p.r && x.p.j && x.p.a));
+    if(partsFilterMode==='unsubmitted') list = list.filter(x=>!x.p.date);
+    if(partsAuthorFilter) list = list.filter(x=>x.p.authors.includes(partsAuthorFilter));
+    if(partsSearchQuery) list = list.filter(x => (x.p.num||'').toLowerCase().includes(partsSearchQuery) || (x.p.name||'').toLowerCase().includes(partsSearchQuery));
+    if(!list.length) return `<tr><td colspan="7" style="text-align:center;color:var(--gray-dim);padding:26px;">Žádné paragrafy k zobrazení.</td></tr>`;
+    return list.map(({p}) => paraLeafRowHtml(p, ro, authors, 0, false)).join('');
+  }
 
-  return list.map(({p})=>{
-    const done = p.f && p.r && p.j && p.a;
-    const stateClass = !p.date ? 'waiting' : done ? 'done' : (p.f||p.r||p.j||p.a) ? 'partial' : 'pending';
-    const moveBtns = canMove ? `<div class="move-btns">
-        <span class="move-btn" onclick="paraMoveRow('${p.id}',-1)" title="Posunout výš">▲</span>
-        <span class="move-btn" onclick="paraMoveRow('${p.id}',1)" title="Posunout níž">▼</span>
-      </div>` : '';
-    const noteRow = partsOpenNoteId===p.id ? `<tr class="note-row"><td class="row-accent"></td><td colspan="6">
-        <div class="note-edit">
-          <textarea ${ro?'readonly':''} placeholder="Poznámka k paragrafu…" onchange="paraUpdateField('${p.id}','note',this.value)">${escapeHtml(p.note)}</textarea>
-          ${ro?'':`<button class="note-clear-btn" onclick="paraClearNote('${p.id}')" title="Smazat poznámku">Smazat poznámku</button>`}
-        </div>
-      </td></tr>` : '';
-    const nameField = ro
-      ? `<div class="para-name-static ${p.authorial?'authorial':''}">${p.name?escapeHtml(p.name):'<span style="color:var(--gray-dim);">—</span>'}</div>`
-      : `<textarea class="cell-input para-name-input ${p.authorial?'authorial':''}" rows="1" placeholder="Název paragrafu…" onchange="paraUpdateField('${p.id}','name',this.value)" oninput="paraAutoGrow(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">${escapeHtml(p.name)}</textarea>`;
-    const authorsField = ro
-      ? `<div class="author-chips">${p.authors.map(a=>`<span class="author-chip">${escapeHtml(a)}</span>`).join('')}</div>`
-      : `<div class="authors-cell">
-          <div class="author-chips">
-            ${p.authors.map(a=>`<span class="author-chip">${escapeHtml(a)}<span class="chip-x" onclick="paraRemoveAuthor('${p.id}','${escapeHtml(a)}')" title="Odebrat">✕</span></span>`).join('')}
-          </div>
-          <select class="cell-input author-select" onchange="paraAddAuthor('${p.id}',this.value); this.value='';">
-            <option value="">+ přidat autora</option>
-            ${authors.filter(a=>!p.authors.includes(a)).map(a=>`<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('')}
-          </select>
-        </div>`;
-
-    return `<tr class="${stateClass}" data-para-row="${p.id}">
-      <td class="row-accent"><div></div></td>
-      <td>
-        <div class="para-cell">
-          <div class="para-meta">
-            ${ro?'':`<span class="grip">⠿</span>`}
-            ${moveBtns}
-            ${ro
-              ? `<span class="para-num-static">${escapeHtml(p.num)}</span>`
-              : `<input class="cell-input num-input" data-para-focus="${p.id}" value="${escapeHtml(p.num)}" placeholder="§" onchange="paraUpdateField('${p.id}','num',this.value)">`}
-            ${ro?'':`<button class="auth-toggle ${p.authorial?'on':''}" title="Autorský název (bez zákonného znění) — v sazbě jde do hranatých závorek" onclick="paraToggleAuthorial('${p.id}')">[ ]</button>`}
-          </div>
-          ${nameField}
-        </div>
-      </td>
-      <td class="mid">${paraFzHtml(p, ro)}</td>
-      <td>${authorsField}</td>
-      <td>${paraDateCellHtml(p, ro)}</td>
-      <td class="num">
-        ${ro
-          ? `<span class="ns-hint" style="display:inline;">${p.chars??'—'}</span>`
-          : `<input class="cell-input chars-input" type="number" min="0" value="${p.chars??''}" placeholder="—" onchange="paraUpdateField('${p.id}','chars',this.value)">`}
-        <span class="ns-hint">${paraNs(p.chars)}</span>
-      </td>
-      <td>
-        ${ro ? '' : `<div class="row-actions">
-          <span class="note-btn ${p.note?'has-note':''}" title="Poznámka" onclick="paraToggleNote('${p.id}')">✎</span>
-          <span class="del-btn" title="Smazat paragraf" onclick="paraDeleteParagraph('${p.id}')">✕</span>
-        </div>`}
-      </td>
-    </tr>${noteRow}`;
-  }).join('');
+  // strom — výchozí pohled v pořadí knihy, respektuje sbalené skupiny
+  const rows = book.paragraphs;
+  const canMove = !ro;
+  let html = '';
+  let stack = [];
+  let collapseFloor = null;
+  let any = false;
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    if (paraIsGroup(row)) {
+      if (collapseFloor !== null) {
+        if (row.level <= collapseFloor) collapseFloor = null;
+        else continue;
+      }
+      while (stack.length && stack[stack.length-1] >= row.level) stack.pop();
+      const depth = stack.length;
+      html += paraGroupRowHtml(book, row, i, depth, ro);
+      any = true;
+      stack.push(row.level);
+      if (row.collapsed) collapseFloor = row.level;
+    } else {
+      if (collapseFloor !== null) continue;
+      html += paraLeafRowHtml(row, ro, authors, stack.length, canMove);
+      any = true;
+    }
+  }
+  if (!any) return `<tr><td colspan="7" style="text-align:center;color:var(--gray-dim);padding:26px;">Žádné paragrafy k zobrazení.</td></tr>`;
+  return html;
 }
 function paraAuthorBreakdownHtml(book){
+  const leaves = paraLeaves(book);
   const AUTHORS = (book.authors||[]).filter(Boolean);
   const allNames = new Set(AUTHORS);
-  book.paragraphs.forEach(p => p.authors.forEach(a => allNames.add(a)));
+  leaves.forEach(p => p.authors.forEach(a => allNames.add(a)));
   const groups = {}; allNames.forEach(a=>groups[a]=[]); groups['']=[];
-  book.paragraphs.forEach(p => {
+  leaves.forEach(p => {
     if(!p.authors.length){ groups[''].push(p); return; }
     p.authors.forEach(a => { groups[a].push(p); });
   });
@@ -2835,7 +3100,7 @@ function paraAuthorBreakdownHtml(book){
     </div>`;
   });
   if(groups[''].length>0) html += `<div class="ab-note">Odevzdáno za kolektiv, bez přiřazení jednotlivým autorům — rozpis honoráře doplníte později, až bude k dispozici.</div>`;
-  if(book.paragraphs.some(p=>p.authors.length>1)) html += `<div class="ab-note">Paragraf s víc autory se počítá celý do součtu u každého z nich — rozdělení honoráře mezi ně si dořešíte ručně.</div>`;
+  if(leaves.some(p=>p.authors.length>1)) html += `<div class="ab-note">Paragraf s víc autory se počítá celý do součtu u každého z nich — rozdělení honoráře mezi ně si dořešíte ručně.</div>`;
   if(partsOpenReminder){
     html += `<div class="reminder-panel">
       <div class="rp-head">Upomínka — ${escapeHtml(partsOpenReminder)}</div>
@@ -2849,7 +3114,7 @@ function paraAuthorBreakdownHtml(book){
   return html;
 }
 function paraMinimapHtml(book){
-  return book.paragraphs.map(p=>{
+  return paraLeaves(book).map(p=>{
     const done = p.f && p.r && p.j && p.a;
     const cls = !p.date ? 'waiting' : done ? 'done' : (p.f||p.r||p.j||p.a) ? 'partial' : '';
     const label = escapeHtml(p.num||'?') + (p.name ? ' — '+escapeHtml(p.name) : '') + (!p.date ? ' (čeká se)' : '');
@@ -2857,7 +3122,7 @@ function paraMinimapHtml(book){
   }).join('');
 }
 function paraNudgeHtml(book){
-  const ps = book.paragraphs || [];
+  const ps = paraLeaves(book);
   const allSubmitted = ps.length>0 && ps.every(p=>p.date);
   if(!allSubmitted || book.rukopisOdevzdan) return '';
   return `<div class="nudge-banner">
@@ -2868,12 +3133,13 @@ function paraNudgeHtml(book){
 }
 function renderPartsSection(book, archived) {
   if (!book.submittedInParts) return '';
-  const total = book.paragraphs.length;
-  const submitted = book.paragraphs.filter(p=>p.date).length;
-  const fCount = book.paragraphs.filter(p=>p.f).length;
-  const rCount = book.paragraphs.filter(p=>p.r).length;
-  const jCount = book.paragraphs.filter(p=>p.j).length;
-  const doneCount = book.paragraphs.filter(p=>p.f&&p.r&&p.j&&p.a).length;
+  const leaves = paraLeaves(book);
+  const total = leaves.length;
+  const submitted = leaves.filter(p=>p.date).length;
+  const fCount = leaves.filter(p=>p.f).length;
+  const rCount = leaves.filter(p=>p.r).length;
+  const jCount = leaves.filter(p=>p.j).length;
+  const doneCount = leaves.filter(p=>p.f&&p.r&&p.j&&p.a).length;
   const submitPct = total ? Math.round(submitted/total*100) : 0;
   const ringKey = 'parts:' + book.id;
   const ringFrom = prevSubmitPct[ringKey];
@@ -2883,6 +3149,7 @@ function renderPartsSection(book, archived) {
   const importHtml = ro ? '' : `
     <div class="add-row-actions">
       <div class="add-row-btn" onclick="paraAddParagraph()">+ Přidat paragraf</div>
+      <div class="add-row-btn" onclick="paraAddGroup()">+ Přidat skupinu (Část/Hlava/Díl…)</div>
       <div class="add-row-btn" onclick="paraToggleImport()">+ Vložit víc najednou ze znění zákona</div>
     </div>
     ${partsImportOpen ? `<div class="import-panel">
@@ -2959,11 +3226,18 @@ function renderPartsSection(book, archived) {
 }
 function paraImportPreviewHtml(book){
   const parsed = partsImportPreview;
-  if(!parsed.length) return `<div class="import-preview"><div class="import-preview-head">Nenašla jsem žádné „§" — zkontrolujte prosím vložený text.</div></div>`;
+  if(!parsed.length) return `<div class="import-preview"><div class="import-preview-head">Nenašla jsem žádné „§" ani Část/Hlavu/Díl/Oddíl — zkontrolujte prosím vložený text.</div></div>`;
   const existingNums = new Set(book.paragraphs.map(p=>p.num.trim()));
   let suspiciousCount = 0;
   const rows = parsed.map(item=>{
     const dup = existingNums.has(item.num.trim());
+    if(item.kind==='g'){
+      return `<div class="import-row group lv${item.level}">
+        <span class="inum">${escapeHtml(item.num)}</span>
+        <span class="iname ${item.name?'':'empty'}">${item.name?escapeHtml(item.name):'(bez nadpisu)'}</span>
+        ${dup?'<span class="idup">už v tabulce</span>':''}
+      </div>`;
+    }
     const suspicious = looksSuspiciousHeading(item.name);
     if(suspicious) suspiciousCount++;
     return `<div class="import-row ${suspicious?'suspicious':''}">
@@ -2973,12 +3247,17 @@ function paraImportPreviewHtml(book){
       ${dup?'<span class="idup">už v tabulce</span>':''}
     </div>`;
   }).join('');
-  const newCount = parsed.filter(item=>!existingNums.has(item.num.trim())).length;
+  const newItems = parsed.filter(item=>!existingNums.has(item.num.trim()));
+  const newCount = newItems.length;
+  const newP = newItems.filter(item=>item.kind!=='g').length;
+  const newG = newItems.filter(item=>item.kind==='g').length;
+  const foundP = parsed.filter(item=>item.kind!=='g').length;
+  const foundG = parsed.filter(item=>item.kind==='g').length;
   return `<div class="import-preview">
-    <div class="import-preview-head">Nalezeno ${parsed.length} paragrafů, ${newCount} nových${suspiciousCount?` · <span class="isus-count">⚠ ${suspiciousCount} k ruční kontrole</span>`:''}</div>
+    <div class="import-preview-head">Nalezeno ${foundP} paragrafů${foundG?` a ${foundG} skupin`:''}, ${newCount} nových${suspiciousCount?` · <span class="isus-count">⚠ ${suspiciousCount} k ruční kontrole</span>`:''}</div>
     <div class="import-preview-list">${rows}</div>
     <div class="import-actions">
-      <button class="btn-mini" onclick="paraCommitImport()" ${newCount?'':'disabled'}>Vložit ${newCount} nových paragrafů</button>
+      <button class="btn-mini" onclick="paraCommitImport()" ${newCount?'':'disabled'}>Vložit ${newP} paragrafů${newG?` a ${newG} skupin`:''}</button>
       <button class="btn-mini ghost" onclick="paraToggleImport()">Zrušit</button>
     </div>
   </div>`;
