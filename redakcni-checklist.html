@@ -2861,22 +2861,62 @@ function paraParseImportText(){
   partsImportPreview = parsed;
   renderMain();
 }
+// Nové položky se vkládají tam, kam patří podle textu zákona — ne na konec
+// tabulky. Kotví se k nejbližšímu okolnímu paragrafu, který v tabulce už je
+// (nejčastěji dopředu, ke svému následujícímu „§"); teprve když v náhledu
+// vůbec žádný známý paragraf není, přidá se na konec jako dřív.
 function paraCommitImport(){
   const b=getBook(); if(!b||b.archivedAt) return;
   if(!partsImportPreview || !partsImportPreview.length) return;
-  const existingNums = new Set(b.paragraphs.map(p=>p.num.trim()));
-  let addedP = 0, addedG = 0, skipped = 0;
-  partsImportPreview.forEach(item=>{
-    if(existingNums.has(item.num.trim())){ skipped++; return; }
-    if(item.kind==='g'){
-      b.paragraphs.push({ id:uuid(), kind:'g', level:item.level, num:item.num, name:item.name||'', collapsed:false });
-      addedG++;
-    } else {
-      b.paragraphs.push({ id:uuid(), num:item.num, name:item.name||'', authorial:false, authors:[], date:'', deadline:'', f:false, r:false, j:false, a:false, chars:null, note:'' });
-      addedP++;
+  const rows = b.paragraphs;
+  const preview = partsImportPreview;
+  const existingIdx = new Map();
+  rows.forEach((r,i)=>existingIdx.set(r.num.trim(), i));
+  const isNew = preview.map(item => !existingIdx.has(item.num.trim()));
+
+  const beforeMap = new Map(); // existující num -> pole nových řádků, které patří těsně před něj
+  const appendList = [];
+  const makeRow = item => item.kind==='g'
+    ? { id:uuid(), kind:'g', level:item.level, num:item.num, name:item.name||'', collapsed:false }
+    : { id:uuid(), num:item.num, name:item.name||'', authorial:false, authors:[], date:'', deadline:'', f:false, r:false, j:false, a:false, chars:null, note:'' };
+
+  for(let i=0; i<preview.length; i++){
+    if(!isNew[i]) continue;
+    let beforeNum = null;
+    for(let j=i+1; j<preview.length; j++){
+      if(!isNew[j]){ beforeNum = preview[j].num.trim(); break; }
     }
-    existingNums.add(item.num.trim());
+    if(beforeNum === null){
+      for(let j=i-1; j>=0; j--){
+        if(!isNew[j]){
+          const idx = existingIdx.get(preview[j].num.trim());
+          beforeNum = (idx+1 < rows.length) ? rows[idx+1].num.trim() : null;
+          break;
+        }
+      }
+    }
+    const newRow = makeRow(preview[i]);
+    if(beforeNum === null || !existingIdx.has(beforeNum)){
+      appendList.push(newRow);
+    } else {
+      if(!beforeMap.has(beforeNum)) beforeMap.set(beforeNum, []);
+      beforeMap.get(beforeNum).push(newRow);
+    }
+  }
+
+  const merged = [];
+  rows.forEach(r=>{
+    const pre = beforeMap.get(r.num.trim());
+    if(pre) merged.push(...pre);
+    merged.push(r);
   });
+  merged.push(...appendList);
+  b.paragraphs = merged;
+
+  const addedP = preview.filter((it,i)=>isNew[i] && it.kind!=='g').length;
+  const addedG = preview.filter((it,i)=>isNew[i] && it.kind==='g').length;
+  const skipped = preview.length - addedP - addedG;
+
   partsImportOpen = false; partsImportPreview = null;
   saveState(); renderMain();
   const parts = [];
