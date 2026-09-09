@@ -817,6 +817,13 @@ tr.note-row:hover { background: var(--page); }
 .import-row.group { background: rgba(64,114,173,0.06); font-weight: 600; }
 .import-row.group .inum { color: var(--navy); }
 .import-row.group.lv1 .iname { font-family: 'Playfair Display', serif; color: var(--navy); }
+.search-box-wrap { position: relative; display: inline-flex; align-items: center; }
+.search-box-wrap .search-box { padding-right: 24px; }
+.search-clear { position: absolute; right: 7px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--gray-dim); cursor: pointer; line-height: 1; padding: 2px; }
+.search-clear:hover { color: var(--rose); }
+.para-select-cb { flex-shrink: 0; cursor: pointer; accent-color: var(--blue); margin: 0; }
+.bulk-bar { display: flex; align-items: center; gap: 10px; background: rgba(64,114,173,0.08); border: 1px solid rgba(64,114,173,0.25); border-radius: var(--radius-sm); padding: 8px 12px; margin-bottom: 10px; }
+.bulk-count { font-size: 12px; font-weight: 600; color: var(--navy); margin-right: 2px; }
 
 /* ===== Vnořené skupiny (Část/Hlava/Díl/Oddíl) ===== */
 tr.grp-row.lv1 { background: rgba(64,114,173,0.05); }
@@ -847,7 +854,7 @@ tr.grp-collapsed-note td { padding: 0 12px 9px 34px; font-size: 11px; color: var
 @media print {
   body { background: var(--white); }
   .sidebar, .main-topbar, .bh-actions, .step-end, .step-waiting-x, .phase-note-toggle, .add-rep-btn, .todo-add, .modal-overlay, .bkp-overlay, .copy-toast, .author-row-del, .add-author-btn, .kb-grip { display: none !important; }
-  .grip, .move-btns, .auth-toggle, .chip-x, .row-actions, .add-row-actions, .import-panel, .controls-row, .active-filter-chip, .expand-hint, .grp-assign-select, .grp-level-btn { display: none !important; }
+  .grip, .move-btns, .auth-toggle, .chip-x, .row-actions, .add-row-actions, .import-panel, .controls-row, .active-filter-chip, .expand-hint, .grp-assign-select, .grp-level-btn, .para-select-cb, .bulk-bar { display: none !important; }
   .app { display: block; }
   .main { display: block; }
   .detail-wrap, .detail { display: block; overflow: visible; height: auto; }
@@ -1574,6 +1581,7 @@ let partsOpenNoteId = null;
 let partsOpenReminder = null;
 let partsImportOpen = false;
 let partsImportPreview = null;
+let partsSelected = new Set(); // id vybraných LISTOVÝCH paragrafů pro hromadné akce (napříč skupinami)
 let prevSubmitPct = {};        // per-book % odevzdáno pro plynulou animaci kola
 
 function initCal() { const n = new Date(); calYear = n.getFullYear(); calMonth = n.getMonth(); }
@@ -2689,6 +2697,51 @@ function paraAssignAuthorToGroup(id, name) {
   saveState(); renderMain();
   showToast(added ? `${name} doplněn(a) k ${added} paragrafům` : `${name} už měl(a) všechny paragrafy v této skupině`);
 }
+
+// ===== Hromadné akce nad vybranými paragrafy (napříč paragrafy i skupinami) =====
+// Výběr je čistě přechodný UI stav (neukládá se) — vždy jde o id LISTOVÝCH
+// paragrafů, i když se zaškrtává přes checkbox u skupiny (ta se sama nikam
+// jako "vybraná" neukládá, jen jednorázově přepne výběr celého svého podstromu —
+// stejný princip jako "Přiřadit autora" u skupiny výše).
+function paraGroupLeafIds(book, groupId) {
+  const rows = book.paragraphs;
+  const i = rows.findIndex(r=>r.id===groupId);
+  if (i<0) return [];
+  const end = paraGroupBlockEnd(rows, i);
+  const ids = [];
+  for (let k=i+1; k<end; k++) { if (!paraIsGroup(rows[k])) ids.push(rows[k].id); }
+  return ids;
+}
+function paraToggleSelect(id) {
+  if (partsSelected.has(id)) partsSelected.delete(id); else partsSelected.add(id);
+  renderMain();
+}
+function paraToggleSelectGroup(groupId) {
+  const b=getBook(); if(!b) return;
+  const ids = paraGroupLeafIds(b, groupId);
+  if (!ids.length) return;
+  const allSelected = ids.every(id=>partsSelected.has(id));
+  ids.forEach(id => allSelected ? partsSelected.delete(id) : partsSelected.add(id));
+  renderMain();
+}
+function paraClearSelection() { partsSelected.clear(); renderMain(); }
+function paraBulkSetDate(iso) {
+  const b=getBook(); if(!b||b.archivedAt) return;
+  if (!partsSelected.size) return;
+  let n=0;
+  paraLeaves(b).forEach(p => { if (partsSelected.has(p.id)) { p.date = iso; n++; } });
+  syncPartsStepsFromParagraphs(b);
+  partsSelected.clear();
+  saveState(); renderMain(); renderBookList();
+  showToast(`Datum odevzdání nastaveno u ${n} paragrafů`);
+}
+function paraBulkSetDateToday() { paraBulkSetDate(todayISO()); }
+function paraBulkSetDatePrompt() {
+  const v = prompt('Datum odevzdání pro vybrané paragrafy (RRRR-MM-DD):', fmtDateInput(todayISO()));
+  if (v===null) return;
+  const t = v.trim(); if (!t) return;
+  paraBulkSetDate(new Date(t).toISOString());
+}
 function paraToggleFaze(id, key) {
   const b=getBook(); if(!b||b.archivedAt) return;
   const p=paraFind(b,id); if(!p) return;
@@ -2755,7 +2808,18 @@ function paraCopyReminder(author) {
 
 function paraSetFilterMode(v){ partsFilterMode = v; renderMain(); }
 function paraSetSort(v){ partsSortMode = v; renderMain(); }
-function paraSetSearch(v){ partsSearchQuery = v.trim().toLowerCase(); renderMain(); }
+// renderMain() přepisuje celý obsah pop-up okna přes innerHTML, takže po každém
+// překreslení vznikne úplně nový <input> — bez ručního obnovení fokusu a pozice
+// kurzoru by se psaní vždy po jednom znaku přerušilo. Hodnota se drží v surové
+// podobě (ne rovnou lowercase/trim), aby se v poli ukazovalo přesně to, co se píše;
+// na malá písmena a bez mezer navíc se převádí až při porovnávání v paraRowsHtml.
+function paraSetSearch(v){
+  partsSearchQuery = v;
+  renderMain();
+  const el = document.getElementById('paraSearchInput');
+  if(el){ el.focus(); const p = el.value.length; el.setSelectionRange(p,p); }
+}
+function paraClearSearch(){ partsSearchQuery=''; renderMain(); }
 function paraFilterByAuthor(name){ partsAuthorFilter = partsAuthorFilter===name ? null : name; renderMain(); }
 function paraJumpTo(id){
   const el = document.querySelector(`tr[data-para-row="${id}"]`);
@@ -2793,17 +2857,26 @@ function looksSuspiciousHeading(name){
   if(/^[A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]{2,6}\s+\S/.test(name)) return true;
   return false;
 }
+// Text odstavce začínající číslem v závorce („(1)", „(2a)") nikdy není nadpis —
+// je to už zákonné znění samotného paragrafu. Nejde spoléhat jen na koncovou
+// interpunkci: zkopírovaný text bývá zalomený uprostřed věty, takže první řádek
+// odstavce často nekončí tečkou ani středníkem, přestože nadpis rozhodně není.
+function looksLikeParagraphBody(s){
+  return /^\(\d+[a-z]?\)/i.test((s||'').trim());
+}
 // Najde nadpis navazující na paragraf nebo strukturní jednotku — buď zbytek
 // stejného řádku (sameLine), nebo nejbližší další neprázdný, neodkazový
 // řádek. Vrací i posunutý index i, pokud byl nadpis načten z dalšího řádku.
 function extractHeading(lines, i, sameLine){
   if(sameLine){
+    if(looksLikeParagraphBody(sameLine)) return { heading: '', i };
     return { heading: /[.;:]$/.test(sameLine) ? '' : sameLine, i };
   }
   let j = i+1;
   while(j < lines.length && isLinkNoiseLine(lines[j])) j++;
   const next = (lines[j]||'').trim();
-  if(next && !/[.;:]$/.test(next)) return { heading: next, i: j };
+  if(!next || looksLikeParagraphBody(next)) return { heading: '', i };
+  if(!/[.;:]$/.test(next)) return { heading: next, i: j };
   return { heading: '', i };
 }
 // Strukturní jednotky nadřazené paragrafu — vždy nastupují v tomto pevném
@@ -2989,6 +3062,7 @@ function paraLeafRowHtml(p, ro, authors, depth, canMove){
       <div class="para-cell">
         <div class="para-meta">
           ${guides}
+          ${ro?'':`<input type="checkbox" class="para-select-cb" ${partsSelected.has(p.id)?'checked':''} onchange="paraToggleSelect('${p.id}')" title="Vybrat pro hromadnou akci (např. nastavení data odevzdání)">`}
           ${ro?'':`<span class="grip">⠿</span>`}
           ${moveBtns}
           ${ro
@@ -3021,6 +3095,9 @@ function paraGroupRowHtml(book, row, i, depth, ro){
   const pct = agg.total ? Math.round(agg.submitted/agg.total*100) : 0;
   const guides = '<span class="grp-guide"></span>'.repeat(depth);
   const authors = (book.authors||[]).filter(Boolean);
+  const groupLeafIds = paraGroupLeafIds(book, row.id);
+  const groupAllSelected = groupLeafIds.length>0 && groupLeafIds.every(id=>partsSelected.has(id));
+  const selectField = ro ? '' : `<input type="checkbox" class="para-select-cb" ${groupAllSelected?'checked':''} ${groupLeafIds.length?'':'disabled'} onchange="paraToggleSelectGroup('${row.id}')" title="Vybrat všechny paragrafy v této skupině pro hromadnou akci">`;
   const numField = ro
     ? `<span class="grp-num-static">${escapeHtml(row.num)}</span>`
     : `<input class="cell-input grp-num-input" data-para-focus="${row.id}" value="${escapeHtml(row.num)}" placeholder="Část I" onchange="paraUpdateGroupField('${row.id}','num',this.value)">`;
@@ -3044,6 +3121,7 @@ function paraGroupRowHtml(book, row, i, depth, ro){
     <td colspan="6">
       <div class="grp-line">
         <span class="grp-indent">${guides}</span>
+        ${selectField}
         ${ro?'':`<span class="grip">⠿</span>`}
         ${moveBtns}
         <span class="grp-twisty" onclick="paraToggleGroupCollapse('${row.id}')" title="${row.collapsed?'Rozbalit':'Sbalit'}">${row.collapsed?'▸':'▾'}</span>
@@ -3063,7 +3141,8 @@ function paraGroupRowHtml(book, row, i, depth, ro){
 function paraRowsHtml(book, archived){
   const ro = archived;
   const authors = (book.authors||[]).filter(Boolean);
-  const flatMode = partsSortMode==='author' || partsFilterMode!=='all' || !!partsAuthorFilter || !!partsSearchQuery;
+  const searchQ = partsSearchQuery.trim().toLowerCase();
+  const flatMode = partsSortMode==='author' || partsFilterMode!=='all' || !!partsAuthorFilter || !!searchQ;
 
   if (flatMode) {
     let list = paraLeaves(book).map((p,i)=>({p,i}));
@@ -3077,7 +3156,7 @@ function paraRowsHtml(book, archived){
     if(partsFilterMode==='incomplete') list = list.filter(x=>!(x.p.f && x.p.r && x.p.j && x.p.a));
     if(partsFilterMode==='unsubmitted') list = list.filter(x=>!x.p.date);
     if(partsAuthorFilter) list = list.filter(x=>x.p.authors.includes(partsAuthorFilter));
-    if(partsSearchQuery) list = list.filter(x => (x.p.num||'').toLowerCase().includes(partsSearchQuery) || (x.p.name||'').toLowerCase().includes(partsSearchQuery));
+    if(searchQ) list = list.filter(x => (x.p.num||'').toLowerCase().includes(searchQ) || (x.p.name||'').toLowerCase().includes(searchQ));
     if(!list.length) return `<tr><td colspan="7" style="text-align:center;color:var(--gray-dim);padding:26px;">Žádné paragrafy k zobrazení.</td></tr>`;
     return list.map(({p}) => paraLeafRowHtml(p, ro, authors, 0, false)).join('');
   }
@@ -3235,7 +3314,10 @@ function renderPartsSection(book, archived) {
           <span class="pf-chip ${partsFilterMode==='all'?'active':''}" onclick="paraSetFilterMode('all')">Vše</span>
           <span class="pf-chip ${partsFilterMode==='incomplete'?'active':''}" onclick="paraSetFilterMode('incomplete')">Jen nekompletní</span>
           <span class="pf-chip ${partsFilterMode==='unsubmitted'?'active':''}" onclick="paraSetFilterMode('unsubmitted')">Neodevzdáno</span>
-          <input type="text" class="search-box" placeholder="Hledat § nebo název…" oninput="paraSetSearch(this.value)">
+          <div class="search-box-wrap">
+            <input type="text" id="paraSearchInput" class="search-box" placeholder="Hledat § nebo název…" value="${escapeHtml(partsSearchQuery)}" oninput="paraSetSearch(this.value)">
+            ${partsSearchQuery ? `<span class="search-clear" onclick="paraClearSearch()" title="Vymazat hledání">✕</span>` : ''}
+          </div>
         </div>
         <select class="sort-select" onchange="paraSetSort(this.value)">
           <option value="book" ${partsSortMode==='book'?'selected':''}>Řadit: pořadí v knize</option>
@@ -3244,6 +3326,12 @@ function renderPartsSection(book, archived) {
       </div>
       <div class="legend">Název v <b class="authorial-sample">[hranatých závorkách kurzívou]</b> = autorský název (paragraf nemá vlastní zákonné znění nadpisu) — přepíná se tlačítkem <b>[ ]</b> vedle názvu. Název bez závorek = převzato ze zákona.</div>
       ${partsAuthorFilter ? `<div class="active-filter-chip">Jen: ${escapeHtml(partsAuthorFilter)} <span onclick="paraFilterByAuthor('${escapeHtml(partsAuthorFilter)}')" title="Zrušit filtr">✕</span></div>` : ''}
+      ${(!archived && partsSelected.size) ? `<div class="bulk-bar">
+        <span class="bulk-count">${partsSelected.size} vybráno</span>
+        <button class="btn-mini" onclick="paraBulkSetDateToday()">Nastavit odevzdáno: dnes</button>
+        <button class="btn-mini ghost" onclick="paraBulkSetDatePrompt()">Nastavit datum…</button>
+        <button class="btn-mini ghost" onclick="paraClearSelection()">Zrušit výběr</button>
+      </div>` : ''}
 
       <div class="tbl-wrap">
         <table>
