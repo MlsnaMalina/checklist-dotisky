@@ -444,8 +444,8 @@ footer.app-footer {
     <h2>Nastavení šablon</h2>
     <div class="template-hint">
       <strong>Proměnné:</strong>
-      <code>{{nazev}}</code> <code>{{autor}}</code> <code>{{isbn}}</code>
-      <code>{{sku}}</code> (NAV č.)
+      <code>{{nazev}}</code> <code>{{autor}}</code>
+      <code>{{sku}}</code>
       <code>{{kusů}}</code> <code>{{datum_navozu}}</code>
       <code>{{objednavkove_cislo}}</code> <code>{{redaktor}}</code>
       <code>{{datum_dnes}}</code>
@@ -491,7 +491,7 @@ const DEFAULT_TEMPLATES = {
 
 Dobrý den Filipe,
 
-posílám informaci o dotisku knihy {{nazev}} ({{autor}}, ISBN: {{isbn}}, NAV č.: {{sku}}).
+posílám informaci o dotisku knihy {{nazev}} ({{autor}}, SKU: {{sku}}).
 
 Počet kusů: {{kusů}}
 Datum návozu: {{datum_navozu}}
@@ -503,7 +503,7 @@ S pozdravem
 
 Dobrý den Martino,
 
-informuji tě o dotisku knihy {{nazev}} ({{autor}}, ISBN: {{isbn}}, NAV č.: {{sku}}).
+informuji tě o dotisku knihy {{nazev}} ({{autor}}, SKU: {{sku}}).
 
 Počet kusů: {{kusů}}
 Datum návozu: {{datum_navozu}}
@@ -513,8 +513,7 @@ S pozdravem
   yammer: `📚 Dotisk | {{nazev}}
 
 Autor: {{autor}}
-ISBN: {{isbn}}
-NAV č.: {{sku}}
+SKU: {{sku}}
 Počet kusů: {{kusů}}
 Datum návozu: {{datum_navozu}}
 
@@ -878,7 +877,7 @@ function renderDetail() {
         <div class="field"><label>Název knihy</label><input type="text" value="${escapeHtml(book.title)}" ${ro} onchange="updateField('title', this.value)"></div>
         <div class="field"><label>Autor</label><input type="text" value="${escapeHtml(book.author)}" ${ro} onchange="updateField('author', this.value)"></div>
         <div class="field"><label>Redaktor</label><input type="text" value="${escapeHtml(book.editor)}" ${ro} onchange="updateField('editor', this.value)"></div>
-        <div class="field"><label>ISBN</label><input type="text" value="${escapeHtml(book.isbn || '')}" ${ro} onchange="updateField('isbn', this.value)"></div>
+        <div class="field"><label>SKU</label><input type="text" value="${escapeHtml(book.isbn || '')}" ${ro} onchange="updateField('isbn', this.value)"></div>
         <div class="field field-fullwidth"><label>Poznámky ke knize</label><textarea class="book-notes" placeholder="Poznámky, čekám na..., důležité informace" ${ro} onchange="updateField('notes', this.value)">${escapeHtml(book.notes || '')}</textarea></div>
         <div class="field"><label>Vytvořeno</label><input type="text" value="${fmtDate(book.createdAt)}" readonly></div>
         ${archived ? `<div class="field"><label>Archivováno</label><input type="text" value="${fmtDate(book.archivedAt)}" readonly></div>` : ''}
@@ -1204,7 +1203,7 @@ function buildIcsEvent(book) {
   const uid = `dotisk-${book.id}-${dl}@checklist-dotisku`;
   const dtStamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
   const summary = icsEscape(`Termín pro knihkupce – ${book.title}`);
-  const desc = icsEscape(`Poslední možný den pro zadání informace o dotisku knihy ${book.title} (ISBN: ${book.isbn || '—'}) pro knihkupce. Datum návozu z tiskárny: ${fmtDate(delivery)}.`);
+  const desc = icsEscape(`Poslední možný den pro zadání informace o dotisku knihy ${book.title} (SKU: ${book.isbn || '—'}) pro knihkupce. Datum návozu z tiskárny: ${fmtDate(delivery)}.`);
   return [
     'BEGIN:VEVENT',
     `UID:${uid}`,

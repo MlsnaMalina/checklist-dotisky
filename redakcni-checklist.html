@@ -994,7 +994,7 @@ tr.grp-collapsed-note td { padding: 0 12px 9px 34px; font-size: 11px; color: var
         </div>
       </div>
       <div class="modal-field">
-        <label>NAV č. <span style="font-weight:300;text-transform:none;letter-spacing:0;">(přidělí se až po odevzdání)</span></label>
+        <label>SKU <span style="font-weight:300;text-transform:none;letter-spacing:0;">(přidělí se až po odevzdání)</span></label>
         <input type="text" id="nb_nav" placeholder="volitelné">
       </div>
       <div class="modal-field">
@@ -1017,7 +1017,7 @@ tr.grp-collapsed-note td { padding: 0 12px 9px 34px; font-size: 11px; color: var
     <div class="tpl-vars">
       <strong>Proměnné:</strong>
       <code>{{nazev}}</code> <code>{{autor}}</code> <code>{{edice}}</code>
-      <code>{{isbn}}</code> <code>{{nav}}</code> <code>{{redaktor}}</code>
+      <code>{{sku}}</code> <code>{{redaktor}}</code>
       <code>{{korektorka}}</code> <code>{{sazec}}</code> <code>{{datum_odevzdani}}</code> <code>{{datum_dnes}}</code>
     </div>
     <textarea class="gen-output" id="genOutput"></textarea>
@@ -1390,7 +1390,7 @@ Dobrý den {{korektorka}},
 
 v příloze zasílám rukopis knihy {{nazev}} od autora {{autor}} k jazykové korektuře.
 
-ISBN: {{isbn}} | Ediční řada: {{edice}}
+Ediční řada: {{edice}}
 
 Prosím o sdělení předpokládaného termínu dokončení korektur.
 
@@ -1431,7 +1431,6 @@ prosím vás o sazbu titulu:
 
 Název: {{nazev}}
 Autor: {{autor}}
-ISBN: {{isbn}}
 Ediční řada: {{edice}}
 
 Podklady v příloze. Případné dotazy rád(a) zodpovím obratem.
@@ -1447,7 +1446,6 @@ prosím o vytvoření elektronické verze (epub) titulu:
 
 Název: {{nazev}}
 Autor: {{autor}}
-ISBN: {{isbn}}
 
 Podklady v příloze.
 
@@ -1458,7 +1456,6 @@ S pozdravem
 
 Autor: {{autor}}
 Ediční řada: {{edice}}
-ISBN: {{isbn}}
 
 Právě vychází nová kniha nakladatelství Wolters Kluwer. 🎉`,
 
@@ -1466,7 +1463,7 @@ Právě vychází nová kniha nakladatelství Wolters Kluwer. 🎉`,
 
 Dobrý den Martino,
 
-zasílám podklady k evidenci autorského výtisku pro titul {{nazev}} (autor: {{autor}}, ISBN: {{isbn}}).
+zasílám podklady k evidenci autorského výtisku pro titul {{nazev}} (autor: {{autor}}).
 
 S pozdravem
 {{redaktor}}`,
@@ -1475,7 +1472,7 @@ S pozdravem
 
 Dobrý den Filipe,
 
-prosím o uzavření účetnictví ke knize {{nazev}} (autor: {{autor}}, ISBN: {{isbn}}, NAV č.: {{nav}}).
+prosím o uzavření účetnictví ke knize {{nazev}} (autor: {{autor}}, SKU: {{sku}}).
 
 S pozdravem
 {{redaktor}}`,
@@ -1495,7 +1492,7 @@ S pozdravem
 
 Dobrý den,
 
-zasílám kalkulaci pro titul {{nazev}} (autor: {{autor}}, ISBN: {{isbn}}) ke schválení.
+zasílám kalkulaci pro titul {{nazev}} (autor: {{autor}}) ke schválení.
 
 Prosím o potvrzení do [doplnit termín].
 
@@ -1510,7 +1507,6 @@ prosím o vytvoření složky pro nový titul:
 
 Název: {{nazev}}
 Autor: {{autor}}
-ISBN: {{isbn}}
 
 Děkuji.
 
@@ -1542,8 +1538,7 @@ const TEMPLATE_VARS = [
   ['nazev', 'Název knihy'],
   ['autor', 'Autor, u více autorů všichni'],
   ['edice', 'Ediční řada'],
-  ['isbn', 'ISBN — první vyplněné (brož., váz., PDF, ePub, Mobi)'],
-  ['nav', 'NAV číslo'],
+  ['sku', 'SKU'],
   ['redaktor', 'Redaktorka'],
   ['korektorka', 'Jazyková korektorka'],
   ['sazec', 'Sazeč'],
@@ -2209,7 +2204,7 @@ function renderMain() {
     </div>`;
 
   let chips = `<span class="chip chip-edice">${escapeHtml(ediceLabel(book))}</span>`;
-  if (book.nav) chips += `<span class="chip chip-nav">NAV: ${escapeHtml(book.nav)}</span>`;
+  if (book.nav) chips += `<span class="chip chip-nav">SKU: ${escapeHtml(book.nav)}</span>`;
   if (book.odevzdaniRukopisu) chips += `<span class="chip chip-odevzdani">Odevzdání: ${fmtDate(book.odevzdaniRukopisu)}</span>`;
   if (cancelled) chips += `<span class="chip chip-cancelled">Zrušeno</span>`;
   if (book.submittedInParts) {
@@ -2270,7 +2265,7 @@ function renderMain() {
             <div class="bh-field"><label>ISBN PDF</label><input type="text" value="${escapeHtml(book.isbnPdf||'')}" ${ro} onchange="updateBook('isbnPdf',this.value)" placeholder="978-80-…"></div>
             <div class="bh-field"><label>ISBN ePub</label><input type="text" value="${escapeHtml(book.isbnEpub||'')}" ${ro} onchange="updateBook('isbnEpub',this.value)" placeholder="978-80-…"></div>
             <div class="bh-field"><label>ISBN Mobi</label><input type="text" value="${escapeHtml(book.isbnMobi||'')}" ${ro} onchange="updateBook('isbnMobi',this.value)" placeholder="978-80-…"></div>
-            <div class="bh-field"><label>NAV č.</label><input type="text" value="${escapeHtml(book.nav||'')}" ${ro} onchange="updateBook('nav',this.value)" onblur="renderMain()" placeholder="přidělí se po odevzdání"></div>
+            <div class="bh-field"><label>SKU</label><input type="text" value="${escapeHtml(book.nav||'')}" ${ro} onchange="updateBook('nav',this.value)" onblur="renderMain()" placeholder="přidělí se po odevzdání"></div>
             <div class="bh-field"><label>Jazyková korektorka</label><input type="text" value="${escapeHtml(book.jazykovaKorektorka||'')}" ${ro} onchange="updateBook('jazykovaKorektorka',this.value)"></div>
             <div class="bh-field"><label>Sazeč</label><input type="text" value="${escapeHtml(book.sazec||'')}" ${ro} onchange="updateBook('sazec',this.value)"></div>
             <div class="bh-field"><label>Datum odevzdání rukopisu</label><input type="date" value="${fmtDateInput(book.odevzdaniRukopisu)}" ${ro} onchange="updateBook('odevzdaniRukopisu',this.value?new Date(this.value).toISOString():'');renderCalendar();renderMain();"></div>
@@ -3555,6 +3550,7 @@ function renderTemplate(tpl, book) {
     .replaceAll('{{edice}}', ediceLabel(book))
     .replaceAll('{{isbn}}', book.isbnBroz||book.isbnVaz||book.isbnPdf||book.isbnEpub||book.isbnMobi||'[nevyplněno]')
     .replaceAll('{{nav}}', book.nav||'[nevyplněno]')
+    .replaceAll('{{sku}}', book.nav||'[nevyplněno]')
     .replaceAll('{{redaktor}}', book.editor||'')
     .replaceAll('{{korektorka}}', book.jazykovaKorektorka||'')
     .replaceAll('{{sazec}}', book.sazec||'')
