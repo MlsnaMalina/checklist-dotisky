@@ -447,19 +447,32 @@ strong{color:var(--navy-ink); font-weight:600;}
         <h2>Souhrn a přehled</h2>
         <p class="section-note">Tři způsoby, jak nad tabulkou vidět celek, aniž by se muselo scrollovat řádek po řádku.</p>
 
-        <h3>Kolo odevzdanosti</h3>
+        <h3>Dvě kola — odevzdanost a zpracovanost</h3>
         <div class="exhibit">
           <div class="exhibit-label">V hlavičce, vedle souhrnu</div>
-          <div style="display:flex; align-items:center; gap:14px;">
-            <div class="mini-ring">
-              <svg viewBox="0 0 68 68" width="52" height="52">
-                <circle cx="34" cy="34" r="28" fill="none" stroke="var(--line)" stroke-width="5"/>
-                <circle cx="34" cy="34" r="28" fill="none" stroke="#e0a300" stroke-width="5" stroke-dasharray="123 176" stroke-linecap="round" transform="rotate(-90 34 34)"/>
-              </svg>
-              <div class="mini-ring-label">86 %</div>
+          <div style="display:flex; align-items:center; gap:24px; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:14px;">
+              <div class="mini-ring">
+                <svg viewBox="0 0 68 68" width="52" height="52">
+                  <circle cx="34" cy="34" r="28" fill="none" stroke="var(--line)" stroke-width="5"/>
+                  <circle cx="34" cy="34" r="28" fill="none" stroke="#e0a300" stroke-width="5" stroke-dasharray="123 176" stroke-linecap="round" transform="rotate(-90 34 34)"/>
+                </svg>
+                <div class="mini-ring-label">86 %</div>
+              </div>
+              <span class="tag">odevzdáno</span>
             </div>
-            <p style="margin:0;">Stejná komponenta jako celkový progress knihy — jen tady měří výhradně <strong>odevzdanost</strong>, ne rozpracovanost. Barva napovídá, jestli je řeč o polovině (modrá), nebo se honí poslední kusy (zlatá, od 70 %).</p>
+            <div style="display:flex; align-items:center; gap:14px;">
+              <div class="mini-ring">
+                <svg viewBox="0 0 68 68" width="52" height="52">
+                  <circle cx="34" cy="34" r="28" fill="none" stroke="var(--line)" stroke-width="5"/>
+                  <circle cx="34" cy="34" r="28" fill="none" stroke="var(--blue)" stroke-width="5" stroke-dasharray="106 176" stroke-linecap="round" transform="rotate(-90 34 34)"/>
+                </svg>
+                <div class="mini-ring-label">60 %</div>
+              </div>
+              <span class="tag">zpracováno</span>
+            </div>
           </div>
+          <p>První kolo je stejná komponenta jako celkový progress knihy — jen tady měří výhradně <strong>odevzdanost</strong> (kolik paragrafů už dorazilo), ne rozpracovanost. Druhé kolo vedle něj počítá <strong>zpracovanost</strong>: průměr ze tří kroků, které děláte vy — naformátováno, redakčně, jazykově — sečtených napříč všemi paragrafy (u 5 paragrafů je to tedy z 15 možných kroků). Autorská kontrola se do něj záměrně nepočítá, protože to už není práce z redakční strany. Roste tak plynule s každým jednotlivým zaškrtnutím, ne až když je paragraf hotový úplně. Barva u obou kol napovídá totéž, jestli je řeč o polovině (modrá), nebo se honí poslední kusy (zlatá, od 70 %, zelená při 100 %).</p>
         </div>
 
         <h3>Mapa paragrafů</h3>

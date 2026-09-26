@@ -334,6 +334,7 @@ body.kb-dragging { user-select: none; cursor: grabbing; }
 .ms-toggle.on { border-color: rgba(184,48,102,0.35); color: #B83066; font-weight: 500; background: rgba(184,48,102,0.04); }
 .ms-toggle.on .ms-box { background: #B83066; border-color: #B83066; }
 .ms-toggle.on .ms-box::after { content: '✓'; color: #fff; font-size: 12px; font-weight: 700; }
+.bh-progress-group { display: flex; align-items: flex-start; gap: 22px; flex-shrink: 0; }
 .bh-progress { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
 .circ-progress { position: relative; width: 68px; height: 68px; }
 .circ-progress svg { transform: rotate(-90deg); }
@@ -1578,6 +1579,7 @@ let partsImportOpen = false;
 let partsImportPreview = null;
 let partsSelected = new Set(); // id vybraných LISTOVÝCH paragrafů pro hromadné akce (napříč skupinami)
 let prevSubmitPct = {};        // per-book % odevzdáno pro plynulou animaci kola
+let prevProcessedPct = {};     // per-book % zpracováno (formátování+redakce+jazykovka) pro plynulou animaci kola
 
 function initCal() { const n = new Date(); calYear = n.getFullYear(); calMonth = n.getMonth(); }
 
@@ -3254,10 +3256,16 @@ function renderPartsSection(book, archived) {
   const rCount = leaves.filter(p=>p.r).length;
   const jCount = leaves.filter(p=>p.j).length;
   const doneCount = leaves.filter(p=>p.f&&p.r&&p.j&&p.a).length;
+  const processedSteps = fCount + rCount + jCount;
+  const processedStepsTotal = total * 3;
   const submitPct = total ? Math.round(submitted/total*100) : 0;
+  const processedPct = processedStepsTotal ? Math.round(processedSteps/processedStepsTotal*100) : 0;
   const ringKey = 'parts:' + book.id;
   const ringFrom = prevSubmitPct[ringKey];
   prevSubmitPct[ringKey] = submitPct;
+  const ringKey2 = 'partsProcessed:' + book.id;
+  const ringFrom2 = prevProcessedPct[ringKey2];
+  prevProcessedPct[ringKey2] = processedPct;
 
   const ro = archived;
   const importHtml = ro ? '' : `
@@ -3292,9 +3300,15 @@ function renderPartsSection(book, archived) {
             <div class="stat accent"><b>${doneCount}</b><span>zcela hotové</span></div>
             <div class="expand-hint" onclick="partsBreakdownOpen=!partsBreakdownOpen;renderMain();">Rozpis podle autora (nepovinné) ${partsBreakdownOpen?'▴':'▾'}</div>
           </div>
-          ${total ? `<div class="bh-progress">
-            <div class="circ-progress">${circSvg(submitPct, false, ringFrom)}<div class="circ-label"><span class="circ-pct">${submitPct}%</span><span class="circ-sub">odevzdáno</span></div></div>
-            <div class="bh-done-count">${submitted} / ${total}</div>
+          ${total ? `<div class="bh-progress-group">
+            <div class="bh-progress">
+              <div class="circ-progress">${circSvg(submitPct, false, ringFrom)}<div class="circ-label"><span class="circ-pct">${submitPct}%</span><span class="circ-sub">odevzdáno</span></div></div>
+              <div class="bh-done-count">${submitted} / ${total}</div>
+            </div>
+            <div class="bh-progress" title="Průměr ze tří kroků — naformátováno, redakčně, jazykově — bez autorské kontroly">
+              <div class="circ-progress">${circSvg(processedPct, false, ringFrom2)}<div class="circ-label"><span class="circ-pct">${processedPct}%</span><span class="circ-sub">zpracováno</span></div></div>
+              <div class="bh-done-count">${processedSteps} / ${processedStepsTotal} kroků</div>
+            </div>
           </div>` : ''}
         </div>
         <div class="author-breakdown ${partsBreakdownOpen?'open':''}">${paraAuthorBreakdownHtml(book)}</div>
