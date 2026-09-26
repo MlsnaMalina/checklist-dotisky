@@ -353,6 +353,9 @@ body.kb-dragging { user-select: none; cursor: grabbing; }
 .colophon h3 { font-family: 'Playfair Display', serif; font-size: 21px; font-weight: 600; color: var(--black); margin-bottom: 3px; }
 .colophon p { font-size: 12.5px; color: var(--gray-text); }
 .colophon-rule.bottom { margin: 10px auto 0; }
+.colophon-btn { margin-top: 12px; }
+.colophon.unlocked { background: #fff8e6; border-color: #f2c47b; }
+.colophon-flag { display: inline-block; vertical-align: middle; margin-left: 8px; padding: 3px 9px; border-radius: 10px; background: #f2c47b; color: #7a5000; font-family: 'DM Sans', system-ui, sans-serif; font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
 .cancelled-notice { background: rgba(192,96,106,0.07); border: 1px solid rgba(192,96,106,0.25); color: #7a2832; border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
 
 /* Sticky note ToDo */
@@ -854,7 +857,7 @@ tr.grp-collapsed-note td { padding: 0 12px 9px 34px; font-size: 11px; color: var
 
 @media print {
   body { background: var(--white); }
-  .sidebar, .main-topbar, .bh-actions, .step-end, .step-waiting-x, .phase-note-toggle, .add-rep-btn, .todo-add, .modal-overlay, .bkp-overlay, .copy-toast, .author-row-del, .add-author-btn, .kb-grip { display: none !important; }
+  .sidebar, .main-topbar, .bh-actions, .colophon-btn, .step-end, .step-waiting-x, .phase-note-toggle, .add-rep-btn, .todo-add, .modal-overlay, .bkp-overlay, .copy-toast, .author-row-del, .add-author-btn, .kb-grip { display: none !important; }
   .grip, .move-btns, .auth-toggle, .chip-x, .row-actions, .add-row-actions, .import-panel, .controls-row, .active-filter-chip, .expand-hint, .grp-assign-select, .grp-level-btn, .para-select-cb, .bulk-bar { display: none !important; }
   .app { display: block; }
   .main { display: block; }
@@ -1161,6 +1164,8 @@ const SVG_FILE = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" st
 // Praporek u blízkého termínu (dřív ⏰) a „předáno ven" u štítku čeká se na (dřív ⏳).
 const SVG_FLAG = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V4"/><path d="M6 4h11l-2.3 3.6L17 11H6"/></svg>`;
 const SVG_HANDOFF = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/><path d="M12 3v11"/><path d="M8.4 6.6L12 3l3.6 3.6"/></svg>`;
+const SVG_LOCK = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>`;
+const SVG_UNLOCK = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.8-1.2"/></svg>`;
 const SVG_PARTS = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 7 2 2 3-3"/><path d="M11 6h10"/><path d="m3 17 2 2 3-3"/><path d="M11 18h10"/></svg>`;
 
 const APP_PASSWORD  = 'dotisky2025';
@@ -1580,6 +1585,8 @@ let partsImportPreview = null;
 let partsSelected = new Set(); // id vybraných LISTOVÝCH paragrafů pro hromadné akce (napříč skupinami)
 let prevSubmitPct = {};        // per-book % odevzdáno pro plynulou animaci kola
 let prevProcessedPct = {};     // per-book % zpracováno (formátování+redakce+jazykovka) pro plynulou animaci kola
+// Záměrně jen v paměti — po obnovení stránky se archivovaná kniha zase sama zamkne.
+let unlockedBookId = null;
 
 function initCal() { const n = new Date(); calYear = n.getFullYear(); calMonth = n.getMonth(); }
 
@@ -2178,7 +2185,10 @@ function renderMain() {
     detail.innerHTML = `<div class="empty-state"><div class="empty-ornament"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div><h2>Vyberte knihu</h2><p>V levém panelu vyberte knihu pro zobrazení checklistu, nebo vytvořte novou.</p><button class="btn btn-primary" onclick="openNewBook()">+ Nová kniha</button></div>`;
     return;
   }
-  const archived = !!book.archivedAt;
+  if (unlockedBookId && unlockedBookId !== book.id) unlockedBookId = null;
+  const inArchive = !!book.archivedAt;
+  const unlocked = inArchive && !isLocked(book);
+  const archived = isLocked(book);
   const cancelled = !!book.cancelled;
   const ro = archived ? 'readonly' : '';
   const curWait = currentWaitingStep(book);
@@ -2190,11 +2200,14 @@ function renderMain() {
 
   let html = '';
   if (cancelled) html += `<div class="cancelled-notice">⚠ Spolupráce zrušena ${fmtDate(book.archivedAt)}${book.cancelReason?' · Důvod: '+escapeHtml(book.cancelReason):''}. Checklist je zachován jen ke čtení.</div>`;
-  else if (archived) html += `
-    <div class="colophon">
+  else if (inArchive) html += `
+    <div class="colophon ${unlocked?'unlocked':''}">
       <div class="colophon-rule"><span>❦</span></div>
-      <h3>Kniha vydána${book.rokVydani?' · '+book.rokVydani:''}</h3>
-      <p>Archivováno ${fmtDate(book.archivedAt)} · checklist je jen ke čtení</p>
+      <h3>Kniha vydána${book.rokVydani?' · '+book.rokVydani:''}${unlocked?' <span class="colophon-flag">odemknuto</span>':''}</h3>
+      <p>${unlocked
+        ? 'Zůstává v archivu i ve statistice vydaných · změny se ukládají průběžně'
+        : `Archivováno ${fmtDate(book.archivedAt)} · checklist je jen ke čtení`}</p>
+      <button class="btn btn-secondary colophon-btn" onclick="${unlocked?'lockArchived()':'unlockArchived()'}">${unlocked?`${SVG_LOCK} Zamknout`:`${SVG_UNLOCK} Odemknout k úpravám`}</button>
       <div class="colophon-rule bottom"><span>❦</span></div>
     </div>`;
   else if (p.pct >= 100) html += `
@@ -2292,7 +2305,7 @@ function renderMain() {
         </div>
       </div>
       <div class="bh-actions">
-        ${!archived
+        ${!inArchive
           ? `<button class="btn btn-success" onclick="openArchiveModal()">Archivovat</button>
              <button class="btn btn-cancel" onclick="openCancelModal()">Zrušit spolupráci</button>`
           : `<button class="btn btn-secondary" onclick="unarchiveBook()">Obnovit do aktivních</button>`}
@@ -2405,7 +2418,7 @@ function renderStep(book, st, archived) {
   }
 
   let archiveStepHtml = '';
-  if (isArchStep && !archived) {
+  if (isArchStep && !book.archivedAt) {
     archiveStepHtml = `<div class="archive-step-ui">
       <input type="number" id="archiveYearInline" placeholder="Rok vydání" min="1990" max="2099">
       <button onclick="archiveFromStep()">Archivovat</button>
@@ -2459,28 +2472,28 @@ function togglePhaseNote(phId, e) {
 
 // Mutations
 function getBook() { return state.books.find(b => b.id===currentBookId); }
-function updateBook(field, value) { const b=getBook(); if(!b||b.archivedAt) return; b[field]=value; saveState(); renderBookList(); }
+function updateBook(field, value) { const b=getBook(); if(!b||isLocked(b)) return; b[field]=value; saveState(); renderBookList(); }
 function updateAuthorAt(i, value) {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   b.authors[i]=value; b.author=joinAuthors(b.authors);
   saveState(); renderBookList();
 }
 function addAuthorRow() {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   b.authors.push(''); saveState(); renderMain();
   const inputs=document.querySelectorAll('.bh-authors .author-row input');
   inputs[inputs.length-1]?.focus();
 }
 // Smazání posledního zbývajícího autora ho jen vyprázdní — pole je povinné.
 function removeAuthorAt(i) {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   if (b.authors.length<=1) { b.authors[i]=''; }
   else { b.authors.splice(i,1); }
   b.author=joinAuthors(b.authors);
   saveState(); renderMain(); renderBookList();
 }
 function toggleStep(stepId) {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   const s=b.steps[stepId]; s.done=!s.done; s.completedAt=s.done?todayISO():null;
   justToggledStep = s.done ? stepId : null;
   // Odškrtnutí kroku zpět zruší i skrytí štítku „čeká se na" — při novém odškrtnutí se zase objeví.
@@ -2489,33 +2502,33 @@ function toggleStep(stepId) {
 }
 // Křížek u štítku: odpověď už dorazila, štítek schovej (dokud se krok neodškrtne znovu).
 function dismissWaiting(bookId, stepId) {
-  const b = state.books.find(x => x.id === bookId); if (!b || b.archivedAt) return;
+  const b = state.books.find(x => x.id === bookId); if (!b || isLocked(b)) return;
   if (!b.waitingDismissed) b.waitingDismissed = [];
   if (!b.waitingDismissed.includes(stepId)) b.waitingDismissed.push(stepId);
   saveState(); render();
 }
 function activateOptional(stepId) {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   if(!b.activeOptional.includes(stepId)) b.activeOptional.push(stepId);
   saveState(); renderMain();
 }
 function addAdditional(stepId) {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   if(!b.additionals[stepId]) b.additionals[stepId]=[];
   b.additionals[stepId].push({done:false,completedAt:null});
   saveState(); renderMain();
 }
 function toggleAdditional(stepId,idx) {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   const r=b.additionals[stepId][idx]; r.done=!r.done; r.completedAt=r.done?todayISO():null;
   saveState(); renderMain(); renderBookList();
 }
 function removeAdditional(stepId,idx) {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   b.additionals[stepId].splice(idx,1); saveState(); renderMain();
 }
 function toggleRukopis() {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   b.rukopisOdevzdan=!b.rukopisOdevzdan; saveState(); renderMain(); renderBookList();
 }
 
@@ -2525,7 +2538,7 @@ function toggleRukopis() {
 // (viz currentPhaseIndex) — jen nezávisle na něm, ať ten druhý zůstane pravdivý,
 // i když je manuskript ve skutečnosti pořád ještě rozdělaný.
 function toggleSubmittedInParts() {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   b.submittedInParts=!b.submittedInParts; saveState(); renderMain(); renderBookList();
 }
 function openPartsModal() { openModal('partsModal'); }
@@ -2601,14 +2614,14 @@ function paraGroupAgg(rows, i) {
 }
 
 function paraAddParagraph() {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   const id = uuid();
   b.paragraphs.push({ id, num:'', name:'', authorial:false, authors:[], date:'', deadline:'', f:false, r:false, j:false, a:false, chars:null, note:'' });
   saveState(); renderMain();
   setTimeout(()=>{ const el=document.querySelector('[data-para-focus="'+id+'"]'); if(el) el.focus(); }, 0);
 }
 function paraDeleteParagraph(id) {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   if(!confirm('Smazat tento paragraf z tabulky?')) return;
   b.paragraphs = b.paragraphs.filter(p=>p.id!==id);
   syncPartsStepsFromParagraphs(b);
@@ -2620,7 +2633,7 @@ function paraDeleteParagraph(id) {
 // díky tomu funguje správně i sousední sourozenec, který je sám skupina
 // s vlastními potomky (jinak by se prohodil jen s jejím posledním řádkem).
 function paraMoveRow(id, dir) {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   const rows = b.paragraphs;
   const i = rows.findIndex(p=>p.id===id);
   if (i<0) return;
@@ -2648,14 +2661,14 @@ function paraMoveRow(id, dir) {
   saveState(); renderMain();
 }
 function paraAddGroup() {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   const id = uuid();
   b.paragraphs.push({ id, kind:'g', level:1, num:'', name:'', collapsed:false });
   saveState(); renderMain();
   setTimeout(()=>{ const el=document.querySelector('[data-para-focus="'+id+'"]'); if(el) el.focus(); }, 0);
 }
 function paraDeleteGroup(id) {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   if(!confirm('Smazat tuto skupinu? Paragrafy uvnitř zůstanou zachovány, jen se z ní vyřadí.')) return;
   b.paragraphs = b.paragraphs.filter(p=>p.id!==id);
   saveState(); renderMain(); renderBookList();
@@ -2667,20 +2680,20 @@ function paraToggleGroupCollapse(id) {
   saveState(); renderMain();
 }
 function paraGroupLevelChange(id, delta) {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   const r=paraFind(b,id); if(!r) return;
   r.level = Math.max(1, Math.min(5, r.level + delta));
   saveState(); renderMain();
 }
 function paraUpdateGroupField(id, field, val) {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   const r=paraFind(b,id); if(!r) return;
   r[field] = val;
   saveState(); renderMain();
 }
 function paraAssignAuthorToGroup(id, name) {
   if(!name) return;
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   const rows = b.paragraphs;
   const i = rows.findIndex(r=>r.id===id);
   if (i<0) return;
@@ -2723,7 +2736,7 @@ function paraToggleSelectGroup(groupId) {
 }
 function paraClearSelection() { partsSelected.clear(); renderMain(); }
 function paraBulkSetDate(iso) {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   if (!partsSelected.size) return;
   let n=0;
   paraLeaves(b).forEach(p => { if (partsSelected.has(p.id)) { p.date = iso; n++; } });
@@ -2740,26 +2753,26 @@ function paraBulkSetDatePrompt() {
   paraBulkSetDate(new Date(t).toISOString());
 }
 function paraToggleFaze(id, key) {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   const p=paraFind(b,id); if(!p) return;
   p[key] = !p[key];
   syncPartsStepsFromParagraphs(b);
   saveState(); renderMain(); renderBookList();
 }
 function paraToggleAuthorial(id) {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   const p=paraFind(b,id); if(!p) return;
   p.authorial = !p.authorial; saveState(); renderMain();
 }
 function paraUpdateField(id, field, val) {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   const p=paraFind(b,id); if(!p) return;
   p[field] = field==='chars' ? (val===''? null : Number(val)) : val;
   if (field==='date') syncPartsStepsFromParagraphs(b);
   saveState(); renderMain(); if (field==='date') renderBookList();
 }
 function paraSetDeadline(id) {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   const p=paraFind(b,id); if(!p) return;
   const cur = p.deadline ? fmtDateInput(p.deadline) : '';
   const v = prompt('Termín odevzdání (RRRR-MM-DD), prázdné pole termín zruší:', cur);
@@ -2770,20 +2783,20 @@ function paraSetDeadline(id) {
 }
 function paraAddAuthor(id, name) {
   if(!name) return;
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   const p=paraFind(b,id); if(!p) return;
   if(!p.authors.includes(name)) p.authors.push(name);
   saveState(); renderMain();
 }
 function paraRemoveAuthor(id, name) {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   const p=paraFind(b,id); if(!p) return;
   p.authors = p.authors.filter(a=>a!==name);
   saveState(); renderMain();
 }
 function paraToggleNote(id) { partsOpenNoteId = partsOpenNoteId===id ? null : id; renderMain(); }
 function paraClearNote(id) {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   const p=paraFind(b,id); if(!p) return;
   p.note = ''; partsOpenNoteId = null; saveState(); renderMain();
 }
@@ -2936,7 +2949,7 @@ function paraParseImportText(){
 // (nejčastěji dopředu, ke svému následujícímu „§"); teprve když v náhledu
 // vůbec žádný známý paragraf není, přidá se na konec jako dřív.
 function paraCommitImport(){
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   if(!partsImportPreview || !partsImportPreview.length) return;
   const rows = b.paragraphs;
   const preview = partsImportPreview;
@@ -3399,7 +3412,7 @@ function paraImportPreviewHtml(book){
     </div>
   </div>`;
 }
-function updatePhaseNote(phId,val) { const b=getBook(); if(!b||b.archivedAt) return; b.phaseNotes[phId]=val; saveState(); }
+function updatePhaseNote(phId,val) { const b=getBook(); if(!b||isLocked(b)) return; b.phaseNotes[phId]=val; saveState(); }
 function toggleStepNote(stepId) {
   const el=document.getElementById('snote-'+stepId);
   if(el) { el.classList.toggle('open'); if(el.classList.contains('open')) el.querySelector('textarea')?.focus(); }
@@ -3412,7 +3425,7 @@ function updateStepNote(stepId,val) {
 
 // ToDo
 function addTodo() {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   const inp=document.getElementById('todoInput'); if(!inp) return;
   const text=inp.value.trim(); if(!text) return;
   const dueInp=document.getElementById('todoDueInput');
@@ -3421,12 +3434,12 @@ function addTodo() {
   saveState(); renderMain();
 }
 function toggleTodoById(id) {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   const t=b.todos.find(x=>x.id===id); if(!t) return;
   t.done=!t.done; saveState(); renderMain();
 }
 function deleteTodoById(id) {
-  const b=getBook(); if(!b||b.archivedAt) return;
+  const b=getBook(); if(!b||isLocked(b)) return;
   b.todos=b.todos.filter(x=>x.id!==id); saveState(); renderMain();
 }
 
@@ -3530,6 +3543,9 @@ function archiveFromStep() {
   document.getElementById('tabArchived').classList.add('active');
   render();
 }
+function isLocked(b) { return !!b.archivedAt && b.id !== unlockedBookId; }
+function unlockArchived() { unlockedBookId = currentBookId; renderMain(); }
+function lockArchived() { unlockedBookId = null; renderMain(); renderBookList(); }
 function unarchiveBook() {
   const b=getBook(); if(!b) return;
   if(!confirm('Obnovit knihu do aktivních?')) return;
