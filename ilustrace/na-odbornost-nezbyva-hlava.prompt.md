@@ -39,7 +39,7 @@ Same hair length, glasses and proportions in every image.
 
 **Slide message**: "There is no head left for expertise." (do NOT write this in the image)
 
-**Scene**: The character sits at a desk, eyes half-closed, exhausted. Their oversized head is drawn open at the top like a lid and is crammed and overflowing with administrative clutter: stacked paper forms, envelopes, a phone, sticky notes, a calendar page, a stopwatch, tangled cables – everything with abstract squiggle lines instead of any writing.
+**Scene**: The character sits at a desk, eyes half-closed, exhausted. Her head is drawn open at the top like a lid and is crammed and overflowing with administrative clutter: stacked paper forms, envelopes, a phone, sticky notes, a calendar page, a stopwatch, tangled cables – everything with abstract squiggle lines instead of any writing.
 **Metaphor**: A single closed book (the expertise) stands on the floor next to the chair, waiting – there is simply no room for it in the head.
 **Accent use**: Magenta #b11e54 on 3-4 clutter items (an urgent envelope, the stopwatch, one sticky note) to signal pressure. Blue #4072ad only on the cover of the waiting book. No green in this image.
 **Composition**: Character and desk in the right 60% of the frame; left 40% stays empty white for the slide headline. Eye level, no background scenery.
