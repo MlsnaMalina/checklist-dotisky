@@ -29,6 +29,8 @@ description: 智能配图与 PPT 信息图生成器。支持三种模式：(1) �
 | `--style bento` | `styles/style-bento.md` |
 | `--style redakce` | `styles/style-redakce.md` |
 
+> **Klíč přes network secret:** když `GEMINI_API_KEY` není nastaven, volejte `generate-image.ts` s `--provider gemini`; klíč přidá agent proxy jako hlavičku `x-goog-api-key`.
+
 **禁止自己编写 System Prompt。**
 
 ❌ 错误：`"你是一个专业的信息图设计师..."`（自己编的）

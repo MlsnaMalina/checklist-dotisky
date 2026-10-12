@@ -256,7 +256,9 @@ async function generateImageGemini(
   references: ReferenceImage[] = [],
   aspectRatio?: AspectRatio
 ): Promise<{ imageData: Buffer; mimeType: string } | null> {
-  const url = `${GEMINI_API_BASE}/${model}:generateContent?key=${apiKey}`;
+  // Key travels in a header, not the URL. With an empty key the header is
+  // omitted so a network secret (agent proxy) can attach x-goog-api-key.
+  const url = `${GEMINI_API_BASE}/${model}:generateContent`;
 
   // Build generation config based on size and aspect ratio
   const generationConfig: Record<string, unknown> = {
@@ -315,7 +317,8 @@ async function generateImageGemini(
   const response = await fetch(url, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...(apiKey ? { 'x-goog-api-key': apiKey } : {})
     },
     body: JSON.stringify(requestBody)
   });
@@ -587,7 +590,10 @@ async function main() {
 
   // Validate API key for chosen provider
   let apiKey = provider === 'openrouter' ? openrouterKey : geminiKey;
-  if (!apiKey) {
+  if (!apiKey && provider === 'gemini') {
+    console.log('Note: GEMINI_API_KEY not set – relying on a network secret for generativelanguage.googleapis.com');
+    apiKey = '';
+  } else if (!apiKey) {
     console.error(`Error: ${provider === 'openrouter' ? 'OPENROUTER_API_KEY' : 'GEMINI_API_KEY'} is required for ${provider} provider`);
     process.exit(1);
   }
