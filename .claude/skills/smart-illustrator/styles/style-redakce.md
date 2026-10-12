@@ -6,16 +6,17 @@ Použití: `--style redakce` (výchozí poměr 16:9).
 
 ## Stálá postavička
 
-> ⚠️ NÁVRH – nahraďte vlastním popisem. Popis musí být v každém promptu doslova stejný, jinak se postavička mezi slidy mění.
+> Popis musí být v každém promptu doslova stejný, jinak se postavička mezi slidy mění.
+> Po prvním povedeném obrázku ho přidávejte přes `--ref` – drží podobu lépe než text.
 
 ```
 THE CHARACTER (identical in every image):
-A small, friendly editor drawn in simple continuous black ink line.
-Oversized round head (about 1/3 of body height), two dot eyes, short curved line for mouth, no nose.
-Short straight bob haircut with a blunt fringe, filled solid black.
-Round thin-rimmed glasses.
-Plain crew-neck sweater, simple trousers, flat shoes; body drawn with minimal lines, no shading.
-Same proportions, haircut and glasses in every image.
+A woman, adult, drawn in simple continuous black ink line, slightly stylized (head a bit larger than realistic, about 1/5 of body height).
+Dark hair reaching just below the shoulders, straight with a slight wave, filled solid black, side part.
+Glasses with medium rectangular frames, black.
+Simple face: dot eyes, short curved line for mouth, small nose line.
+Plain long-sleeved top, simple trousers, flat shoes; minimal lines, no shading.
+Same hair length, glasses and proportions in every image.
 ```
 
 ## Gemini System Prompt

@@ -30,12 +30,12 @@ You are an editorial illustrator. Create a clean, witty single-scene illustratio
 - Add decorative frames or borders
 
 THE CHARACTER (identical in every image):
-A small, friendly editor drawn in simple continuous black ink line.
-Oversized round head (about 1/3 of body height), two dot eyes, short curved line for mouth, no nose.
-Short straight bob haircut with a blunt fringe, filled solid black.
-Round thin-rimmed glasses.
-Plain crew-neck sweater, simple trousers, flat shoes; body drawn with minimal lines, no shading.
-Same proportions, haircut and glasses in every image.
+A woman, adult, drawn in simple continuous black ink line, slightly stylized (head a bit larger than realistic, about 1/5 of body height).
+Dark hair reaching just below the shoulders, straight with a slight wave, filled solid black, side part.
+Glasses with medium rectangular frames, black.
+Simple face: dot eyes, short curved line for mouth, small nose line.
+Plain long-sleeved top, simple trousers, flat shoes; minimal lines, no shading.
+Same hair length, glasses and proportions in every image.
 
 **Slide message**: "There is no head left for expertise." (do NOT write this in the image)
 
