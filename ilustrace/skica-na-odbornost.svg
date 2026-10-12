@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+<rect width="1600" height="900" fill="#fff"/>
+<g fill="none" stroke="#000" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- desk -->
+  <path d="M760 600 H1450"/><path d="M790 600 V820"/><path d="M1420 600 V820"/>
+  <!-- laptop -->
+  <path d="M1180 600 L1220 500 H1360 L1330 600 Z"/>
+  <!-- chair -->
+  <path d="M900 640 H1060"/><path d="M915 640 V820"/><path d="M1045 640 V820"/><path d="M1055 640 V470"/>
+  <!-- body -->
+  <path d="M940 640 Q930 540 975 470 Q1010 455 1040 475 Q1065 545 1050 640"/>
+  <!-- arms on desk -->
+  <path d="M985 500 Q1050 560 1150 590"/><path d="M1030 505 Q1090 560 1170 585"/>
+  <!-- legs -->
+  <path d="M950 640 Q930 720 935 820"/><path d="M1000 640 Q990 730 1000 820"/><path d="M920 820 H950"/><path d="M985 820 H1020"/>
+  <!-- neck + head -->
+  <path d="M995 470 V445"/>
+  <ellipse cx="1000" cy="385" rx="58" ry="64" fill="#fff"/>
+  <!-- glasses -->
+  <rect x="955" y="378" width="36" height="24" rx="4"/><rect x="1008" y="378" width="36" height="24" rx="4"/><path d="M991 388 H1008"/>
+  <!-- tired eyes -->
+  <path d="M965 392 Q973 396 981 392"/><path d="M1018 392 Q1026 396 1034 392"/>
+  <path d="M988 425 Q1000 420 1012 425"/>
+  <!-- open lid -->
+  <path d="M945 345 Q930 300 960 285" />
+</g>
+<!-- hair -->
+<path d="M942 380 Q935 315 1000 312 Q1065 315 1060 380 Q1068 440 1062 480 L1040 470 Q1045 420 1040 370 Q1000 340 960 372 Q955 420 960 470 L938 480 Q932 430 942 380 Z" fill="#000"/>
+<!-- clutter pile above head -->
+<g stroke="#000" stroke-width="4" stroke-linejoin="round">
+  <rect x="955" y="245" width="90" height="62" fill="#fff" transform="rotate(-8 1000 276)"/>
+  <rect x="1010" y="200" width="80" height="55" fill="#b11e54" transform="rotate(10 1050 228)"/>
+  <path d="M1010 200 L1050 230 L1090 200" fill="none" stroke="#fff" transform="rotate(10 1050 228)"/>
+  <rect x="925" y="190" width="70" height="90" fill="#fff" transform="rotate(-18 960 235)"/>
+  <circle cx="1000" cy="160" r="34" fill="#fff"/><path d="M1000 160 V138 M1000 160 L1016 168" fill="none"/>
+  <rect x="992" y="118" width="16" height="10" fill="#b11e54"/>
+  <rect x="1060" y="140" width="48" height="48" fill="#b11e54" transform="rotate(-12 1084 164)"/>
+  <rect x="900" y="120" width="44" height="76" rx="8" fill="#fff" transform="rotate(14 922 158)"/>
+  <rect x="1075" y="260" width="70" height="50" fill="#fff" transform="rotate(22 1110 285)"/>
+  <path d="M880 300 q20 -20 40 0 t40 0" fill="none"/>
+</g>
+<g stroke="#000" stroke-width="2.5" fill="none" stroke-linecap="round">
+  <path d="M970 262 q8 -6 16 0 t16 0 t16 0"/><path d="M968 278 q8 -6 16 0 t16 0 t16 0"/>
+  <path d="M940 225 q6 -5 12 0 t12 0 t12 0" transform="rotate(-18 960 235)"/>
+  <path d="M1090 280 q6 -5 12 0 t12 0" transform="rotate(22 1110 285)"/>
+</g>
+<!-- waiting book on floor -->
+<g stroke="#000" stroke-width="5" stroke-linejoin="round">
+  <rect x="1110" y="720" width="70" height="100" fill="#4072ad"/>
+  <path d="M1110 720 l-14 10 v100 l14 -10" fill="#fff"/>
+</g>
+<!-- empty area guide -->
+<rect x="60" y="60" width="560" height="780" fill="none" stroke="#ccc" stroke-width="2" stroke-dasharray="10 10"/>
+</svg>
