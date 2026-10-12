@@ -1,45 +1,47 @@
-You are an editorial illustrator. Create a clean, witty single-scene illustration for a presentation slide.
+Generate one standalone 16:9 horizontal illustration for a presentation slide.
 
-**Format**: 16:9 horizontal (landscape)
-
-**Visual Style**:
-- Black ink line drawing on pure white background #FFFFFF
-- Uniform, confident line weight; hand-drawn feel, but clean
-- Flat fills only, no gradients, no shadows, no textures, no 3D
-- Generous whitespace (at least 40% of canvas empty)
-- One clear visual metaphor per image, readable in 2 seconds
-- The recurring character (described below) is always the protagonist
+**Visual DNA**:
+- Pure white background #FFFFFF. No paper texture, no beige, no gradients, no shadows, no noise.
+- Minimalist black hand-drawn line art, thin pen lines, slightly wobbly, not vector-clean, no heavy outlines.
+- Lots of empty white space: main subject takes 40–60% of the canvas, at least 35% stays blank.
+- One image explains ONE idea through ONE absurd but logical physical metaphor, built from 1–2 low-tech objects (drawer, box, scale, funnel, ladder, well, pipe, old machine, rubber stamp, filing cabinet…).
+- Feeling: a clever sketch drawn on white paper by an editor. Strange, but readable in one second.
 
 **Color Palette (strict)**:
-- Lines and solid fills: black #000000
-- Background: white #FFFFFF
-- Accents ONLY from these three, used sparingly (max ~15% of the image):
-  - Blue #4072ad – expertise, knowledge, the valuable thing
-  - Magenta #b11e54 – pressure, overload, problem, urgency
-  - Green #98c452 – relief, solution, growth
-- No other colors, no tints, no grey tones
+- Black: all line art, the character, objects.
+- Accents only, used sparingly (max ~10% of the image, often just 1–3 small spots):
+  - Magenta #b11e54 – problem, pressure, warning, overload
+  - Green #98c452 – main path, direction arrows, solution, the good outcome
+  - Blue #4072ad – knowledge, expertise, the valuable thing, inner state
+- No other colors, no tints, no grey fills.
 
 **ABSOLUTELY NO TEXT**:
-- No letters, words, numbers, labels, captions, titles, signatures or watermarks
-- No legible writing on papers, books, screens or signs – use abstract lines/squiggles instead
-- No symbols that read as text (§, @, %, $, #)
+- No letters, words, numbers, labels, captions, titles or signatures.
+- Papers, books and screens carry only abstract squiggle lines.
+- No symbols that read as text (§, @, %, $, #).
+- Meaning is carried by colored arrows, marks and the metaphor itself; text lives on the slide.
 
 **DO NOT**:
-- Add speech bubbles with text
-- Use more than one character unless the scene requires it
-- Add decorative frames or borders
+- No PPT infographic, formal flowchart, course slide, commercial vector illustration, flat corporate art.
+- No cute mascot, no children's cartoon, no emoji style.
+- No realistic UI, no tech dashboards.
+- No frames, borders or title areas.
 
-THE CHARACTER (identical in every image):
-A woman, adult, drawn in simple continuous black ink line, slightly stylized (head a bit larger than realistic, about 1/5 of body height).
-Dark hair reaching just below the shoulders, straight with a slight wave, filled solid black, side part.
-Glasses with medium rectangular frames, black.
-Simple face: dot eyes, short curved line for mouth, small nose line.
-Plain long-sleeved top, simple trousers, flat shoes; minimal lines, no shading.
-Same hair length, glasses and proportions in every image.
+RECURRING CHARACTER – "Kanka" (identical in every image):
+A small solid-black ink blot creature: an irregular blob body with a few small splash droplets and one short drip at the bottom edge.
+Two white dot eyes, nothing else on the face, blank deadpan serious expression.
+Two thin black stick legs and two thin black stick arms.
+Slightly uneven hand-drawn outline, filled solid black.
+Size: small, roughly 1/6 of the image height.
+Serious, quiet, a bit clumsy but not stupid – a deadpan office worker doing an absurd but logical job.
+NOT cute, NOT a mascot, NOT a sticker, no clothes, no accessories, no sparkly eyes, no mouth.
 
-**Slide message**: "There is no head left for expertise." (do NOT write this in the image)
+**Core idea**: Editors are so loaded with administration that no capacity is left for their actual expertise. ("There is no head left for expertise." – do NOT write this.)
 
-**Scene**: The character sits at a desk, eyes half-closed, exhausted. Her head is drawn open at the top like a lid and is crammed and overflowing with administrative clutter: stacked paper forms, envelopes, a phone, sticky notes, a calendar page, a stopwatch, tangled cables – everything with abstract squiggle lines instead of any writing.
-**Metaphor**: A single closed book (the expertise) stands on the floor next to the chair, waiting – there is simply no room for it in the head.
-**Accent use**: Magenta #b11e54 on 3-4 clutter items (an urgent envelope, the stopwatch, one sticky note) to signal pressure. Blue #4072ad only on the cover of the waiting book. No green in this image.
-**Composition**: Character and desk in the right 60% of the frame; left 40% stays empty white for the slide headline. Eye level, no background scenery.
+**Metaphor**: A wobbly tower of administrative clutter balanced on top of Kanka – stacked paper forms, envelopes, a desk phone, a stopwatch, a rubber stamp, a tangle of cable – all papers with abstract squiggles only. The tower is much taller than Kanka.
+
+**Kanka's action**: Kanka stands with legs bent under the weight, both thin arms raised to steady the tower on its head. At its feet lies a closed book. Kanka tries to reach the book with one foot, but cannot bend down without the tower falling.
+
+**Accent use**: Magenta #b11e54 on 2 items in the tower (one envelope, the stopwatch). Blue #4072ad only on the cover of the book on the floor. No green in this image.
+
+**Composition**: Scene in the right 60% of the frame, tower reaching close to the top edge; the left 40% stays empty white for the slide headline. No floor line beyond a short ground stroke, no background.
